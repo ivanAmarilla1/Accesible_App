@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "143718571775",
+    "project_id": "accessible-app",
+    "storage_bucket": "accessible-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:143718571775:android:05aca5ad5b41ba7532b6ca",
+        "android_client_info": {
+          "package_name": "com.blessingsoftware.accesibleapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "143718571775-ev48erlg3qak4lllf0ustnbr0jfesnov.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.blessingsoftware.accesibleapp",
+            "certificate_hash": "f9d44fe45a859bff3184914af27216d7e758ecc6"
+          }
+        },
+        {
+          "client_id": "143718571775-g0k7iki63ekhn0hmj25euk21hikdi9p1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrfepjL-NultupFBMmUo8Rif-Fv0uuUhU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "143718571775-g0k7iki63ekhn0hmj25euk21hikdi9p1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
