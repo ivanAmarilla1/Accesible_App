@@ -1,6 +1,8 @@
-package com.blessingsoftware.accesibleapp.usecases.login
+package com.blessingsoftware.accesibleapp.usecases.authentication
 
 import android.content.res.Configuration
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +14,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,12 +25,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.R
+import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
+import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import kotlinx.coroutines.launch
 
 //TODO Ver inyeccion de dependencias
 @Composable
-fun LoginView(viewModel: LoginViewModel, navController: NavController) {
+fun LoginView(viewModel: AuthViewModel, navController: NavController) {
     Box(
         Modifier
             .fillMaxSize()
@@ -39,44 +44,60 @@ fun LoginView(viewModel: LoginViewModel, navController: NavController) {
 }
 
 @Composable
-fun login(modifier: Modifier, viewModel: LoginViewModel, navController: NavController) {
+fun login(modifier: Modifier, viewModel: AuthViewModel, navController: NavController) {
     //engancha la vista al live data del viewmodel
     val email: String by viewModel.email.observeAsState(initial = "")
     val password: String by viewModel.password.observeAsState(initial = "")
-    val buttonEnabler: Boolean by viewModel.buttonEnabler.observeAsState(initial = false)
-    val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
-    val coroutineScope = rememberCoroutineScope()//variable para ejecutar corrutinas
+    //val buttonEnabler: Boolean by viewModel.buttonEnabler.observeAsState(initial = false)
+    //val coroutineScope = rememberCoroutineScope()//variable para ejecutar corrutinas
+    //var email by remember { mutableStateOf("") }
+    //var password by remember { mutableStateOf("") }
+    var loginFlag = viewModel.flag.observeAsState()
+    val loginFlow = viewModel.loginFlow.collectAsState()
 
-    //muestra pantalla de carga
-    if (isLoading) {
-        Box(Modifier.fillMaxSize()) {
-            CircularProgressIndicator(Modifier.align(Alignment.Center))
+    Column(modifier = modifier) {
+        HeaderImage(Modifier.align(Alignment.CenterHorizontally))
+        Spacer(modifier = Modifier.padding(16.dp))
+        EmailField(email) { viewModel.onFieldsChanged(it, password) }
+        Spacer(modifier = Modifier.padding(6.dp))
+        PasswordField(password) { viewModel.onFieldsChanged(email, it) }
+        Spacer(modifier = Modifier.padding(6.dp))
+        ForgotPassword(Modifier.align(Alignment.End))
+        Spacer(modifier = Modifier.padding(10.dp))
+        LoginButton() {
+            viewModel.login(email, password)
         }
-    } else {
-        Column(modifier = modifier) {
-            HeaderImage(Modifier.align(Alignment.CenterHorizontally))
-            Spacer(modifier = Modifier.padding(16.dp))
-            EmailField(email) { viewModel.onLoginChanged(it, password) }
-            Spacer(modifier = Modifier.padding(6.dp))
-            PasswordField(password) { viewModel.onLoginChanged(email, it) }
-            Spacer(modifier = Modifier.padding(6.dp))
-            ForgotPassword(Modifier.align(Alignment.End))
-            Spacer(modifier = Modifier.padding(10.dp))
-            LoginButton(buttonEnabler) {
-                coroutineScope.launch {
-                    viewModel.onLoginSelected(navController)
-                }
-            }
-            Spacer(modifier = Modifier.padding(16.dp))
-            DontHaveAccount(Modifier.align(Alignment.CenterHorizontally))
-            Spacer(modifier = Modifier.padding(4.dp))
-            RegisterButton { viewModel.registerUser(navController) }
-            Spacer(modifier = Modifier.padding(6.dp))
-            SignUpWithGoogleButton()
-        }
+        Spacer(modifier = Modifier.padding(16.dp))
+        DontHaveAccount(Modifier.align(Alignment.CenterHorizontally))
+        Spacer(modifier = Modifier.padding(4.dp))
+        RegisterButton { }
+        Spacer(modifier = Modifier.padding(6.dp))
+        SignUpWithGoogleButton()
     }
 
-
+    loginFlow.value.let {
+        if (loginFlag.value == true) {
+            Log.d("loginflow", "Ingresando a loginflow")
+            when (it) {
+                is Resource.Success -> {
+                    LaunchedEffect(Unit) {
+                        navController.navigate(AppScreens.HomeView.route) {
+                            popUpTo(AppScreens.LoginView.route) { inclusive = true }
+                        }
+                    }
+                }
+                is Resource.Failure -> {
+                    val context = LocalContext.current
+                    Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
+                }
+                Resource.Loading -> {
+                    Box(Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -143,7 +164,7 @@ fun ForgotPassword(modifier: Modifier) {
 }
 
 @Composable
-fun LoginButton(buttonEnabler: Boolean, onLoginSelected: () -> Unit) {
+fun LoginButton(onLoginSelected: () -> Unit) {
     Button(
         onClick = { onLoginSelected() }, modifier = Modifier
             .fillMaxWidth()
@@ -152,7 +173,7 @@ fun LoginButton(buttonEnabler: Boolean, onLoginSelected: () -> Unit) {
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.primary,
             disabledBackgroundColor = Color.DarkGray
-        ), enabled = buttonEnabler
+        )
     ) {
         Text("Iniciar Sesión")
     }
@@ -172,7 +193,7 @@ fun DontHaveAccount(modifier: Modifier) {
 @Composable
 fun RegisterButton(registerUser: () -> Unit) {
     Button(
-        onClick = {registerUser()}, modifier = Modifier
+        onClick = { registerUser() }, modifier = Modifier
             .fillMaxWidth()
             .padding(30.dp, 0.dp, 30.dp, 0.dp)
             .height(50.dp),
@@ -219,7 +240,7 @@ fun MainScreenPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colors.background
         ) {
-            LoginView(LoginViewModel(), rememberNavController())
+            //LoginView(null, rememberNavController())
         }
     }
 }
