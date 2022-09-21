@@ -76,6 +76,9 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         repository.logOut()
         _loginFlow.value = null
         _signUpFlow.value = null
+        _email.value = ""
+        _password.value = ""
+        _flag.value = false
     }
 
     //funcion de onChange(seria basicamente cada vez que se escribe algo en los campos)

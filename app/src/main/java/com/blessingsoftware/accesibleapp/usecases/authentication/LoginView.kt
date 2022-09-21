@@ -6,8 +6,10 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -38,24 +40,21 @@ fun LoginView(viewModel: AuthViewModel, navController: NavController) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        login(Modifier.align(Alignment.Center), viewModel, navController)
+        Login(Modifier.align(Alignment.Center), viewModel, navController)
     }
 
 }
 
 @Composable
-fun login(modifier: Modifier, viewModel: AuthViewModel, navController: NavController) {
+private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: NavController) {
     //engancha la vista al live data del viewmodel
     val email: String by viewModel.email.observeAsState(initial = "")
     val password: String by viewModel.password.observeAsState(initial = "")
-    //val buttonEnabler: Boolean by viewModel.buttonEnabler.observeAsState(initial = false)
-    //val coroutineScope = rememberCoroutineScope()//variable para ejecutar corrutinas
-    //var email by remember { mutableStateOf("") }
-    //var password by remember { mutableStateOf("") }
-    var loginFlag = viewModel.flag.observeAsState()
+    val loginFlag = viewModel.flag.observeAsState()
     val loginFlow = viewModel.loginFlow.collectAsState()
 
-    Column(modifier = modifier) {
+   // val scrollState = rememberScrollState()
+    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         HeaderImage(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.padding(16.dp))
         EmailField(email) { viewModel.onFieldsChanged(it, password) }
@@ -70,7 +69,7 @@ fun login(modifier: Modifier, viewModel: AuthViewModel, navController: NavContro
         Spacer(modifier = Modifier.padding(16.dp))
         DontHaveAccount(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.padding(4.dp))
-        RegisterButton { }
+        RegisterButton { navController.navigate(AppScreens.SignUpView.route) }
         Spacer(modifier = Modifier.padding(6.dp))
         SignUpWithGoogleButton()
     }
@@ -101,7 +100,7 @@ fun login(modifier: Modifier, viewModel: AuthViewModel, navController: NavContro
 }
 
 @Composable
-fun HeaderImage(modifier: Modifier) {
+private fun HeaderImage(modifier: Modifier) {
     Image(
         painterResource(R.drawable.user_ic), contentDescription = "Icono de usuario",
         modifier = modifier
@@ -109,7 +108,7 @@ fun HeaderImage(modifier: Modifier) {
 }
 
 @Composable
-fun EmailField(email: String, onTextFieldChanged: (String) -> Unit) {
+private fun EmailField(email: String, onTextFieldChanged: (String) -> Unit) {
     TextField(
         label = { Text(text = "Email") },
         value = email,
@@ -130,7 +129,7 @@ fun EmailField(email: String, onTextFieldChanged: (String) -> Unit) {
 }
 
 @Composable
-fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit) {
+private fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit) {
     TextField(
         label = { Text(text = "Contraseña") },
         value = password,
@@ -153,7 +152,7 @@ fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit) {
 }
 
 @Composable
-fun ForgotPassword(modifier: Modifier) {
+private fun ForgotPassword(modifier: Modifier) {
     Text(
         text = "Olvidaste la contraseña?",
         modifier = modifier.clickable { },
@@ -164,7 +163,7 @@ fun ForgotPassword(modifier: Modifier) {
 }
 
 @Composable
-fun LoginButton(onLoginSelected: () -> Unit) {
+private fun LoginButton(onLoginSelected: () -> Unit) {
     Button(
         onClick = { onLoginSelected() }, modifier = Modifier
             .fillMaxWidth()
@@ -180,7 +179,7 @@ fun LoginButton(onLoginSelected: () -> Unit) {
 }
 
 @Composable
-fun DontHaveAccount(modifier: Modifier) {
+private fun DontHaveAccount(modifier: Modifier) {
     Text(
         modifier = modifier,
         text = "No tienes una cuenta?",
@@ -191,7 +190,7 @@ fun DontHaveAccount(modifier: Modifier) {
 }
 
 @Composable
-fun RegisterButton(registerUser: () -> Unit) {
+private fun RegisterButton(registerUser: () -> Unit) {
     Button(
         onClick = { registerUser() }, modifier = Modifier
             .fillMaxWidth()
@@ -208,7 +207,7 @@ fun RegisterButton(registerUser: () -> Unit) {
 }
 
 @Composable
-fun SignUpWithGoogleButton() {
+private fun SignUpWithGoogleButton() {
     Button(
         onClick = {}, modifier = Modifier
             .fillMaxWidth()
@@ -233,7 +232,7 @@ fun SignUpWithGoogleButton() {
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
-fun MainScreenPreview() {
+private fun MainScreenPreview() {
     AccesibleAppTheme {
         // A surface container using the 'background' color from the theme
         Surface(

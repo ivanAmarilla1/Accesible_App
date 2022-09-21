@@ -8,6 +8,7 @@ import com.blessingsoftware.accesibleapp.usecases.home.HomeView
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.authentication.LoginView
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
+import com.blessingsoftware.accesibleapp.usecases.authentication.SignUpView
 import com.blessingsoftware.accesibleapp.usecases.splashscreen.SplashScreen
 
 @Composable
@@ -22,6 +23,9 @@ fun AppNavigation(authViewModel: AuthViewModel, homeViewModel: HomeViewModel) {
         composable(route = AppScreens.LoginView.route/*ruta de la pantalla authentication*/) {
             //cuando se accede a la ruta de la 1era pantalla, se llama a la funcion FirstScreen pasando como parametro el navController
             LoginView(authViewModel, navController)
+        }
+        composable(AppScreens.SignUpView.route) {
+            SignUpView(authViewModel, navController)
         }
         composable(route = AppScreens.HomeView.route) {
             HomeView(authViewModel, navController)

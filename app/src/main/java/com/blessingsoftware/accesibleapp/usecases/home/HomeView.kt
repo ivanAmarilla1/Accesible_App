@@ -1,6 +1,8 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
+import android.app.Activity
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -8,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -26,6 +29,18 @@ fun HomeView(viewModel: AuthViewModel?, navController: NavController) {
     ) {
         Home(Modifier.align(Alignment.Center), viewModel, navController)
     }
+
+    //HomeBackHandler()
+}
+
+@Composable
+private fun HomeBackHandler() {
+    val activity = (LocalContext.current as? Activity)
+    androidx.activity.compose.BackHandler(enabled = true, onBack = {
+        activity?.finish()
+
+        Log.d("BackHandler", "Boton atras")
+    })
 }
 
 @Composable
