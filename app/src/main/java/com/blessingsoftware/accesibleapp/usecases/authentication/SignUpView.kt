@@ -1,7 +1,9 @@
 package com.blessingsoftware.accesibleapp.usecases.authentication
 
+import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -12,9 +14,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,11 +31,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.R
+import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 
 @Composable
-fun SignUpView(viewModel: AuthViewModel?, navController: NavController) {
+fun SignUpView(viewModel: AuthViewModel, navController: NavController) {
     Box(
         Modifier
             .fillMaxSize()
@@ -36,24 +44,39 @@ fun SignUpView(viewModel: AuthViewModel?, navController: NavController) {
     ) {
         SignUp(Modifier.padding(0.dp, 10.dp), viewModel, navController)
     }
-    SignUpBackHandler(navController)
+    SignUpBackHandler(viewModel, navController)
 }
 
 @Composable
-private fun SignUp(modifier: Modifier, viewModel: AuthViewModel?, navController: NavController) {
-    //val scrollState = rememberScrollState()
+private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: NavController) {
+
+    val name: String by viewModel.name.observeAsState(initial = "")
+    val email: String by viewModel.email.observeAsState(initial = "")
+    val password: String by viewModel.password.observeAsState(initial = "")
+    val confirmPassword: String by viewModel.confirmPassword.observeAsState(initial = "")
+    val signUpFlag = viewModel.flag.observeAsState()
+    val signUpFlow = viewModel.signUpFlow.collectAsState()
+
+    val context = LocalContext.current
     Column(modifier.verticalScroll(rememberScrollState())) {
         SignUpHeader(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.padding(20.dp))
-        SignUpNameField("")
+        SignUpNameField(name) {viewModel.onSignUpFieldsChanged(it, email, password, confirmPassword)}
         Spacer(modifier = Modifier.padding(10.dp))
-        SignUpEmailField("")
+        SignUpEmailField(email) {viewModel.onSignUpFieldsChanged(name, it, password, confirmPassword)}
         Spacer(modifier = Modifier.padding(10.dp))
-        SignUpPasswordField("")
+        SignUpPasswordField(password) {viewModel.onSignUpFieldsChanged(name, email, it, confirmPassword)}
         Spacer(modifier = Modifier.padding(10.dp))
-        SignUpConfirmPasswordField("")
+        SignUpConfirmPasswordField(confirmPassword) {viewModel.onSignUpFieldsChanged(name, email, password, it)}
         Spacer(modifier = Modifier.padding(15.dp))
-        SignUpButton()
+        SignUpButton {
+            if (password == confirmPassword){
+                viewModel.signUp(name, email, password)
+            }else {
+                //Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_LONG)
+                Log.d("SignUpButton", "Las contraseñas no coinciden")
+            }
+        }
         Spacer(modifier = Modifier.padding(7.dp))
         AlreadyHaveAnAccount(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.padding(5.dp))
@@ -61,7 +84,32 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel?, navController:
         Spacer(modifier = Modifier.padding(7.dp))
         SignUpWithGoogleButton()
     }
+
+    signUpFlow.value.let {
+        if (signUpFlag.value == true) {
+            Log.d("signUpflow", "Ingresando a signUpflow")
+            when (it) {
+                is Resource.Success -> {
+                    LaunchedEffect(Unit) {
+                        navController.navigate(AppScreens.HomeView.route) {
+                            popUpTo(AppScreens.LoginView.route) { inclusive = true }
+                        }
+                    }
+                }
+                is Resource.Failure -> {
+                    val context = LocalContext.current
+                    Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
+                }
+                Resource.Loading -> {
+                    Box(Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    }
+                }
+            }
+        }
+    }
 }
+
 
 @Composable
 private fun SignUpHeader(modifier: Modifier) {
@@ -72,15 +120,15 @@ private fun SignUpHeader(modifier: Modifier) {
 }
 
 @Composable
-private fun SignUpNameField(name: String /*onTextFieldChanged: (String) -> Unit*/) {
+private fun SignUpNameField(name: String, onSignUpFieldsChanged: (String) -> Unit) {
     TextField(
         //label = { Text(text = "Nombre") },
         placeholder = { Text(text = "Nombre") },
         value = name,
-        onValueChange = { /*onTextFieldChanged(it)*/ },
+        onValueChange = { onSignUpFieldsChanged(it) },
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         singleLine = true,
         maxLines = 1,
         colors = TextFieldDefaults.textFieldColors(
@@ -94,12 +142,12 @@ private fun SignUpNameField(name: String /*onTextFieldChanged: (String) -> Unit*
 }
 
 @Composable
-private fun SignUpEmailField(email: String /*onTextFieldChanged: (String) -> Unit*/) {
+private fun SignUpEmailField(email: String, onSignUpFieldsChanged: (String) -> Unit) {
     TextField(
         //label = { Text(text = "Correo electrónico") },
         placeholder = { Text(text = "Correo electrónico") },
         value = email,
-        onValueChange = { /*onTextFieldChanged(it)*/ },
+        onValueChange = { onSignUpFieldsChanged(it) },
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -116,12 +164,12 @@ private fun SignUpEmailField(email: String /*onTextFieldChanged: (String) -> Uni
 }
 
 @Composable
-private fun SignUpPasswordField(password: String /*onTextFieldChanged: (String) -> Unit*/) {
+private fun SignUpPasswordField(password: String, onSignUpFieldsChanged: (String) -> Unit) {
     TextField(
         //label = { Text(text = "Contraseña") },
         placeholder = { Text(text = "Contraseña") },
         value = password,
-        onValueChange = { /*onTextFieldChanged(it)*/ },
+        onValueChange = { onSignUpFieldsChanged(it) },
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -140,12 +188,12 @@ private fun SignUpPasswordField(password: String /*onTextFieldChanged: (String) 
 }
 
 @Composable
-private fun SignUpConfirmPasswordField(confirmPassword: String /*onTextFieldChanged: (String) -> Unit*/) {
+private fun SignUpConfirmPasswordField(confirmPassword: String, onSignUpFieldsChanged: (String) -> Unit) {
     TextField(
         //label = { Text(text = "Confirme la contraseña") },
         placeholder = { Text(text = "Confirme la contraseña") },
         value = confirmPassword,
-        onValueChange = { /*onTextFieldChanged(it)*/ },
+        onValueChange = { onSignUpFieldsChanged(it) },
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -164,9 +212,9 @@ private fun SignUpConfirmPasswordField(confirmPassword: String /*onTextFieldChan
 }
 
 @Composable
-private fun SignUpButton(/*onSignUpSelected: () -> Unit*/) {
+private fun SignUpButton(onSignUpSelected: () -> Unit) {
     Button(
-        onClick = { /*onSignUpSelected() */ }, modifier = Modifier
+        onClick = { onSignUpSelected() }, modifier = Modifier
             .fillMaxWidth()
             .padding(30.dp, 0.dp, 30.dp, 0.dp)
             .height(50.dp),
@@ -229,8 +277,9 @@ private fun SignUpWithGoogleButton() {
 }
 
 @Composable
-private fun SignUpBackHandler(navController: NavController) {
+private fun SignUpBackHandler(viewModel: AuthViewModel, navController: NavController) {
     BackHandler(enabled = true, onBack = {
+        viewModel.cleanFields()
         navController.navigate(AppScreens.LoginView.route) {
             popUpTo(AppScreens.LoginView.route) { inclusive = true }
         }
@@ -256,7 +305,7 @@ fun SignUpScreenPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colors.background
         ) {
-            SignUpView(null, rememberNavController())
+            //SignUpView(null, rememberNavController())
         }
     }
 }

@@ -53,7 +53,7 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
     val loginFlag = viewModel.flag.observeAsState()
     val loginFlow = viewModel.loginFlow.collectAsState()
 
-   // val scrollState = rememberScrollState()
+    // val scrollState = rememberScrollState()
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         HeaderImage(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.padding(16.dp))
@@ -69,7 +69,7 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
         Spacer(modifier = Modifier.padding(16.dp))
         DontHaveAccount(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.padding(4.dp))
-        RegisterButton { navController.navigate(AppScreens.SignUpView.route) }
+        RegisterButton { viewModel.cleanFields(); navController.navigate(AppScreens.SignUpView.route) }
         Spacer(modifier = Modifier.padding(6.dp))
         SignUpWithGoogleButton()
     }

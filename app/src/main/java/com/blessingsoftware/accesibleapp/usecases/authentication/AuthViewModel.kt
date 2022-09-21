@@ -24,11 +24,15 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
     //variables privadas que solo se puede modificar desde el viewmodel
     private val _email = MutableLiveData<String>()
     private val _password = MutableLiveData<String>()
+    private val _confirmPassword = MutableLiveData<String>()
+    private val _name = MutableLiveData<String>()
     private val _flag = MutableLiveData<Boolean>()
 
     //variable que se conecta con el view para capturar la interacciones del usuario
     val email: LiveData<String> = _email
     val password: LiveData<String> = _password
+    val confirmPassword: LiveData<String> = _confirmPassword
+    val name: LiveData<String> = _name
     val flag: LiveData<Boolean> = _flag
 
 
@@ -44,11 +48,10 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
     init {
         if (repository.currentUser != null) {
             _flag.value = true
-            Log.d("currentUser",currentUser?.displayName.toString())
+            Log.d("currentUser", currentUser?.displayName.toString())
             _loginFlow.value = Resource.Success(repository.currentUser!!)
         }
     }
-
 
     //Funcion de inicio de sesion
     fun login(email: String, password: String) = viewModelScope.launch {
@@ -67,18 +70,23 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
     }
 
     fun signUp(name: String, email: String, password: String) = viewModelScope.launch {
-        _signUpFlow.value = Resource.Loading
-        val result = repository.signUp(name, email, password)
-        _signUpFlow.value = result
+        if (isValidEmail(email)) {
+            if (isValidPassword(password)) {
+                _flag.value = true
+                _signUpFlow.value = Resource.Loading
+                val result = repository.signUp(name, email, password)
+                _signUpFlow.value = result
+            } else {
+                //TODO mensaje de password invalido
+            }
+        } else {
+            //TODO mensaje de email invalido
+        }
     }
 
     fun logOut() {
         repository.logOut()
-        _loginFlow.value = null
-        _signUpFlow.value = null
-        _email.value = ""
-        _password.value = ""
-        _flag.value = false
+        cleanFields()
     }
 
     //funcion de onChange(seria basicamente cada vez que se escribe algo en los campos)
@@ -86,6 +94,30 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         _flag.value = false
         _email.value = email
         _password.value = password
+    }
+
+    fun onSignUpFieldsChanged(
+        name: String,
+        email: String,
+        password: String,
+        confirmPassword: String
+    ) {
+        _flag.value = false
+        _name.value = name
+        _email.value = email
+        _password.value = password
+        _confirmPassword.value = confirmPassword
+    }
+
+    //Limpiador de campos
+    fun cleanFields() {
+        _loginFlow.value = null
+        _signUpFlow.value = null
+        _email.value = ""
+        _password.value = ""
+        _name.value = ""
+        _confirmPassword.value = ""
+        _flag.value = false
     }
 
     //Validacion de email y password

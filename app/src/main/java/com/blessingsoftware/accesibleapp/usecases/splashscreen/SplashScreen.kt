@@ -38,6 +38,7 @@ fun SplashScreen(authViewModel: AuthViewModel?, navController: NavController) {
 
     //Log.d("loginflow", "Ingresando a loginflow")
     LaunchedEffect(Unit) {
+        Log.d("Loginflow value",loginFlow?.value.toString())
         if (loginFlow?.value != null) {
             when (loginFlow.value) {
                 is Resource.Success -> {

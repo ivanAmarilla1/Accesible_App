@@ -47,7 +47,8 @@ private fun HomeBackHandler() {
 fun Home(modifier: Modifier, viewModel: AuthViewModel?, navController: NavController) {
     Column(modifier = modifier) {
         Text("Home Screen")
-        viewModel?.currentUser?.email?.let { Text(it?.trim()) }
+        viewModel?.currentUser?.displayName?.let { Text(it.trim()) }
+        viewModel?.currentUser?.email?.let { Text(it.trim()) }
         Spacer(modifier = Modifier.padding(16.dp))
         LogOutButton(viewModel, navController)
     }
