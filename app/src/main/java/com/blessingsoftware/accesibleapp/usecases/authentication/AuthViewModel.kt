@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.usecases.authentication
 
+import android.content.Context
 import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
@@ -8,8 +9,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.model.domain.User
 import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +48,12 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
 
     private val _signUpFlow = MutableStateFlow<Resource<FirebaseUser>?>(null)
     val signUpFlow: StateFlow<Resource<FirebaseUser>?> = _signUpFlow
+
+    private val googleSignIn: GoogleSignInClient
+        get() {
+            TODO()
+        }
+
 
     val currentUser: FirebaseUser?
         get() = repository.currentUser
@@ -84,9 +97,25 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         }
     }
 
-    fun logOut() {
+    fun signUpWithGoogle(credential: AuthCredential) = viewModelScope.launch {
+        _flag.value = true
+        _loginFlow.value = Resource.Loading
+        val result = repository.signUpWithGoogle(credential)
+        _loginFlow.value = result
+
+    }
+
+    fun logOut(context: Context) {
         repository.logOut()
         cleanFields()
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(R.string.default_web_client_id.toString())
+            .requestEmail()
+            .build()
+
+        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+        googleSignInClient.signOut()
     }
 
     //funcion de onChange(seria basicamente cada vez que se escribe algo en los campos)
@@ -124,6 +153,6 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
     private fun isValidEmail(email: String): Boolean =
         Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
-    private fun isValidPassword(password: String): Boolean = password.length > 6
+    private fun isValidPassword(password: String): Boolean = password.length >= 6
 
 }

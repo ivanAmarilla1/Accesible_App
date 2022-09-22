@@ -1,6 +1,7 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.layout.*
@@ -57,9 +58,10 @@ fun Home(modifier: Modifier, viewModel: AuthViewModel?, navController: NavContro
 
 @Composable
 fun LogOutButton(viewModel: AuthViewModel?, navController: NavController) {
+    val context = LocalContext.current
     Button(
         onClick = {
-            viewModel?.logOut()
+            viewModel?.logOut(context)
             navController.navigate(AppScreens.LoginView.route) {
                 popUpTo(AppScreens.HomeView.route) { inclusive = true }
             }

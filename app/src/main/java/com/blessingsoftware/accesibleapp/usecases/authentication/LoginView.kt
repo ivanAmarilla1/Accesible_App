@@ -1,8 +1,11 @@
 package com.blessingsoftware.accesibleapp.usecases.authentication
 
+import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -30,6 +34,11 @@ import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 
 //TODO Ver inyeccion de dependencias
@@ -53,6 +62,10 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
     val loginFlag = viewModel.flag.observeAsState()
     val loginFlow = viewModel.loginFlow.collectAsState()
 
+    //para la autenticacion con google
+    val context = LocalContext.current
+    val token = stringResource(R.string.default_web_client_id)
+
     // val scrollState = rememberScrollState()
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         HeaderImage(Modifier.align(Alignment.CenterHorizontally))
@@ -71,7 +84,7 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
         Spacer(modifier = Modifier.padding(4.dp))
         RegisterButton { viewModel.cleanFields(); navController.navigate(AppScreens.SignUpView.route) }
         Spacer(modifier = Modifier.padding(6.dp))
-        SignUpWithGoogleButton()
+        SignUpWithGoogleButton(context, token, viewModel)
     }
 
     loginFlow.value.let {
@@ -207,9 +220,21 @@ private fun RegisterButton(registerUser: () -> Unit) {
 }
 
 @Composable
-private fun SignUpWithGoogleButton() {
-    Button(
-        onClick = {}, modifier = Modifier
+private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: AuthViewModel) {
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+                viewModel.signUpWithGoogle(credential)
+            } catch (e: ApiException) {
+                Log.w("TAG", "Google sign in failed", e)
+            }
+        }
+    OutlinedButton(
+        border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
+        modifier = Modifier
             .fillMaxWidth()
             .padding(30.dp, 0.dp, 30.dp, 0.dp)
             .height(50.dp),
@@ -217,12 +242,23 @@ private fun SignUpWithGoogleButton() {
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.primary,
             disabledBackgroundColor = MaterialTheme.colors.primary
-        )
-    ) {
+        ),
+        onClick = {
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(token)
+                .requestEmail()
+                .build()
+
+            val googleSignInClient = GoogleSignIn.getClient(context, gso)
+            launcher.launch(googleSignInClient.signInIntent)
+        },
+
+        ) {
         Image(painterResource(R.drawable.google), contentDescription = "icono google")
         Text(text = " Ingresar con Google")
     }
 }
+
 
 @Preview(showBackground = true, name = "Light mode")
 @Preview(
