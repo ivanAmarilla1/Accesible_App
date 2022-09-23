@@ -12,10 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
@@ -75,7 +77,7 @@ fun LogOutButton(viewModel: AuthViewModel?, navController: NavController) {
             disabledBackgroundColor = Color.DarkGray
         ),
     ) {
-        Text("Cerrar Sesión")
+        Text(stringResource(R.string.logout))
     }
 }
 

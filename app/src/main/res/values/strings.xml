@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">Accesible App</string>
+
+    <string name="name">Nombre</string>
+    <string name="email">Email</string>
+    <string name="password">Contraseña</string>
+    <string name="confirm_password">Confirma la contraseña</string>
+    <string name="login">Iniciar Sesión</string>
+    <string name="dont_have_account">No tienes una cuenta?</string>
+    <string name="forgot_password">Olvidaste la contraseña?</string>
+    <string name="signup">Registrarse</string>
+    <string name="google_signin"> Ingresar con Google</string>
+    <string name="already_have_account">Ya tienes una cuenta?</string>
+    <string name="sign_up_here">Inicia sesión aquí</string>
+    <string name="logout">Cerrar Sesión</string>
+    <string name="or"> O</string>
+
+    <string name="welcome_back">Welcome Back</string>
+    <string name="empty" />
+
 </resources>

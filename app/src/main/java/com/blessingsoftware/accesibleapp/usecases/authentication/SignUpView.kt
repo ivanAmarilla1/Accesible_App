@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -122,8 +123,8 @@ private fun SignUpHeader(modifier: Modifier) {
 @Composable
 private fun SignUpNameField(name: String, onSignUpFieldsChanged: (String) -> Unit) {
     TextField(
-        //label = { Text(text = "Nombre") },
-        placeholder = { Text(text = "Nombre") },
+        label = { Text(text = stringResource(R.string.name), color = MaterialTheme.colors.secondaryVariant) },
+        //placeholder = { Text(text = stringResource(R.string.name), color = MaterialTheme.colors.secondaryVariant) },
         value = name,
         onValueChange = { onSignUpFieldsChanged(it) },
         shape = RoundedCornerShape(20.dp),
@@ -132,8 +133,7 @@ private fun SignUpNameField(name: String, onSignUpFieldsChanged: (String) -> Uni
         singleLine = true,
         maxLines = 1,
         colors = TextFieldDefaults.textFieldColors(
-            //TODO Aplicar tema de colores de material design
-            textColor = MaterialTheme.colors.primary,
+            textColor = MaterialTheme.colors.secondary,
             //backgroundColor = Color(0xFFEEECEC),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -144,8 +144,8 @@ private fun SignUpNameField(name: String, onSignUpFieldsChanged: (String) -> Uni
 @Composable
 private fun SignUpEmailField(email: String, onSignUpFieldsChanged: (String) -> Unit) {
     TextField(
-        //label = { Text(text = "Correo electrónico") },
-        placeholder = { Text(text = "Correo electrónico") },
+        //placeholder = { Text(text = "Correo electrónico") },
+        label = { Text(text = stringResource(R.string.email), color = MaterialTheme.colors.secondaryVariant) },
         value = email,
         onValueChange = { onSignUpFieldsChanged(it) },
         shape = RoundedCornerShape(20.dp),
@@ -154,8 +154,7 @@ private fun SignUpEmailField(email: String, onSignUpFieldsChanged: (String) -> U
         singleLine = true,
         maxLines = 1,
         colors = TextFieldDefaults.textFieldColors(
-            //TODO Aplicar tema de colores de material design
-            textColor = MaterialTheme.colors.primary,
+            textColor = MaterialTheme.colors.secondary,
             //backgroundColor = Color(0xFFEEECEC),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -166,8 +165,8 @@ private fun SignUpEmailField(email: String, onSignUpFieldsChanged: (String) -> U
 @Composable
 private fun SignUpPasswordField(password: String, onSignUpFieldsChanged: (String) -> Unit) {
     TextField(
-        //label = { Text(text = "Contraseña") },
-        placeholder = { Text(text = "Contraseña") },
+        //placeholder = { Text(text = "Contraseña") },
+        label = { Text(text = stringResource(R.string.password), color = MaterialTheme.colors.secondaryVariant) },
         value = password,
         onValueChange = { onSignUpFieldsChanged(it) },
         shape = RoundedCornerShape(20.dp),
@@ -177,8 +176,7 @@ private fun SignUpPasswordField(password: String, onSignUpFieldsChanged: (String
         maxLines = 1,
         visualTransformation = PasswordVisualTransformation(),
         colors = TextFieldDefaults.textFieldColors(
-            //TODO Aplicar tema de colores de material design
-            textColor = MaterialTheme.colors.primary,
+            textColor = MaterialTheme.colors.secondary,
             //backgroundColor = Color(0xFFEEECEC),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -190,8 +188,8 @@ private fun SignUpPasswordField(password: String, onSignUpFieldsChanged: (String
 @Composable
 private fun SignUpConfirmPasswordField(confirmPassword: String, onSignUpFieldsChanged: (String) -> Unit) {
     TextField(
-        //label = { Text(text = "Confirme la contraseña") },
-        placeholder = { Text(text = "Confirme la contraseña") },
+        //placeholder = { Text(text = "Confirme la contraseña") },
+        label = { Text(text = stringResource(R.string.confirm_password), color = MaterialTheme.colors.secondaryVariant) },
         value = confirmPassword,
         onValueChange = { onSignUpFieldsChanged(it) },
         shape = RoundedCornerShape(20.dp),
@@ -201,8 +199,7 @@ private fun SignUpConfirmPasswordField(confirmPassword: String, onSignUpFieldsCh
         maxLines = 1,
         visualTransformation = PasswordVisualTransformation(),
         colors = TextFieldDefaults.textFieldColors(
-            //TODO Aplicar tema de colores de material design
-            textColor = MaterialTheme.colors.primary,
+            textColor = MaterialTheme.colors.secondary,
             //backgroundColor = Color(0xFFEEECEC),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -224,7 +221,7 @@ private fun SignUpButton(onSignUpSelected: () -> Unit) {
             disabledBackgroundColor = Color.DarkGray
         )
     ) {
-        Text("Registrarse")
+        Text(stringResource(R.string.signup), color = MaterialTheme.colors.onBackground)
     }
 }
 
@@ -232,17 +229,17 @@ private fun SignUpButton(onSignUpSelected: () -> Unit) {
 private fun AlreadyHaveAnAccount(modifier: Modifier) {
     Text(
         modifier = modifier,
-        text = "Ya tienes una cuenta?",
+        text = stringResource(R.string.already_have_account),
         fontSize = 18.sp,
         //fontWeight = FontWeight.Bold,
-        color = Color.Blue
+        color = MaterialTheme.colors.secondary
     )
     Text(
-        text = "Inicia sesión aquí",
+        text = stringResource(R.string.sign_up_here),
         modifier = modifier.clickable { },
         fontSize = 18.sp,
         //fontWeight = FontWeight.Bold,
-        color = Color.Blue
+        color = MaterialTheme.colors.secondary
     )
 }
 
@@ -250,11 +247,11 @@ private fun AlreadyHaveAnAccount(modifier: Modifier) {
 fun OrDivider() {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Divider(
-            startIndent = 8.dp, thickness = 1.dp, color = Color.Blue, modifier = Modifier
-                .width(175.dp)
+            startIndent = 8.dp, thickness = 1.dp, color = MaterialTheme.colors.secondary, modifier = Modifier
+                .width(165.dp)
         )
-        Text("  O")
-        Divider(startIndent = 8.dp, thickness = 1.dp, color = Color.Blue)
+        Text("  " +stringResource(R.string.or), color = MaterialTheme.colors.secondary)
+        Divider(startIndent = 8.dp, thickness = 1.dp, color = MaterialTheme.colors.secondary)
     }
 }
 
@@ -268,11 +265,11 @@ private fun SignUpWithGoogleButton() {
         shape = RoundedCornerShape(20.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.primary,
-            disabledBackgroundColor = MaterialTheme.colors.primary
+            //disabledBackgroundColor = MaterialTheme.colors.primary
         )
     ) {
         Image(painterResource(R.drawable.google), contentDescription = "icono google")
-        Text(text = " Ingresar con Google")
+        Text(text = " "+stringResource(R.string.google_signin), color = MaterialTheme.colors.onBackground)
     }
 }
 

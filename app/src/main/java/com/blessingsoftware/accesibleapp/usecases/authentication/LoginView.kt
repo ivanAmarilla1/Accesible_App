@@ -123,7 +123,7 @@ private fun HeaderImage(modifier: Modifier) {
 @Composable
 private fun EmailField(email: String, onTextFieldChanged: (String) -> Unit) {
     TextField(
-        label = { Text(text = "Email") },
+        label = { Text(text = stringResource(R.string.email), color = MaterialTheme.colors.secondaryVariant)},
         value = email,
         onValueChange = { onTextFieldChanged(it) },
         shape = RoundedCornerShape(20.dp),
@@ -132,8 +132,7 @@ private fun EmailField(email: String, onTextFieldChanged: (String) -> Unit) {
         singleLine = true,
         maxLines = 1,
         colors = TextFieldDefaults.textFieldColors(
-            //TODO Aplicar tema de colores de material design
-            //textColor = Color(0xFF020202),
+            textColor = MaterialTheme.colors.secondary,
             //backgroundColor = Color(0xFFEEECEC),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -144,7 +143,7 @@ private fun EmailField(email: String, onTextFieldChanged: (String) -> Unit) {
 @Composable
 private fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit) {
     TextField(
-        label = { Text(text = "Contraseña") },
+        label = { Text(text = stringResource(R.string.password), color = MaterialTheme.colors.secondaryVariant) },
         value = password,
         onValueChange = { onTextFieldChanged(it) },
         shape = RoundedCornerShape(20.dp),
@@ -154,8 +153,7 @@ private fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit
         maxLines = 1,
         visualTransformation = PasswordVisualTransformation(),
         colors = TextFieldDefaults.textFieldColors(
-            //TODO Aplicar tema de colores de material design
-            //textColor = Color(0xFF020202),
+            textColor = MaterialTheme.colors.secondary,
             //backgroundColor = Color(0xFFEEECEC),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -167,11 +165,11 @@ private fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit
 @Composable
 private fun ForgotPassword(modifier: Modifier) {
     Text(
-        text = "Olvidaste la contraseña?",
-        modifier = modifier.clickable { },
+        text = stringResource(R.string.forgot_password),
+        modifier = modifier.clickable { TODO() },
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
-        color = Color.Blue
+        color = MaterialTheme.colors.secondary
     )
 }
 
@@ -187,7 +185,7 @@ private fun LoginButton(onLoginSelected: () -> Unit) {
             disabledBackgroundColor = Color.DarkGray
         )
     ) {
-        Text("Iniciar Sesión")
+        Text(stringResource(R.string.login), color = MaterialTheme.colors.onBackground)
     }
 }
 
@@ -195,10 +193,10 @@ private fun LoginButton(onLoginSelected: () -> Unit) {
 private fun DontHaveAccount(modifier: Modifier) {
     Text(
         modifier = modifier,
-        text = "No tienes una cuenta?",
+        text = stringResource(R.string.dont_have_account),
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
-        color = Color.Blue
+        color = MaterialTheme.colors.secondary
     )
 }
 
@@ -215,7 +213,7 @@ private fun RegisterButton(registerUser: () -> Unit) {
             disabledBackgroundColor = MaterialTheme.colors.primary
         )
     ) {
-        Text("Registrarse")
+        Text(stringResource(R.string.signup), color = MaterialTheme.colors.onBackground)
     }
 }
 
@@ -255,7 +253,7 @@ private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: A
 
         ) {
         Image(painterResource(R.drawable.google), contentDescription = "icono google")
-        Text(text = " Ingresar con Google")
+        Text(text = " "+stringResource(R.string.google_signin), color = MaterialTheme.colors.onBackground)
     }
 }
 

@@ -93,4 +93,6 @@ dependencies {
     kapt "com.google.dagger:hilt-compiler:2.38.1"
     //Constrain layout compose
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
+    //SystemUI controller
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
 }
