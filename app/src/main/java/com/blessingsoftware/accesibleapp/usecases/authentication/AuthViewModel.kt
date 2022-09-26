@@ -28,37 +28,59 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepository) :
     ViewModel() {
 
-    //variables privadas que solo se puede modificar desde el viewmodel
+    //Datos de usuario
     private val _email = MutableLiveData<String>()
     private val _password = MutableLiveData<String>()
     private val _confirmPassword = MutableLiveData<String>()
     private val _name = MutableLiveData<String>()
-    private val _flag = MutableLiveData<Boolean>()
-
-    //variable que se conecta con el view para capturar la interacciones del usuario
     val email: LiveData<String> = _email
     val password: LiveData<String> = _password
     val confirmPassword: LiveData<String> = _confirmPassword
     val name: LiveData<String> = _name
+
+    //Validaciones
+    private val _validateEmail = MutableLiveData<Boolean>()
+    private val _validatePassword = MutableLiveData<Boolean>()
+    private val _validateName = MutableLiveData<Boolean>()
+    private val _validateConfirmPassword = MutableLiveData<Boolean>()
+    private val _validatePasswordsEquals = MutableLiveData<Boolean>()
+    val validatePasswordsEquals: LiveData<Boolean?> = _validatePasswordsEquals
+    val validateConfirmPassword: LiveData<Boolean?> = _validateConfirmPassword
+    val validateName: LiveData<Boolean?> = _validateName
+    val validatePassword: LiveData<Boolean?> = _validatePassword
+    val validateEmail: LiveData<Boolean?> = _validateEmail
+
+    //Visibilidad de la contraseña
+    private val _passwordVisibility = MutableLiveData<Boolean>()
+    val passwordVisibility: LiveData<Boolean?> = _passwordVisibility
+
+    //Bandera para entrar a las funciones de login o signUp
+    private val _flag = MutableLiveData<Boolean>()
     val flag: LiveData<Boolean> = _flag
 
-
+    //flujo de login, variable que recupera el usuario al iniciar sesion
     private val _loginFlow = MutableStateFlow<Resource<FirebaseUser>?>(null)
     val loginFlow: StateFlow<Resource<FirebaseUser>?> = _loginFlow
 
+    //flujo de registro de usuario, recupera al usuario nuevo registrado
     private val _signUpFlow = MutableStateFlow<Resource<FirebaseUser>?>(null)
     val signUpFlow: StateFlow<Resource<FirebaseUser>?> = _signUpFlow
 
-    private val googleSignIn: GoogleSignInClient
-        get() {
-            TODO()
-        }
 
-
+    //Recupera usuario actual del servidor de firebase
     val currentUser: FirebaseUser?
         get() = repository.currentUser
 
     init {
+        //datos de validacion porque sino me da null pointer exception
+        _validateEmail.value = true
+        _validatePassword.value = true
+        _validateName.value = true
+        _validateConfirmPassword.value = true
+        _validatePasswordsEquals.value = true
+        _passwordVisibility.value = false
+
+        //al iniciar la app se recupera la sesion del usuario registrado
         if (repository.currentUser != null) {
             _flag.value = true
             Log.d("currentUser", currentUser?.displayName.toString())
@@ -68,43 +90,42 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
 
     //Funcion de inicio de sesion
     fun login(email: String, password: String) = viewModelScope.launch {
-        if (isValidEmail(email)) {
-            if (isValidPassword(password)) {
-                _flag.value = true
-                _loginFlow.value = Resource.Loading
-                val result = repository.login(email, password)
-                _loginFlow.value = result
-            } else {
-                //TODO mensaje de password invalido
-            }
-        } else {
-            //TODO mensaje de email invalido
-        }
-    }
-
-    fun signUp(name: String, email: String, password: String) = viewModelScope.launch {
-        if (isValidEmail(email)) {
-            if (isValidPassword(password)) {
-                _flag.value = true
-                _signUpFlow.value = Resource.Loading
-                val result = repository.signUp(name, email, password)
-                _signUpFlow.value = result
-            } else {
-                //TODO mensaje de password invalido
-            }
-        } else {
-            //TODO mensaje de email invalido
-        }
-    }
-
-    fun signUpWithGoogle(credential: AuthCredential) = viewModelScope.launch {
         _flag.value = true
         _loginFlow.value = Resource.Loading
-        val result = repository.signUpWithGoogle(credential)
+        val result = repository.login(email, password)
         _loginFlow.value = result
+    }
+
+    //funcion de registro
+    fun signUp(name: String, email: String, password: String) = viewModelScope.launch {
+        _flag.value = true
+        _signUpFlow.value = Resource.Loading
+        val result = repository.signUp(name, email, password)
+        _signUpFlow.value = result
+    }
+
+    //funcion de ingreso con Google
+    fun signUpWithGoogle(credential: AuthCredential, source: Int) = viewModelScope.launch {
+        _flag.value = true
+        when (source) {//variable que indica de que pantalla viene la solicitud, para modificaar el flow correspondiente
+            1 -> {
+                _loginFlow.value = Resource.Loading
+                val result = repository.signUpWithGoogle(credential)
+                _loginFlow.value = result
+            }
+            2 -> {
+                _signUpFlow.value = Resource.Loading
+                val result = repository.signUpWithGoogle(credential)
+                _signUpFlow.value = result
+            }
+            else -> {
+                Log.d("Error", "error de la fuente de informacion de inicio de sesion")
+            }
+        }
 
     }
 
+    //funcion de cierre de sesion
     fun logOut(context: Context) {
         repository.logOut()
         cleanFields()
@@ -125,6 +146,7 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         _password.value = password
     }
 
+    //Funcion onChange de la pantalla de registro
     fun onSignUpFieldsChanged(
         name: String,
         email: String,
@@ -138,7 +160,7 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         _confirmPassword.value = confirmPassword
     }
 
-    //Limpiador de campos
+    //Limpia campos y reinicia variables
     fun cleanFields() {
         _loginFlow.value = null
         _signUpFlow.value = null
@@ -147,12 +169,36 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         _name.value = ""
         _confirmPassword.value = ""
         _flag.value = false
+        _validateEmail.value = true
+        _validatePassword.value = true
     }
 
-    //Validacion de email y password
-    private fun isValidEmail(email: String): Boolean =
-        Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    //Validacion de email y password para login
+    fun validateDataLogin(email: String, password: String): Boolean {
+        _validateEmail.value = Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        _validatePassword.value = password.length >= 6
+        return _validateEmail.value!! && _validatePassword.value!!
+    }
 
-    private fun isValidPassword(password: String): Boolean = password.length >= 6
+    //Validacion de email y password para login
+    fun validateRegistrationData(
+        name: String,
+        email: String,
+        password: String,
+        confirmPassword: String
+    ): Boolean {
+        _validateName.value = name.isNotBlank()
+        _validateEmail.value = Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        _validatePassword.value = password.length >= 6
+        _validateConfirmPassword.value = password.length >= 6
+        _validatePasswordsEquals.value = password == confirmPassword
+
+        return _validateEmail.value!! && _validatePassword.value!! && _validateName.value!! && _validateConfirmPassword.value!! && _validatePasswordsEquals.value!!
+    }
+
+
+    fun  onVisibilityChanges(passwordVisibility: Boolean) {
+        _passwordVisibility.value = passwordVisibility
+    }
 
 }

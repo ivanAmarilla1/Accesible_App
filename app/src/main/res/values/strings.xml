@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Accesible App</string>
 
     <string name="name">Nombre</string>
@@ -17,5 +17,11 @@
 
     <string name="welcome_back">Welcome Back</string>
     <string name="empty" />
+
+    //Errores de validacion
+    <string name="validate_email" tools:ignore="ExtraTranslation">Email invalido</string>
+    <string name="validate_password" tools:ignore="DuplicateDefinition,ExtraTranslation">La contraseña debe contener al menos 6 caracteres</string>
+    <string name="validate_password_match" tools:ignore="DuplicateDefinition,ExtraTranslation">Las contraseñas no coinciden</string>
+    <string name="validate_name">Ingrese su nombre</string>
 
 </resources>

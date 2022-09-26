@@ -5,36 +5,48 @@ import android.content.res.Configuration
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AlternateEmail
+import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.filled.PermIdentity
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextField
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
 
 @Composable
 fun SignUpView(viewModel: AuthViewModel, navController: NavController) {
@@ -58,32 +70,88 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: 
     val signUpFlag = viewModel.flag.observeAsState()
     val signUpFlow = viewModel.signUpFlow.collectAsState()
 
+    //para la autenticacion con google
     val context = LocalContext.current
+    val token = stringResource(R.string.default_web_client_id)
+
+    //Validacion
+    val focusManager = LocalFocusManager.current
+    val validateEmail = viewModel.validateEmail.observeAsState()
+    val validatePassword = viewModel.validatePassword.observeAsState()
+    val validateName = viewModel.validateName.observeAsState()
+    val validateConfirmPassword = viewModel.validateConfirmPassword.observeAsState()
+    val validatePassordsEquals = viewModel.validatePasswordsEquals.observeAsState()
+    val validateEmailError = stringResource(R.string.validate_email)
+    val validatePasswordError = stringResource(R.string.validate_password)
+    val validateNameError = stringResource(R.string.validate_name)
+    val validateConfirmPasswordError = stringResource(R.string.validate_password)
+    val validatePasswordsEqualsError = stringResource(R.string.validate_password_match)
+    val isPasswordVissible by rememberSaveable { mutableStateOf(false) }
+    val isConfirmPasswordVissible by rememberSaveable { mutableStateOf(false) }
+
+
     Column(modifier.verticalScroll(rememberScrollState())) {
         SignUpHeader(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.padding(20.dp))
-        SignUpNameField(name) {viewModel.onSignUpFieldsChanged(it, email, password, confirmPassword)}
-        Spacer(modifier = Modifier.padding(10.dp))
-        SignUpEmailField(email) {viewModel.onSignUpFieldsChanged(name, it, password, confirmPassword)}
-        Spacer(modifier = Modifier.padding(10.dp))
-        SignUpPasswordField(password) {viewModel.onSignUpFieldsChanged(name, email, it, confirmPassword)}
-        Spacer(modifier = Modifier.padding(10.dp))
-        SignUpConfirmPasswordField(confirmPassword) {viewModel.onSignUpFieldsChanged(name, email, password, it)}
-        Spacer(modifier = Modifier.padding(15.dp))
+        SignUpNameField(name, validateName.value, validateNameError, focusManager) {
+            viewModel.onSignUpFieldsChanged(
+                it,
+                email,
+                password,
+                confirmPassword
+            )
+        }
+        //Spacer(modifier = Modifier.padding(10.dp))
+        SignUpEmailField(email, validateEmail.value, validateEmailError, focusManager) {
+            viewModel.onSignUpFieldsChanged(
+                name,
+                it,
+                password,
+                confirmPassword
+            )
+        }
+        //Spacer(modifier = Modifier.padding(10.dp))
+        SignUpPasswordField(
+            password,
+            validatePassword.value,
+            validatePasswordError,
+            isPasswordVissible,
+            focusManager
+        ) {
+            viewModel.onSignUpFieldsChanged(
+                name,
+                email,
+                it,
+                confirmPassword
+            )
+        }
+        //Spacer(modifier = Modifier.padding(10.dp))
+        SignUpConfirmPasswordField(
+            confirmPassword,
+            validateConfirmPassword.value,
+            validatePassordsEquals.value,
+            validateConfirmPasswordError,
+            validatePasswordsEqualsError,
+            isConfirmPasswordVissible,
+            focusManager
+        ) {
+            viewModel.onSignUpFieldsChanged(
+                name,
+                email,
+                password,
+                it
+            )
+        }
+        Spacer(modifier = Modifier.padding(5.dp))
         SignUpButton {
-            if (password == confirmPassword){
-                viewModel.signUp(name, email, password)
-            }else {
-                //Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_LONG)
-                Log.d("SignUpButton", "Las contraseñas no coinciden")
-            }
+            registerFunction(name, email, password, confirmPassword, viewModel, context)
         }
         Spacer(modifier = Modifier.padding(7.dp))
         AlreadyHaveAnAccount(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.padding(5.dp))
         OrDivider()
         Spacer(modifier = Modifier.padding(7.dp))
-        SignUpWithGoogleButton()
+        SignUpWithGoogleButton(context, token, viewModel)
     }
 
     signUpFlow.value.let {
@@ -121,90 +189,112 @@ private fun SignUpHeader(modifier: Modifier) {
 }
 
 @Composable
-private fun SignUpNameField(name: String, onSignUpFieldsChanged: (String) -> Unit) {
-    TextField(
-        label = { Text(text = stringResource(R.string.name), color = MaterialTheme.colors.secondaryVariant) },
-        //placeholder = { Text(text = stringResource(R.string.name), color = MaterialTheme.colors.secondaryVariant) },
+private fun SignUpNameField(
+    name: String,
+    validateName: Boolean?,
+    validateNameError: String,
+    focusManager: FocusManager,
+    onTextFieldChanged: (String) -> Unit
+) {
+    CustomOutlinedTextField(
         value = name,
-        onValueChange = { onSignUpFieldsChanged(it) },
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-        singleLine = true,
-        maxLines = 1,
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = MaterialTheme.colors.secondary,
-            //backgroundColor = Color(0xFFEEECEC),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+        onValueChange = { onTextFieldChanged(it) },
+        label = stringResource(R.string.name),
+        showError = !validateName!!,
+        errorMessage = validateNameError,
+        leadingIconImageVector = Icons.Default.PermIdentity,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Down) }
         )
     )
 }
 
 @Composable
-private fun SignUpEmailField(email: String, onSignUpFieldsChanged: (String) -> Unit) {
-    TextField(
-        //placeholder = { Text(text = "Correo electrónico") },
-        label = { Text(text = stringResource(R.string.email), color = MaterialTheme.colors.secondaryVariant) },
+private fun SignUpEmailField(
+    email: String,
+    validateEmail: Boolean?,
+    validateEmailError: String,
+    focusManager: FocusManager,
+    onTextFieldChanged: (String) -> Unit
+) {
+    CustomOutlinedTextField(
         value = email,
-        onValueChange = { onSignUpFieldsChanged(it) },
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        singleLine = true,
-        maxLines = 1,
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = MaterialTheme.colors.secondary,
-            //backgroundColor = Color(0xFFEEECEC),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+        onValueChange = { onTextFieldChanged(it) },
+        label = stringResource(R.string.email),
+        showError = !validateEmail!!,
+        errorMessage = validateEmailError,
+        leadingIconImageVector = Icons.Default.AlternateEmail,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Down) }
         )
     )
 }
 
 @Composable
-private fun SignUpPasswordField(password: String, onSignUpFieldsChanged: (String) -> Unit) {
-    TextField(
-        //placeholder = { Text(text = "Contraseña") },
-        label = { Text(text = stringResource(R.string.password), color = MaterialTheme.colors.secondaryVariant) },
+private fun SignUpPasswordField(
+    password: String,
+    validatePassword: Boolean?,
+    validatePasswordError: String,
+    isPasswordVissible: Boolean,
+    focusManager: FocusManager,
+    onTextFieldChanged: (String) -> Unit
+) {
+    CustomOutlinedTextField(
         value = password,
-        onValueChange = { onSignUpFieldsChanged(it) },
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        singleLine = true,
-        maxLines = 1,
-        visualTransformation = PasswordVisualTransformation(),
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = MaterialTheme.colors.secondary,
-            //backgroundColor = Color(0xFFEEECEC),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+        onValueChange = { onTextFieldChanged(it) },
+        label = stringResource(R.string.password),
+        showError = !validatePassword!!,
+        errorMessage = validatePasswordError,
+        isPasswordField = true,
+        isPasswordVisible = isPasswordVissible,
+        //onVisibilityChanges = { isPasswordVissible = it },
+        leadingIconImageVector = Icons.Default.Password,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Down) }
         )
-
     )
 }
 
 @Composable
-private fun SignUpConfirmPasswordField(confirmPassword: String, onSignUpFieldsChanged: (String) -> Unit) {
-    TextField(
-        //placeholder = { Text(text = "Confirme la contraseña") },
-        label = { Text(text = stringResource(R.string.confirm_password), color = MaterialTheme.colors.secondaryVariant) },
+private fun SignUpConfirmPasswordField(
+    confirmPassword: String,
+    validateConfirmPassword: Boolean?,
+    validatePaswordsEquals: Boolean?,
+    validateConfirmPasswordError: String,
+    validatePaswordsEqualsError: String,
+    isConfirmPasswordVissible: Boolean,
+    focusManager: FocusManager,
+    onTextFieldChanged: (String) -> Unit
+) {
+    CustomOutlinedTextField(
         value = confirmPassword,
-        onValueChange = { onSignUpFieldsChanged(it) },
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        singleLine = true,
-        maxLines = 1,
-        visualTransformation = PasswordVisualTransformation(),
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = MaterialTheme.colors.secondary,
-            //backgroundColor = Color(0xFFEEECEC),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+        onValueChange = { onTextFieldChanged(it) },
+        label = stringResource(R.string.confirm_password),
+        showError = !validateConfirmPassword!! || !validatePaswordsEquals!!,
+        errorMessage = if (!validateConfirmPassword) validateConfirmPasswordError else validatePaswordsEqualsError,
+        isPasswordField = true,
+        isPasswordVisible = isConfirmPasswordVissible,
+        //onVisibilityChanges = { isPasswordVissible = it },
+        leadingIconImageVector = Icons.Default.Password,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.clearFocus() }
         )
-
     )
 }
 
@@ -223,6 +313,22 @@ private fun SignUpButton(onSignUpSelected: () -> Unit) {
     ) {
         Text(stringResource(R.string.signup), color = MaterialTheme.colors.onBackground)
     }
+}
+
+fun registerFunction(
+    name: String,
+    email: String,
+    password: String,
+    confirmPassword: String,
+    viewModel: AuthViewModel,
+    context: Context
+) {
+    if (viewModel.validateRegistrationData(name, email, password, confirmPassword)) {
+        viewModel.signUp(name, email, password)
+    } else {
+        Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG)
+    }
+
 }
 
 @Composable
@@ -247,29 +353,57 @@ private fun AlreadyHaveAnAccount(modifier: Modifier) {
 fun OrDivider() {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Divider(
-            startIndent = 8.dp, thickness = 1.dp, color = MaterialTheme.colors.secondary, modifier = Modifier
+            startIndent = 8.dp,
+            thickness = 1.dp,
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
                 .width(165.dp)
         )
-        Text("  " +stringResource(R.string.or), color = MaterialTheme.colors.secondary)
+        Text("  " + stringResource(R.string.or), color = MaterialTheme.colors.secondary)
         Divider(startIndent = 8.dp, thickness = 1.dp, color = MaterialTheme.colors.secondary)
     }
 }
 
 @Composable
-private fun SignUpWithGoogleButton() {
-    Button(
-        onClick = {}, modifier = Modifier
+private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: AuthViewModel) {
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+                viewModel.signUpWithGoogle(credential, 2)
+            } catch (e: ApiException) {
+                Log.w("TAG", "Google sign in failed", e)
+            }
+        }
+    OutlinedButton(
+        border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
+        modifier = Modifier
             .fillMaxWidth()
             .padding(30.dp, 0.dp, 30.dp, 0.dp)
             .height(50.dp),
         shape = RoundedCornerShape(20.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.primary,
-            //disabledBackgroundColor = MaterialTheme.colors.primary
-        )
-    ) {
+            disabledBackgroundColor = MaterialTheme.colors.primary
+        ),
+        onClick = {
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(token)
+                .requestEmail()
+                .build()
+
+            val googleSignInClient = GoogleSignIn.getClient(context, gso)
+            launcher.launch(googleSignInClient.signInIntent)
+        },
+
+        ) {
         Image(painterResource(R.drawable.google), contentDescription = "icono google")
-        Text(text = " "+stringResource(R.string.google_signin), color = MaterialTheme.colors.onBackground)
+        Text(
+            text = " " + stringResource(R.string.google_signin),
+            color = MaterialTheme.colors.onBackground
+        )
     }
 }
 
@@ -281,10 +415,9 @@ private fun SignUpBackHandler(viewModel: AuthViewModel, navController: NavContro
             popUpTo(AppScreens.LoginView.route) { inclusive = true }
         }
 
-        Log.d("BackHandler","Boton atras")
+        Log.d("BackHandler", "Boton atras")
     })
 }
-
 
 
 @Preview(showBackground = true, name = "Light mode")

@@ -11,19 +11,22 @@ import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
-    primary = LightBlue700,
-    primaryVariant = LightBlue300,
-    secondary = LightBlue100,
-    onBackground = White,
+    primary = LightBlue700,//Botones, interfaz principal, etc
+    primaryVariant = LightBlue300,//reservado para otro color de la interfaz
+    secondary = LightBlue100,//Texto de la app
+    onSecondary = DarkModeColor,//Fondo de Textfields
+    onBackground = White,//Texto de los botones
     background = DarkModeBackground,//fondo de la app
+
 )
 
 
 private val LightColorPalette = lightColors(
-    primary = LightBlue700,//Botones, interfaz, etc
+    primary = LightBlue700,//Botones, interfaz principal, etc
     primaryVariant = LightBlue300,//reservado para otro color de la interfaz
     secondary = Gray700,//Texto de la app
     secondaryVariant = Gray500,//placeholders
+    onSecondary = Gray300,//Fondo de Textfields
     onBackground = White,//Texto de los botones
     background = Gray100,//fondo de la app
 

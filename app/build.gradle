@@ -4,6 +4,7 @@ plugins {
     id 'com.google.gms.google-services'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -95,4 +96,6 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
     //SystemUI controller
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
+    //Iconos
+    implementation "androidx.compose.material:material-icons-extended:1.2.1"
 }

@@ -3,6 +3,7 @@ package com.blessingsoftware.accesibleapp.usecases.authentication
 import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,18 +12,27 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AlternateEmail
+import androidx.compose.material.icons.filled.Password
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,7 +41,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.R
+import com.blessingsoftware.accesibleapp.model.domain.InputWrapper
 import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextField
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -66,18 +78,40 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
     val context = LocalContext.current
     val token = stringResource(R.string.default_web_client_id)
 
+
+    //Validacion
+    val focusManager = LocalFocusManager.current
+    val validateEmail = viewModel.validateEmail.observeAsState()
+    val validatePassword = viewModel.validatePassword.observeAsState()
+    val validateEmailError = stringResource(R.string.validate_email)
+    val validatePasswordError = stringResource(R.string.validate_password)
+    var isPasswordVissible = viewModel.passwordVisibility.observeAsState()
+
+
     // val scrollState = rememberScrollState()
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         HeaderImage(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.padding(16.dp))
-        EmailField(email) { viewModel.onFieldsChanged(it, password) }
-        Spacer(modifier = Modifier.padding(6.dp))
-        PasswordField(password) { viewModel.onFieldsChanged(email, it) }
-        Spacer(modifier = Modifier.padding(6.dp))
+        EmailField(email, validateEmail.value, validateEmailError, focusManager) {
+            viewModel.onFieldsChanged(
+                it,
+                password
+            )
+        }
+        //Spacer(modifier = Modifier.padding(6.dp))
+        PasswordField(
+            password,
+            validatePassword.value,
+            validatePasswordError,
+            isPasswordVissible.value,
+            focusManager,
+            { viewModel.onVisibilityChanges(it)}
+        ) { viewModel.onFieldsChanged(email, it) }
+        //Spacer(modifier = Modifier.padding(6.dp))
         ForgotPassword(Modifier.align(Alignment.End))
         Spacer(modifier = Modifier.padding(10.dp))
         LoginButton() {
-            viewModel.login(email, password)
+            loginFunction(email, password, viewModel, context)
         }
         Spacer(modifier = Modifier.padding(16.dp))
         DontHaveAccount(Modifier.align(Alignment.CenterHorizontally))
@@ -112,6 +146,7 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
     }
 }
 
+
 @Composable
 private fun HeaderImage(modifier: Modifier) {
     Image(
@@ -121,44 +156,58 @@ private fun HeaderImage(modifier: Modifier) {
 }
 
 @Composable
-private fun EmailField(email: String, onTextFieldChanged: (String) -> Unit) {
-    TextField(
-        label = { Text(text = stringResource(R.string.email), color = MaterialTheme.colors.secondaryVariant)},
+private fun EmailField(
+    email: String,
+    validateEmail: Boolean?,
+    validateEmailError: String,
+    focusManager: FocusManager,
+    onTextFieldChanged: (String) -> Unit
+) {
+    CustomOutlinedTextField(
         value = email,
         onValueChange = { onTextFieldChanged(it) },
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        singleLine = true,
-        maxLines = 1,
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = MaterialTheme.colors.secondary,
-            //backgroundColor = Color(0xFFEEECEC),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+        label = stringResource(R.string.email),
+        showError = !validateEmail!!,
+        errorMessage = validateEmailError,
+        leadingIconImageVector = Icons.Default.AlternateEmail,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Down) }
         )
     )
 }
 
 @Composable
-private fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit) {
-    TextField(
-        label = { Text(text = stringResource(R.string.password), color = MaterialTheme.colors.secondaryVariant) },
+private fun PasswordField(
+    password: String,
+    validatePassword: Boolean?,
+    validatePasswordError: String,
+    isPasswordVissible: Boolean?,
+    focusManager: FocusManager,
+    onVisibilityChanges: (Boolean) -> Unit,
+    onTextFieldChanged: (String) -> Unit
+
+) {
+    CustomOutlinedTextField(
         value = password,
         onValueChange = { onTextFieldChanged(it) },
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        singleLine = true,
-        maxLines = 1,
-        visualTransformation = PasswordVisualTransformation(),
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = MaterialTheme.colors.secondary,
-            //backgroundColor = Color(0xFFEEECEC),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+        label = stringResource(R.string.password),
+        showError = !validatePassword!!,
+        errorMessage = validatePasswordError,
+        isPasswordField = true,
+        isPasswordVisible = isPasswordVissible!!,
+        onVisibilityChanges = { onVisibilityChanges(it) },
+        leadingIconImageVector = Icons.Default.Password,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.clearFocus() }
         )
-
     )
 }
 
@@ -217,6 +266,16 @@ private fun RegisterButton(registerUser: () -> Unit) {
     }
 }
 
+private fun loginFunction(email: String, password: String, viewModel: AuthViewModel, context: Context) {
+    if (viewModel.validateDataLogin(email, password)) {
+        viewModel.login(email, password)
+    } else {
+        Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG)
+    }
+
+
+}
+
 @Composable
 private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: AuthViewModel) {
     val launcher =
@@ -225,7 +284,7 @@ private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: A
             try {
                 val account = task.getResult(ApiException::class.java)!!
                 val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-                viewModel.signUpWithGoogle(credential)
+                viewModel.signUpWithGoogle(credential, 1)
             } catch (e: ApiException) {
                 Log.w("TAG", "Google sign in failed", e)
             }
@@ -253,7 +312,10 @@ private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: A
 
         ) {
         Image(painterResource(R.drawable.google), contentDescription = "icono google")
-        Text(text = " "+stringResource(R.string.google_signin), color = MaterialTheme.colors.onBackground)
+        Text(
+            text = " " + stringResource(R.string.google_signin),
+            color = MaterialTheme.colors.onBackground
+        )
     }
 }
 
