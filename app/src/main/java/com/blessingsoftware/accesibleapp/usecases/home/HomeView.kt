@@ -49,9 +49,9 @@ private fun HomeBackHandler() {
 @Composable
 fun Home(modifier: Modifier, viewModel: AuthViewModel?, navController: NavController) {
     Column(modifier = modifier) {
-        Text("Home Screen")
-        viewModel?.currentUser?.displayName?.let { Text(it.trim()) }
-        viewModel?.currentUser?.email?.let { Text(it.trim()) }
+        Text("Home Screen", color = MaterialTheme.colors.secondary)
+        viewModel?.currentUser?.displayName?.let { Text(it.trim(), color = MaterialTheme.colors.secondary) }
+        viewModel?.currentUser?.email?.let { Text(it.trim(), color = MaterialTheme.colors.secondary) }
         Spacer(modifier = Modifier.padding(16.dp))
         LogOutButton(viewModel, navController)
     }

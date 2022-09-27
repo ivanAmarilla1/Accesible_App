@@ -53,6 +53,8 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
     //Visibilidad de la contraseña
     private val _passwordVisibility = MutableLiveData<Boolean>()
     val passwordVisibility: LiveData<Boolean?> = _passwordVisibility
+    private val _confirmPasswordVisibility = MutableLiveData<Boolean>()
+    val confirmPasswordVisibility: LiveData<Boolean?> = _confirmPasswordVisibility
 
     //Bandera para entrar a las funciones de login o signUp
     private val _flag = MutableLiveData<Boolean>()
@@ -72,13 +74,14 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         get() = repository.currentUser
 
     init {
-        //datos de validacion porque sino me da null pointer exception
+        //datos de validacion porque si no me da null pointer exception
         _validateEmail.value = true
         _validatePassword.value = true
         _validateName.value = true
         _validateConfirmPassword.value = true
         _validatePasswordsEquals.value = true
         _passwordVisibility.value = false
+        _confirmPasswordVisibility.value = false
 
         //al iniciar la app se recupera la sesion del usuario registrado
         if (repository.currentUser != null) {
@@ -171,6 +174,11 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         _flag.value = false
         _validateEmail.value = true
         _validatePassword.value = true
+        _validateName.value = true
+        _validateConfirmPassword.value = true
+        _validatePasswordsEquals.value = true
+        _passwordVisibility.value = false
+        _confirmPasswordVisibility.value = false
     }
 
     //Validacion de email y password para login
@@ -197,8 +205,12 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
     }
 
 
-    fun  onVisibilityChanges(passwordVisibility: Boolean) {
+    //Mostrar u ocultar la contraseña
+    fun  onPasswordVisibilityChanges(passwordVisibility: Boolean) {
         _passwordVisibility.value = passwordVisibility
+    }
+    fun  onConfirmPasswordVisibilityChanges(confirmPasswordVisibility: Boolean) {
+        _confirmPasswordVisibility.value = confirmPasswordVisibility
     }
 
 }

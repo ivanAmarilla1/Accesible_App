@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.PermIdentity
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.ui.composables.CustomGoogleButton
 import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextField
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
@@ -86,8 +86,8 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: 
     val validateNameError = stringResource(R.string.validate_name)
     val validateConfirmPasswordError = stringResource(R.string.validate_password)
     val validatePasswordsEqualsError = stringResource(R.string.validate_password_match)
-    val isPasswordVissible by rememberSaveable { mutableStateOf(false) }
-    val isConfirmPasswordVissible by rememberSaveable { mutableStateOf(false) }
+    val isPasswordVissible = viewModel.passwordVisibility.observeAsState()
+    val isConfirmPasswordVissible = viewModel.confirmPasswordVisibility.observeAsState()
 
 
     Column(modifier.verticalScroll(rememberScrollState())) {
@@ -115,8 +115,9 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: 
             password,
             validatePassword.value,
             validatePasswordError,
-            isPasswordVissible,
-            focusManager
+            isPasswordVissible.value,
+            focusManager,
+            { viewModel.onPasswordVisibilityChanges(it) }
         ) {
             viewModel.onSignUpFieldsChanged(
                 name,
@@ -132,8 +133,9 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: 
             validatePassordsEquals.value,
             validateConfirmPasswordError,
             validatePasswordsEqualsError,
-            isConfirmPasswordVissible,
-            focusManager
+            isConfirmPasswordVissible.value,
+            focusManager,
+            { viewModel.onConfirmPasswordVisibilityChanges(it) }
         ) {
             viewModel.onSignUpFieldsChanged(
                 name,
@@ -243,8 +245,9 @@ private fun SignUpPasswordField(
     password: String,
     validatePassword: Boolean?,
     validatePasswordError: String,
-    isPasswordVissible: Boolean,
+    isPasswordVisible: Boolean?,
     focusManager: FocusManager,
+    onVisibilityChanges: (Boolean) -> Unit,
     onTextFieldChanged: (String) -> Unit
 ) {
     CustomOutlinedTextField(
@@ -254,8 +257,8 @@ private fun SignUpPasswordField(
         showError = !validatePassword!!,
         errorMessage = validatePasswordError,
         isPasswordField = true,
-        isPasswordVisible = isPasswordVissible,
-        //onVisibilityChanges = { isPasswordVissible = it },
+        isPasswordVisible = isPasswordVisible!!,
+        onVisibilityChanges = { onVisibilityChanges(it) },
         leadingIconImageVector = Icons.Default.Password,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
@@ -271,22 +274,23 @@ private fun SignUpPasswordField(
 private fun SignUpConfirmPasswordField(
     confirmPassword: String,
     validateConfirmPassword: Boolean?,
-    validatePaswordsEquals: Boolean?,
+    validatePasswordsEquals: Boolean?,
     validateConfirmPasswordError: String,
-    validatePaswordsEqualsError: String,
-    isConfirmPasswordVissible: Boolean,
+    validatePasswordsEqualsError: String,
+    isConfirmPasswordVisible: Boolean?,
     focusManager: FocusManager,
+    onVisibilityChanges: (Boolean) -> Unit,
     onTextFieldChanged: (String) -> Unit
 ) {
     CustomOutlinedTextField(
         value = confirmPassword,
         onValueChange = { onTextFieldChanged(it) },
         label = stringResource(R.string.confirm_password),
-        showError = !validateConfirmPassword!! || !validatePaswordsEquals!!,
-        errorMessage = if (!validateConfirmPassword) validateConfirmPasswordError else validatePaswordsEqualsError,
+        showError = !validateConfirmPassword!! || !validatePasswordsEquals!!,
+        errorMessage = if (!validateConfirmPassword) validateConfirmPasswordError else validatePasswordsEqualsError,
         isPasswordField = true,
-        isPasswordVisible = isConfirmPasswordVissible,
-        //onVisibilityChanges = { isPasswordVissible = it },
+        isPasswordVisible = isConfirmPasswordVisible!!,
+        onVisibilityChanges = { onVisibilityChanges(it) },
         leadingIconImageVector = Icons.Default.Password,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
@@ -326,7 +330,7 @@ fun registerFunction(
     if (viewModel.validateRegistrationData(name, email, password, confirmPassword)) {
         viewModel.signUp(name, email, password)
     } else {
-        Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG)
+        Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG).show()
     }
 
 }
@@ -366,9 +370,11 @@ fun OrDivider() {
 
 @Composable
 private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: AuthViewModel) {
+    var isLoading by remember { mutableStateOf(false) }//para la animacion del circularProgressIndicator
     val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+            isLoading = false
             try {
                 val account = task.getResult(ApiException::class.java)!!
                 val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
@@ -377,6 +383,20 @@ private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: A
                 Log.w("TAG", "Google sign in failed", e)
             }
         }
+
+    CustomGoogleButton(isLoading = isLoading) {
+        isLoading = true
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(token)
+            .requestEmail()
+            .build()
+
+        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+        launcher.launch(googleSignInClient.signInIntent)
+    }
+
+
+    /*
     OutlinedButton(
         border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
         modifier = Modifier
@@ -404,18 +424,17 @@ private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: A
             text = " " + stringResource(R.string.google_signin),
             color = MaterialTheme.colors.onBackground
         )
-    }
+    }*/
 }
 
 @Composable
 private fun SignUpBackHandler(viewModel: AuthViewModel, navController: NavController) {
     BackHandler(enabled = true, onBack = {
-        viewModel.cleanFields()
         navController.navigate(AppScreens.LoginView.route) {
             popUpTo(AppScreens.LoginView.route) { inclusive = true }
         }
-
-        Log.d("BackHandler", "Boton atras")
+        viewModel.cleanFields()
+        //Log.d("BackHandler", "Boton atras")
     })
 }
 

@@ -60,10 +60,14 @@ fun CustomOutlinedTextField(
                     contentDescription = "Show error icon"
                 )
                 if (isPasswordField) {
-                    Icon(
-                        imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = "Toggle password visibility"
-                    )
+                    IconButton(onClick = {onVisibilityChanges(!isPasswordVisible)}){
+                        Icon(
+                            imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = "Toggle password visibility",
+                            tint = if (showError) MaterialTheme.colors.error else MaterialTheme.colors.secondary
+                        )
+                    }
+
                 }
             },
             visualTransformation = when {
