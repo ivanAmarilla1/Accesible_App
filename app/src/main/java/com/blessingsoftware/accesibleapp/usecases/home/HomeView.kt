@@ -16,15 +16,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.R
+import com.blessingsoftware.accesibleapp.ui.composables.BottomNavigationBar
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
+import com.blessingsoftware.accesibleapp.usecases.navigation.AUTH_ROUTE
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 
 
 @Composable
-fun HomeView(viewModel: AuthViewModel?, navController: NavController) {
+fun HomeView(viewModel: AuthViewModel?, navController: NavHostController) {
     Box(
         Modifier
             .fillMaxSize()
@@ -64,7 +67,7 @@ fun LogOutButton(viewModel: AuthViewModel?, navController: NavController) {
     Button(
         onClick = {
             viewModel?.logOut(context)
-            navController.navigate(AppScreens.LoginView.route) {
+            navController.navigate(AUTH_ROUTE) {
                 popUpTo(AppScreens.HomeView.route) { inclusive = true }
             }
         },

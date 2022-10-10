@@ -3,7 +3,6 @@ package com.blessingsoftware.accesibleapp.usecases.authentication
 import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,7 +20,6 @@ import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -34,25 +32,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.R
-import com.blessingsoftware.accesibleapp.model.domain.InputWrapper
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.CustomGoogleButton
 import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextField
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
+import com.blessingsoftware.accesibleapp.usecases.navigation.HOME_ROUTE
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
-import kotlinx.coroutines.launch
 
 //TODO Ver inyeccion de dependencias
 @Composable
@@ -120,7 +114,7 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
             when (it) {
                 is Resource.Success -> {
                     LaunchedEffect(Unit) {
-                        navController.navigate(AppScreens.HomeView.route) {
+                        navController.navigate(HOME_ROUTE) {
                             popUpTo(AppScreens.LoginView.route) { inclusive = true }
                         }
                     }
@@ -265,8 +259,6 @@ private fun loginFunction(email: String, password: String, viewModel: AuthViewMo
     } else {
         Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG).show()
     }
-
-
 }
 
 @Composable

@@ -43,6 +43,7 @@ import com.blessingsoftware.accesibleapp.ui.composables.CustomGoogleButton
 import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextField
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
+import com.blessingsoftware.accesibleapp.usecases.navigation.HOME_ROUTE
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -149,7 +150,7 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: 
             registerFunction(name, email, password, confirmPassword, viewModel, context)
         }
         Spacer(modifier = Modifier.padding(7.dp))
-        AlreadyHaveAnAccount(Modifier.align(Alignment.CenterHorizontally))
+        AlreadyHaveAnAccount(Modifier.align(Alignment.CenterHorizontally)) {BackToLogin(viewModel, navController)}
         Spacer(modifier = Modifier.padding(5.dp))
         OrDivider()
         Spacer(modifier = Modifier.padding(7.dp))
@@ -162,7 +163,7 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: 
             when (it) {
                 is Resource.Success -> {
                     LaunchedEffect(Unit) {
-                        navController.navigate(AppScreens.HomeView.route) {
+                        navController.navigate(HOME_ROUTE) {
                             popUpTo(AppScreens.LoginView.route) { inclusive = true }
                         }
                     }
@@ -180,7 +181,6 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: 
         }
     }
 }
-
 
 @Composable
 private fun SignUpHeader(modifier: Modifier) {
@@ -336,7 +336,7 @@ fun registerFunction(
 }
 
 @Composable
-private fun AlreadyHaveAnAccount(modifier: Modifier) {
+private fun AlreadyHaveAnAccount(modifier: Modifier, goToLoginView: () -> Unit) {
     Text(
         modifier = modifier,
         text = stringResource(R.string.already_have_account),
@@ -346,11 +346,18 @@ private fun AlreadyHaveAnAccount(modifier: Modifier) {
     )
     Text(
         text = stringResource(R.string.sign_up_here),
-        modifier = modifier.clickable { },
+        modifier = modifier.clickable { goToLoginView() },
         fontSize = 18.sp,
         //fontWeight = FontWeight.Bold,
         color = MaterialTheme.colors.secondary
     )
+}
+
+fun BackToLogin(viewModel: AuthViewModel, navController: NavController) {
+    navController.navigate(AppScreens.LoginView.route){
+        popUpTo(AppScreens.LoginView.route) { inclusive = true }
+    }
+    viewModel.cleanFields()
 }
 
 @Composable
@@ -395,36 +402,6 @@ private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: A
         launcher.launch(googleSignInClient.signInIntent)
     }
 
-
-    /*
-    OutlinedButton(
-        border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(30.dp, 0.dp, 30.dp, 0.dp)
-            .height(50.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.primary,
-            disabledBackgroundColor = MaterialTheme.colors.primary
-        ),
-        onClick = {
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(token)
-                .requestEmail()
-                .build()
-
-            val googleSignInClient = GoogleSignIn.getClient(context, gso)
-            launcher.launch(googleSignInClient.signInIntent)
-        },
-
-        ) {
-        Image(painterResource(R.drawable.google), contentDescription = "icono google")
-        Text(
-            text = " " + stringResource(R.string.google_signin),
-            color = MaterialTheme.colors.onBackground
-        )
-    }*/
 }
 
 @Composable

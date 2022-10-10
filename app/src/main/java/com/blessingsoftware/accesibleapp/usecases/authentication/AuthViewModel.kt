@@ -28,6 +28,9 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepository) :
     ViewModel() {
 
+    //TODO Encapsular datos de usuario en un data class
+    private val _user = MutableLiveData<User>()
+    val user: LiveData<User> = _user
     //Datos de usuario
     private val _email = MutableLiveData<String>()
     private val _password = MutableLiveData<String>()

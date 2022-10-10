@@ -1,4 +1,4 @@
-package com.blessingsoftware.accesibleapp.provider.firebase.di
+package com.blessingsoftware.accesibleapp.provider.di
 
 import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
 import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepositoryImpl
@@ -8,6 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
+//Investigar que es esto xd
 @InstallIn(SingletonComponent::class)
 @Module
 class AppModule {
