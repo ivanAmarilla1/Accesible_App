@@ -65,7 +65,7 @@ fun CustomGoogleButton(
                 tint = Color.Unspecified
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = if (clicked) loadingText else text)
+            Text(text = if (clicked) loadingText else text, color = MaterialTheme.colors.onBackground)
             if (isLoading) {
                 Spacer(modifier = Modifier.width(16.dp))
                 CircularProgressIndicator(

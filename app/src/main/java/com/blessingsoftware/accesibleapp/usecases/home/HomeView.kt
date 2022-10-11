@@ -80,7 +80,7 @@ fun LogOutButton(viewModel: AuthViewModel?, navController: NavController) {
             disabledBackgroundColor = Color.DarkGray
         ),
     ) {
-        Text(stringResource(R.string.logout))
+        Text(stringResource(R.string.logout), color = MaterialTheme.colors.onBackground)
     }
 }
 

@@ -24,4 +24,6 @@
     <string name="validate_password_match" tools:ignore="DuplicateDefinition,ExtraTranslation">Las contraseñas no coinciden</string>
     <string name="validate_name">Ingrese su nombre</string>
 
+    //Otros
+    <string name="edit_account">Editar Perfil</string>
 </resources>

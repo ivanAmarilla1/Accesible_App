@@ -1,16 +1,23 @@
 package com.blessingsoftware.accesibleapp.ui.composables
 
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
+import com.blessingsoftware.accesibleapp.usecases.home.HomeView
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 
 @Composable
@@ -21,18 +28,22 @@ fun BottomNavigationBar(navController: NavHostController, items: List<AppScreens
 
     val bottomBarDestination = items.any { it.route == currentDestination?.route }//Para mostrar el bottomBar en las pantallas que tenga la lista items
     if (bottomBarDestination) {
-        BottomNavigation {
+        BottomNavigation (
+            backgroundColor = MaterialTheme.colors.onSecondary
+                ) {
             items.forEach { screen ->
+                val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                 BottomNavigationItem(
                     icon = {
                         Icon(
-                            imageVector = screen.icon,
-                            contentDescription = screen.tittle
+                            (if (selected) screen.icon_filled else screen.icon_outlined)!!,
+                            contentDescription = screen.tittle,
+                            tint = MaterialTheme.colors.onBackground
                         )
                     },
-                    label = { Text(screen.tittle) },
-                    alwaysShowLabel = false,
-                    selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                    //label = { Text(screen.tittle, color = MaterialTheme.colors.onBackground) },
+                    //alwaysShowLabel = false,
+                    selected = selected,
                     onClick = {
                         navController.navigate(screen.route) {
                             // Pop up to the home destination of the graph to
@@ -55,8 +66,23 @@ fun BottomNavigationBar(navController: NavHostController, items: List<AppScreens
 
 }
 
+@Preview(
+    showBackground = true,
+    showSystemUi = true,
+    name = "Dark mode",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
 @Composable
-private fun currentRoute(navController: NavHostController): NavDestination? {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    return navBackStackEntry?.destination
+fun BottomBarPreview() {
+    AccesibleAppTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colors.background
+        ) {
+            val bottomNavigationItems = listOf(AppScreens.HomeView, AppScreens.RandomView)
+            val navController = rememberNavController()
+            BottomNavigationBar(navController, bottomNavigationItems)
+        }
+    }
 }
