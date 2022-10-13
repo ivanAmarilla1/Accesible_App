@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -13,8 +14,9 @@ import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 
 @Composable
 fun RandomView(navController: NavController) {
-    Column(modifier = Modifier) {
-        Text("Random Screen", color = MaterialTheme.colors.secondary)
-
+    Box(modifier = Modifier.padding(0.dp, 50.dp, 0.dp, 50.dp)) {
+        Column(modifier = Modifier) {
+            Text("Random Screen", color = MaterialTheme.colors.secondary)
+        }
     }
 }

@@ -40,7 +40,7 @@ val Teal200 = Color(0xFF03DAC5)
 //val DarkModeBackground= Color(0xFF0A192F)
 val DarkModeColorBlue= Color(0xFF172A46)//para cosas dentro de la app, por ej. pop ups o ventanas
 
-val Black = Color(0xFF000000)
+
 val Gray50= Color(0xFFFAFAFA)
 val Gray100= Color(0xFFF5F5F5)
 val Gray200= Color(0xFFEEEEEE)
@@ -55,6 +55,7 @@ val Gray800= Color(0xFF424242)
 val Primary= Color(0xFF0288D1)
 val PimaryVariant= Color(0xFF4FC3F7)
 val White = Color(0xFFFFFFFF)
+val Black = Color(0xFF000000)
 
 //Dark Mode
 val DarkModeSecondary= Color(0xFF35363A)//para cosas dentro de la app, por ej. pop ups o ventanas

@@ -6,6 +6,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
@@ -15,7 +16,9 @@ private val DarkColorPalette = darkColors(
     secondaryVariant = DarkModeSecondaryTextColor,//placeholders
     onSecondary = DarkModeSecondary,//Fondo de Textfields
     onBackground = White,//Texto de los botones
-    background = DarkModeBackground//
+    onSurface = Black,//Sobre mapa
+    background = DarkModeBackground,//fondo de la app
+
 
 )
 
@@ -27,6 +30,7 @@ private val LightColorPalette = lightColors(
     secondaryVariant = LightModeSecondaryTextColor,//placeholders
     onSecondary = LightModeSecondary,//Fondo de Textfields
     onBackground = White,//Texto de los botones
+    onSurface = Black,//Sobre mapa
     background = LightModeBackground,//fondo de la app
 
     /* Other default colors to override
@@ -52,7 +56,7 @@ fun AccesibleAppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Comp
     val systemUIController = rememberSystemUiController()
     SideEffect {
         systemUIController.setSystemBarsColor(
-            color = Primary
+            color = Color.Transparent
         )
     }
 

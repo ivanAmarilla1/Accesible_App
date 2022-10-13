@@ -1,12 +1,16 @@
 package com.blessingsoftware.accesibleapp.usecases.main
 
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.blessingsoftware.accesibleapp.R
@@ -19,7 +23,7 @@ fun TopBar(
     scope: CoroutineScope,
     scaffoldState: ScaffoldState,
     navController: NavHostController,
-    items: List<AppScreens>
+    items: List<AppScreens>,
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -28,10 +32,12 @@ fun TopBar(
         items.any { it.route == currentDestination?.route }//Para mostrar el bottomBar en las pantallas que tenga la lista items
     if (bottomBarDestination) {
         TopAppBar(
+            modifier = Modifier.height(50.dp),
+            elevation = 0.dp,
             title = {
                 Text(
-                    text = LocalContext.current.getString(R.string.app_name),
-                    color = MaterialTheme.colors.secondary
+                    text = "",//LocalContext.current.getString(R.string.app_name),
+                    color = MaterialTheme.colors.onSurface
                 )
             },//titulo del TopBar
             navigationIcon = {//Icono de 3 lineas de la parte izquierda
@@ -44,16 +50,16 @@ fun TopBar(
                     Icon(
                         imageVector = Icons.Filled.Menu,
                         contentDescription = "Menu icon",
-                        tint = MaterialTheme.colors.onBackground
+                        tint = MaterialTheme.colors.onSurface
                     )
                 }
             },
             actions = {
                 IconButton(onClick = { /*TODO*/ }) {//iconos de la parte derecha del TopBar
-                    Icon(imageVector = Icons.Filled.Search, contentDescription = "Menu icon")
+                    Icon(imageVector = Icons.Filled.Search, contentDescription = "Menu icon", tint = MaterialTheme.colors.onSurface)
                 }
             },
-            backgroundColor = MaterialTheme.colors.background
+            backgroundColor = Color.Transparent//MaterialTheme.colors.onSecondary
         )
     }
 }

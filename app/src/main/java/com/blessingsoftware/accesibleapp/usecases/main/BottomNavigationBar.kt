@@ -2,6 +2,7 @@ package com.blessingsoftware.accesibleapp.ui.composables
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -10,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -29,6 +31,7 @@ fun BottomNavigationBar(navController: NavHostController, items: List<AppScreens
     val bottomBarDestination = items.any { it.route == currentDestination?.route }//Para mostrar el bottomBar en las pantallas que tenga la lista items
     if (bottomBarDestination) {
         BottomNavigation (
+            modifier = Modifier.height(50.dp),
             backgroundColor = MaterialTheme.colors.onSecondary
                 ) {
             items.forEach { screen ->

@@ -7,6 +7,8 @@ import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,19 +26,33 @@ import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AUTH_ROUTE
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.maps.android.compose.GoogleMap
 
 
 @Composable
 fun HomeView(viewModel: AuthViewModel?, navController: NavHostController) {
+    /*rememberSystemUiController().apply {
+        setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = MaterialTheme.colors.isLight
+        )
+    }*/
     Box(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(0.dp, 0.dp, 0.dp, 50.dp)
     ) {
-        Home(Modifier.align(Alignment.Center), viewModel, navController)
+        MainMap()
     }
 
+
     //HomeBackHandler()
+}
+
+@Composable
+fun MainMap() {
+    GoogleMap(modifier = Modifier.fillMaxSize())
 }
 
 @Composable
@@ -53,8 +69,18 @@ private fun HomeBackHandler() {
 fun Home(modifier: Modifier, viewModel: AuthViewModel?, navController: NavController) {
     Column(modifier = modifier) {
         Text("Home Screen", color = MaterialTheme.colors.secondary)
-        viewModel?.currentUser?.displayName?.let { Text(it.trim(), color = MaterialTheme.colors.secondary) }
-        viewModel?.currentUser?.email?.let { Text(it.trim(), color = MaterialTheme.colors.secondary) }
+        viewModel?.currentUser?.displayName?.let {
+            Text(
+                it.trim(),
+                color = MaterialTheme.colors.secondary
+            )
+        }
+        viewModel?.currentUser?.email?.let {
+            Text(
+                it.trim(),
+                color = MaterialTheme.colors.secondary
+            )
+        }
         Spacer(modifier = Modifier.padding(16.dp))
         LogOutButton(viewModel, navController)
     }
@@ -99,7 +125,7 @@ fun HomeScreenPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colors.background
         ) {
-            HomeView(null, rememberNavController())
+            //HomeView(null, rememberNavController())
         }
     }
 }
