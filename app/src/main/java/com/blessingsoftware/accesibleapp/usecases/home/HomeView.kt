@@ -1,16 +1,15 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
 import android.app.Activity
-import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -19,31 +18,32 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.R
-import com.blessingsoftware.accesibleapp.ui.composables.BottomNavigationBar
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AUTH_ROUTE
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
 
 
 @Composable
-fun HomeView(viewModel: AuthViewModel?, navController: NavHostController) {
+fun HomeView(viewModel: HomeViewModel, navController: NavHostController) {
     /*rememberSystemUiController().apply {
         setSystemBarsColor(
             color = Color.Transparent,
             darkIcons = MaterialTheme.colors.isLight
         )
     }*/
+    GetUserLocation(viewModel)
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(0.dp, 0.dp, 0.dp, 50.dp)
     ) {
-        MainMap()
+        MainMap(viewModel)
     }
 
 
@@ -51,10 +51,48 @@ fun HomeView(viewModel: AuthViewModel?, navController: NavHostController) {
 }
 
 @Composable
-fun MainMap() {
-    GoogleMap(modifier = Modifier.fillMaxSize())
+fun MainMap(viewModel: HomeViewModel) {
+
+    val userLat = viewModel.userCurrentLat.observeAsState()
+    val userLng = viewModel.userCurrentLng.observeAsState()
+    val userLocation = LatLng(userLat.value!!, userLng.value!!)
+    Log.d("pickup: ", userLocation.toString() )
+    GoogleMap(modifier = Modifier.fillMaxSize()) {
+        Marker(position = userLocation, title = "Tu ubicación", snippet = "Ubicación en tiempo real")
+
+    }
 }
 
+//Obtener ubicacion de usuario
+@Composable
+private fun GetUserLocation(viewModel: HomeViewModel) {
+    val context = LocalContext.current
+    val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+    try {
+        if (viewModel.locationPermissionGranted.value == true) {
+            val locationResult = fusedLocationProviderClient.lastLocation
+            locationResult.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val lastKnownLocation = task.result
+
+                    if (lastKnownLocation != null) {
+                        viewModel.currentUserGeoCoord(
+                            LatLng(
+                                lastKnownLocation.latitude,
+                                lastKnownLocation.longitude
+                            )
+                        )
+                    }
+                } else {
+                    Log.d("Exception", " Current User location is null")
+                }
+            }
+
+        }
+    } catch (e: SecurityException) {
+        Log.d("Exception", "Exception:  $e.message.toString()")
+    }
+}
 @Composable
 private fun HomeBackHandler() {
     val activity = (LocalContext.current as? Activity)

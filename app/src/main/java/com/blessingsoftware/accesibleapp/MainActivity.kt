@@ -1,6 +1,9 @@
 package com.blessingsoftware.accesibleapp
 
+import android.Manifest
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -8,19 +11,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
+import com.blessingsoftware.accesibleapp.model.domain.Constants.REQUEST_CODE_LOCATION_PERMISSION
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
-import com.blessingsoftware.accesibleapp.usecases.home.HomeView
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.main.MainScreen
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.maps.android.compose.GoogleMap
+import com.blessingsoftware.accesibleapp.util.TrackingUtility
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
+import com.vmadalin.easypermissions.EasyPermissions
 import dagger.hilt.android.AndroidEntryPoint
+import pub.devrel.easypermissions.AppSettingsDialog
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
+
 
     private val loginViewModel by viewModels<AuthViewModel>()
     private val homeViewModel by viewModels<HomeViewModel>()
@@ -34,11 +40,62 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    MainScreen(modifier = Modifier.fillMaxSize(), loginViewModel = loginViewModel, homeViewModel = homeViewModel, rememberNavController())
+                    requestLocationPermissions()
+                    MainScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        loginViewModel = loginViewModel,
+                        homeViewModel = homeViewModel,
+                        rememberNavController()
+                    )
                 }
             }
         }
     }
+
+    private fun requestLocationPermissions() {
+        if (TrackingUtility.hasLocationPermissions(this)) {
+            homeViewModel.permissionGrand(true)
+            return
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                "Debe aceptar los permisos de ubicacion para que la aplicacion funcione correctamente",
+                REQUEST_CODE_LOCATION_PERMISSION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            )
+
+        }
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            AppSettingsDialog.Builder(this).build().show()
+        } else {
+            when (requestCode) {
+                0 -> requestLocationPermissions()
+            }
+        }
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
+        when (requestCode) {
+            0 -> {
+                homeViewModel.permissionGrand(true)
+                Toast.makeText(this, "Permiso concedido", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
 }
 
 

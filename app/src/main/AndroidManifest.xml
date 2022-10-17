@@ -2,8 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.blessingsoftware.accesibleapp">
-
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
         android:name = ".AccesibleApp"
@@ -16,6 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AccesibleApp"
         tools:targetApi="31">
+
+
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCYeKVzyvjiJN6DJhZJd4ZceLmW1ezzEQo"/>

@@ -26,4 +26,6 @@
 
     //Otros
     <string name="edit_account">Editar Perfil</string>
+    <string name="request_permissions">Debe aceptar los permisos de ubicacion para que la aplicacion funcione correctamente</string>
+
 </resources>
