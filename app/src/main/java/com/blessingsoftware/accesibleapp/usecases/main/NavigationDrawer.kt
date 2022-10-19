@@ -13,15 +13,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
+import com.blessingsoftware.accesibleapp.usecases.navigation.AUTH_ROUTE
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -72,9 +75,6 @@ fun NavigationDrawer(
                     .fillMaxWidth()
             )
 
-
-
-
             items.forEach { item ->
                 DrawerItem(item, currentDestination?.route == item.route) {
                     navController.navigate(item.route) {
@@ -88,6 +88,14 @@ fun NavigationDrawer(
                     }
                 }
             }
+
+            Spacer(
+                modifier = Modifier
+                    .height(15.dp)
+                    .fillMaxWidth()
+            )
+
+            LogOutButton(auhViewModel, navController, scaffoldState, scope)
 
 
         }
@@ -136,4 +144,35 @@ fun UserImage() {
             .clip(CircleShape)
             .background(Color.Gray)
     )
+}
+
+@Composable
+private fun LogOutButton(
+    viewModel: AuthViewModel?,
+    navController: NavController,
+    scaffoldState: ScaffoldState,
+    scope: CoroutineScope
+) {
+    val context = LocalContext.current
+    Button(
+        onClick = {
+            scope.launch {
+                scaffoldState.drawerState.close()
+            }
+            viewModel?.logOut(context)
+            navController.navigate(AUTH_ROUTE) {
+                popUpTo(AppScreens.HomeView.route) { inclusive = true }
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.primary,
+            disabledBackgroundColor = Color.DarkGray
+        ),
+    ) {
+        Text(stringResource(R.string.logout), color = MaterialTheme.colors.onBackground)
+    }
 }

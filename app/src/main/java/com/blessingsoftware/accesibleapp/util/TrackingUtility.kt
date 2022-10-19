@@ -6,6 +6,8 @@ import android.os.Build
 import pub.devrel.easypermissions.EasyPermissions
 
 object TrackingUtility {
+
+    //Corrobora si ya se ha concedido los permisos de ubicacion
     fun hasLocationPermissions(context: Context) =
             EasyPermissions.hasPermissions(
                 context,

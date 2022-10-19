@@ -128,6 +128,7 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
                         CircularProgressIndicator(Modifier.align(Alignment.Center))
                     }
                 }
+                else -> {throw IllegalStateException("Error de autenticacion")}
             }
         }
     }

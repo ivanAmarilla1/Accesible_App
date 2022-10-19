@@ -177,6 +177,7 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: 
                         CircularProgressIndicator(Modifier.align(Alignment.Center))
                     }
                 }
+                else -> {throw IllegalStateException("Error de autenticacion")}
             }
         }
     }

@@ -1,8 +1,8 @@
 package com.blessingsoftware.accesibleapp
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,15 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.model.domain.Constants.REQUEST_CODE_LOCATION_PERMISSION
+import com.blessingsoftware.accesibleapp.model.domain.Constants.SHOW_CURRENT_LOCATION
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.main.MainScreen
 import com.blessingsoftware.accesibleapp.util.TrackingUtility
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.LatLng
 import com.vmadalin.easypermissions.EasyPermissions
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
@@ -40,7 +40,6 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    requestLocationPermissions()
                     MainScreen(
                         modifier = Modifier.fillMaxSize(),
                         loginViewModel = loginViewModel,
@@ -49,6 +48,15 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                     )
                 }
             }
+            prepLocationUpdates(homeViewModel)
+        }
+    }
+
+    private fun prepLocationUpdates(viewModel: HomeViewModel) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            viewModel.startLocationUpdates()
+        } else {
+            requestLocationPermissions()
         }
     }
 
@@ -64,7 +72,6 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
             )
-
         }
     }
 
@@ -73,7 +80,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
             AppSettingsDialog.Builder(this).build().show()
         } else {
             when (requestCode) {
-                0 -> requestLocationPermissions()
+                0 -> Toast.makeText(this, "La aplicación necesita permisos de ubicacion para funcionar correctamente", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -82,6 +89,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         when (requestCode) {
             0 -> {
                 homeViewModel.permissionGrand(true)
+                homeViewModel.startLocationUpdates()
                 Toast.makeText(this, "Permiso concedido", Toast.LENGTH_LONG).show()
             }
         }
