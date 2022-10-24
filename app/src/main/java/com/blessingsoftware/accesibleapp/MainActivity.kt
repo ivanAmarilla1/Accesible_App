@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.model.domain.Constants.REQUEST_CODE_LOCATION_PERMISSION
 import com.blessingsoftware.accesibleapp.model.domain.Constants.SHOW_CURRENT_LOCATION
+import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
@@ -34,6 +35,10 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            //Si el usuario esta logueado, carga los lugares en el mapa
+            loginViewModel.currentUser?.let {
+                homeViewModel.getPlaces()
+            }
             AccesibleAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -53,7 +58,11 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     private fun prepLocationUpdates(viewModel: HomeViewModel) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             viewModel.startLocationUpdates()
         } else {
             requestLocationPermissions()
@@ -80,7 +89,11 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
             AppSettingsDialog.Builder(this).build().show()
         } else {
             when (requestCode) {
-                0 -> Toast.makeText(this, "La aplicación necesita permisos de ubicacion para funcionar correctamente", Toast.LENGTH_LONG).show()
+                0 -> Toast.makeText(
+                    this,
+                    "La aplicación necesita permisos de ubicacion para funcionar correctamente",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }

@@ -21,6 +21,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun HomeView(viewModel: HomeViewModel, navController: NavHostController) {
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -40,6 +41,10 @@ fun MainMap(viewModel: HomeViewModel) {
         userLocation = LatLng(location!!.latitude.toDouble(), location!!.longitude.toDouble())
     }
 
+    //Lugares
+    val places by viewModel.places.observeAsState(initial = emptyList())
+
+
     //Posicion inicial de la vista del mapa
     val cam = LatLng(-25.285971270337797, -57.59672128640907)
     val cameraPosition = rememberCameraPositionState {
@@ -54,6 +59,19 @@ fun MainMap(viewModel: HomeViewModel) {
                 title = "Tu ubicación",
                 snippet = "Ubicación en tiempo real",
             )
+        }
+        places.forEach {
+                place ->
+            Log.d("NombreLugar", place.placeName)
+            if (place.placeLat.isNotEmpty() && place.placeLng.isNotEmpty()) {
+                val placePosition =
+                    LatLng(place.placeLat.toDouble(), place.placeLng.toDouble())
+                Marker(
+                    position = placePosition,
+                    title = place.placeName,
+                    snippet = place.placeDescription
+                )
+            }
         }
     }
     GPS(location)

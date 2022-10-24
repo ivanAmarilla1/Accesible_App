@@ -2,32 +2,34 @@ package com.blessingsoftware.accesibleapp.usecases.home
 
 
 import android.app.Application
-import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.blessingsoftware.accesibleapp.model.domain.LocationLiveData
-import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
-import com.google.android.gms.maps.model.LatLng
+import com.blessingsoftware.accesibleapp.model.domain.Place
+import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-
-class HomeViewModel (application: Application): AndroidViewModel(application) {
+@HiltViewModel
+class HomeViewModel @Inject constructor(application: Application, private val db: FirestoreRepository): AndroidViewModel(application) {
     private val locationLiveData = LocationLiveData(application)
     fun getLocationLiveData() = locationLiveData
     fun startLocationUpdates() {
         locationLiveData.startLocationUpdates()
     }
-
     private var _locationPermissionGranted = MutableLiveData(false)
     var locationPermissionGranted : LiveData<Boolean> = _locationPermissionGranted
     fun permissionGrand(setGranted: Boolean) {
         _locationPermissionGranted.value = setGranted
     }
+
+    var places: MutableLiveData<List<Place>> = MutableLiveData<List<Place>>()
+
+    fun getPlaces(){
+        places.value = db.getAllPlaces()
+    }
+
 }
 /*
 @HiltViewModel
