@@ -11,6 +11,10 @@ import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.RandomView
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.blessingsoftware.accesibleapp.usecases.navigation.HOME_ROUTE
+import com.blessingsoftware.accesibleapp.usecases.test.ItemFour
+import com.blessingsoftware.accesibleapp.usecases.test.ItemOne
+import com.blessingsoftware.accesibleapp.usecases.test.ItemThree
+import com.blessingsoftware.accesibleapp.usecases.test.ItemTwo
 
 fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
@@ -23,5 +27,18 @@ fun NavGraphBuilder.homeNavGraph(
         composable(AppScreens.RandomView.route) {
             RandomView(navController)
         }
+        composable(AppScreens.ItemOne.route) {
+            ItemOne(navController)
+        }
+        composable(AppScreens.ItemTwo.route) {
+            ItemTwo(navController)
+        }
+        composable(AppScreens.ItemThree.route) {
+            ItemThree(navController)
+        }
+        composable(AppScreens.ItemFour.route) {
+            ItemFour(navController)
+        }
+
     }
 }

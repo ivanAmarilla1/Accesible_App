@@ -23,8 +23,6 @@ class HomeViewModel (application: Application): AndroidViewModel(application) {
         locationLiveData.startLocationUpdates()
     }
 
-
-
     private var _locationPermissionGranted = MutableLiveData(false)
     var locationPermissionGranted : LiveData<Boolean> = _locationPermissionGranted
     fun permissionGrand(setGranted: Boolean) {

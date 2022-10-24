@@ -11,7 +11,7 @@ import com.google.android.gms.location.*
 
 class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
 
-    val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+    private val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
     //Cuando se ejecuta un pedido de location
     override fun onActive() {

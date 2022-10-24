@@ -43,6 +43,13 @@ fun MainScreen(
     )
     val scope = rememberCoroutineScope()
     val bottomNavigationItems = listOf(AppScreens.HomeView, AppScreens.RandomView)
+    val drawerItems = listOf(
+        AppScreens.HomeView,
+        AppScreens.ItemOne,
+        AppScreens.ItemTwo,
+        AppScreens.ItemThree,
+        AppScreens.ItemFour
+    )
     Scaffold(
         scaffoldState = scaffoldState,
         bottomBar = { BottomNavigationBar(navController, items = bottomNavigationItems) },
@@ -52,14 +59,15 @@ fun MainScreen(
                 scope,
                 scaffoldState,
                 navController,
-                bottomNavigationItems,
+                drawerItems,
                 loginViewModel
             )
         },
+        drawerBackgroundColor = MaterialTheme.colors.background,
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen
     ) {
         AppNavigation(loginViewModel, homeViewModel, navController)
-        TopBar(scope, scaffoldState,navController, bottomNavigationItems)
+        TopBar(scope, scaffoldState, navController, bottomNavigationItems)
     }
 }
 

@@ -25,4 +25,8 @@ sealed class AppScreens(
     //Home routes
     object HomeView : AppScreens("home_view", "Home", Icons.Outlined.Home, Icons.Filled.Home )
     object RandomView : AppScreens("random_view", "Random", Icons.Outlined.Search, Icons.Filled.Search)
+    object ItemOne : AppScreens("item_one", "Item One", Icons.Outlined.Search, Icons.Filled.Search)
+    object ItemTwo : AppScreens("item:two", "Item Two", Icons.Outlined.Search, Icons.Filled.Search)
+    object ItemThree : AppScreens("item:three", "Item Three", Icons.Outlined.Search, Icons.Filled.Search)
+    object ItemFour : AppScreens("item_four", "Item Four", Icons.Outlined.Search, Icons.Filled.Search)
 }

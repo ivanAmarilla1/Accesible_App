@@ -40,28 +40,36 @@ fun NavigationDrawer(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val topBarDestination =
-        items.any { it.route == currentDestination?.route }//Para mostrar el bottomBar en las pantallas que tenga la lista items
+        items.any { it.route == currentDestination?.route }//Para mostrar el topBar en las pantallas que tenga la lista items
     if (topBarDestination) {
-        Column(modifier = Modifier.background(MaterialTheme.colors.background)) {
+        Column() {
             Row(
                 modifier = Modifier
-                    .height(100.dp)
+                    .height(150.dp)
                     .fillMaxWidth()
+                    //.background(MaterialTheme.colors.onSecondary)
+                    .padding(20.dp, 25.dp, 0.dp, 0.dp)
+
             ) {
                 UserImage()
-                auhViewModel.currentUser?.displayName?.let {
+                Spacer(modifier = Modifier.padding(10.dp))
+                Column(Modifier.padding(top = 15.dp)) {
+                    auhViewModel.currentUser?.displayName?.let {
+                        Text(
+                            it.trim(),
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colors.secondary
+                        )
+                    }
                     Text(
-                        it.trim(),
+                        text = stringResource(R.string.edit_account),
+                        modifier = Modifier.clickable { },//TODO Editar perfil
+                        fontSize = 14.sp,
+                        //fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colors.secondary
                     )
                 }
-                Text(
-                    text = stringResource(R.string.edit_account),
-                    modifier = Modifier.clickable { },//TODO Editar perfil
-                    fontSize = 18.sp,
-                    //fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colors.secondary
-                )
+
             }
             Divider(
                 modifier = Modifier.fillMaxWidth(),
@@ -94,9 +102,12 @@ fun NavigationDrawer(
                     .height(15.dp)
                     .fillMaxWidth()
             )
-
-            LogOutButton(auhViewModel, navController, scaffoldState, scope)
-
+            Column(modifier = Modifier.fillMaxSize().padding(end = 15.dp, bottom = 15.dp),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.End
+            ) {
+                LogOutButton(auhViewModel, navController, scaffoldState, scope)
+            }
 
         }
     }
@@ -114,7 +125,7 @@ fun DrawerItem(
             .height(56.dp)
             .padding(6.dp)
             .clip(RoundedCornerShape(12))
-            .background(if (selected) Color.Blue.copy(alpha = 0.25f) else Color.Transparent)
+            .background(if (selected) MaterialTheme.colors.onSecondary else Color.Transparent)
             .padding(8.dp)
             .clickable { onItemClick(item) },
         verticalAlignment = Alignment.CenterVertically
@@ -123,13 +134,13 @@ fun DrawerItem(
             modifier = Modifier.size(32.dp),
             imageVector = item.icon_filled!!,
             contentDescription = item.tittle,
-            tint = if (selected) Color.Blue else Color.Gray
+            tint = if (selected) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.secondary
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = item.tittle,
             style = TextStyle(fontSize = 18.sp),
-            color = if (selected) Color.Blue else Color.Black
+            color = if (selected) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.secondary
         )
     }
 }
@@ -140,9 +151,9 @@ fun UserImage() {
         painter = painterResource(R.drawable.user_ic),//TODO agregar imagen de usuario
         contentDescription = "User image",
         modifier = Modifier//modificadores de tamaño, forma y fondo
-            .size(150.dp)
+            .size(100.dp)
             .clip(CircleShape)
-            .background(Color.Gray)
+            .background(Color.White)
     )
 }
 
@@ -165,7 +176,7 @@ private fun LogOutButton(
             }
         },
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(0.6f)
             .height(50.dp),
         shape = RoundedCornerShape(20.dp),
         colors = ButtonDefaults.buttonColors(
@@ -175,4 +186,6 @@ private fun LogOutButton(
     ) {
         Text(stringResource(R.string.logout), color = MaterialTheme.colors.onBackground)
     }
+
+
 }

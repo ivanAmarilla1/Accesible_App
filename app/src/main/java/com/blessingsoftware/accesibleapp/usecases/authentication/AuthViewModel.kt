@@ -13,6 +13,7 @@ import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.User
 import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
+import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -25,7 +26,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepository) :
+class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepository, private val db: FirestoreRepository) :
     ViewModel() {
 
     //TODO Encapsular datos de usuario en un data class
@@ -108,16 +109,20 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         _signUpFlow.value = Resource.Loading
         val result = repository.signUp(name, email, password)
         _signUpFlow.value = result
+        //guardar al usuario en la db
+        db.storeUser(email, name, "EMAIL")
     }
 
     //funcion de ingreso con Google
-    fun signUpWithGoogle(credential: AuthCredential, source: Int) = viewModelScope.launch {
+    fun signUpWithGoogle(credential: AuthCredential, userEmail: String, userName: String, source: Int) = viewModelScope.launch {
         _flag.value = true
         when (source) {//variable que indica de que pantalla viene la solicitud, para modificaar el flow correspondiente
             1 -> {
                 _loginFlow.value = Resource.Loading
                 val result = repository.signUpWithGoogle(credential)
                 _loginFlow.value = result
+                //guardar al usuario en la db
+                db.storeUser(userEmail.toString(), userName.toString(), "GOOGLE")
             }
             2 -> {
                 _signUpFlow.value = Resource.Loading

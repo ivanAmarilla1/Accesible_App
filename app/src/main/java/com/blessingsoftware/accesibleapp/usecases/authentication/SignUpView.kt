@@ -386,7 +386,9 @@ private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: A
             try {
                 val account = task.getResult(ApiException::class.java)!!
                 val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-                viewModel.signUpWithGoogle(credential, 2)
+                val userEmail = account.email!!
+                val userName = account.displayName!!
+                viewModel.signUpWithGoogle(credential, userEmail, userName, 2)
             } catch (e: ApiException) {
                 Log.w("TAG", "Google sign in failed", e)
             }

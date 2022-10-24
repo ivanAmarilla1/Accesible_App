@@ -48,7 +48,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
 
-//TODO Ver inyeccion de dependencias
+
 @Composable
 fun LoginView(viewModel: AuthViewModel, navController: NavController) {
     Box(
@@ -272,7 +272,9 @@ private fun SignUpWithGoogleButton(context: Context, token: String, viewModel: A
             try {
                 val account = task.getResult(ApiException::class.java)!!
                 val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-                viewModel.signUpWithGoogle(credential, 1)
+                val userEmail = account.email!!
+                val userName = account.displayName!!
+                viewModel.signUpWithGoogle(credential, userEmail, userName, 1)
             } catch (e: ApiException) {
                 isLoading = false
                 Log.w("TAG", "Google sign in failed", e)
