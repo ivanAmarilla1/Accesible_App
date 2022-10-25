@@ -24,6 +24,11 @@
     <string name="validate_password_match" tools:ignore="DuplicateDefinition,ExtraTranslation">Las contraseñas no coinciden</string>
     <string name="validate_name">Ingrese su nombre</string>
 
+    //Pantalla sugerencia
+    <string name="my_location">Mi ubicación</string>
+    <string name="place_name">Nombre del Lugar</string>
+    <string name="place_description">Agregue una descripción del Lugar</string>
+
     //Otros
     <string name="edit_account">Editar Perfil</string>
     <string name="request_permissions">Debe aceptar los permisos de ubicacion para que la aplicacion funcione correctamente</string>

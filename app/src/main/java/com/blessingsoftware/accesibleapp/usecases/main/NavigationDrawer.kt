@@ -39,77 +39,76 @@ fun NavigationDrawer(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val topBarDestination =
-        items.any { it.route == currentDestination?.route }//Para mostrar el topBar en las pantallas que tenga la lista items
-    if (topBarDestination) {
-        Column() {
-            Row(
-                modifier = Modifier
-                    .height(150.dp)
-                    .fillMaxWidth()
-                    //.background(MaterialTheme.colors.onSecondary)
-                    .padding(20.dp, 25.dp, 0.dp, 0.dp)
+    Column() {
+        Row(
+            modifier = Modifier
+                .height(150.dp)
+                .fillMaxWidth()
+                //.background(MaterialTheme.colors.onSecondary)
+                .padding(20.dp, 25.dp, 0.dp, 0.dp)
 
-            ) {
-                UserImage()
-                Spacer(modifier = Modifier.padding(10.dp))
-                Column(Modifier.padding(top = 15.dp)) {
-                    auhViewModel.currentUser?.displayName?.let {
-                        Text(
-                            it.trim(),
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colors.secondary
-                        )
-                    }
+        ) {
+            UserImage()
+            Spacer(modifier = Modifier.padding(10.dp))
+            Column(Modifier.padding(top = 15.dp)) {
+                auhViewModel.currentUser?.displayName?.let {
                     Text(
-                        text = stringResource(R.string.edit_account),
-                        modifier = Modifier.clickable { },//TODO Editar perfil
-                        fontSize = 14.sp,
-                        //fontWeight = FontWeight.Bold,
+                        it.trim(),
+                        fontSize = 18.sp,
                         color = MaterialTheme.colors.secondary
                     )
                 }
-
-            }
-            Divider(
-                modifier = Modifier.fillMaxWidth(),
-                startIndent = 8.dp,
-                thickness = 1.dp,
-                color = MaterialTheme.colors.secondary
-            )
-            Spacer(
-                modifier = Modifier
-                    .height(15.dp)
-                    .fillMaxWidth()
-            )
-
-            items.forEach { item ->
-                DrawerItem(item, currentDestination?.route == item.route) {
-                    navController.navigate(item.route) {
-                        popUpTo(AppScreens.HomeView.route) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                    }
-                    scope.launch {
-                        scaffoldState.drawerState.close()
-                    }
-                }
-            }
-
-            Spacer(
-                modifier = Modifier
-                    .height(15.dp)
-                    .fillMaxWidth()
-            )
-            Column(modifier = Modifier.fillMaxSize().padding(end = 15.dp, bottom = 15.dp),
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.End
-            ) {
-                LogOutButton(auhViewModel, navController, scaffoldState, scope)
+                Text(
+                    text = stringResource(R.string.edit_account),
+                    modifier = Modifier.clickable { },//TODO Editar perfil
+                    fontSize = 14.sp,
+                    //fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colors.secondary
+                )
             }
 
         }
+        Divider(
+            modifier = Modifier.fillMaxWidth(),
+            startIndent = 8.dp,
+            thickness = 1.dp,
+            color = MaterialTheme.colors.secondary
+        )
+        Spacer(
+            modifier = Modifier
+                .height(15.dp)
+                .fillMaxWidth()
+        )
+
+        items.forEach { item ->
+            DrawerItem(item, currentDestination?.route == item.route) {
+                navController.navigate(item.route) {
+                    popUpTo(AppScreens.HomeView.route) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                }
+                scope.launch {
+                    scaffoldState.drawerState.close()
+                }
+            }
+        }
+
+        Spacer(
+            modifier = Modifier
+                .height(15.dp)
+                .fillMaxWidth()
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(end = 15.dp, bottom = 15.dp),
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.End
+        ) {
+            LogOutButton(auhViewModel, navController, scaffoldState, scope)
+        }
+
     }
 }
 
@@ -122,7 +121,7 @@ fun DrawerItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(65.dp)
             .padding(6.dp)
             .clip(RoundedCornerShape(12))
             .background(if (selected) MaterialTheme.colors.onSecondary else Color.Transparent)
@@ -132,7 +131,7 @@ fun DrawerItem(
     ) {
         Icon(
             modifier = Modifier.size(32.dp),
-            imageVector = item.icon_filled!!,
+            imageVector = if (selected) item.icon_filled!! else item.icon_outlined!!,
             contentDescription = item.tittle,
             tint = if (selected) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.secondary
         )

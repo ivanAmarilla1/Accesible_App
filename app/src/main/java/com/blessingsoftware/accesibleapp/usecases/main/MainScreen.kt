@@ -45,10 +45,17 @@ fun MainScreen(
     val bottomNavigationItems = listOf(AppScreens.HomeView, AppScreens.RandomView)
     val drawerItems = listOf(
         AppScreens.HomeView,
+        AppScreens.MakeSuggestion,
         AppScreens.ItemOne,
         AppScreens.ItemTwo,
-        AppScreens.ItemThree,
-        AppScreens.ItemFour
+        AppScreens.ItemThree
+    )
+    val topBarItems = listOf(
+        AppScreens.HomeView,
+        AppScreens.MakeSuggestion,
+        AppScreens.ItemOne,
+        AppScreens.ItemTwo,
+        AppScreens.RandomView
     )
     Scaffold(
         scaffoldState = scaffoldState,
@@ -67,7 +74,7 @@ fun MainScreen(
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen
     ) {
         AppNavigation(loginViewModel, homeViewModel, navController)
-        TopBar(scope, scaffoldState, navController, bottomNavigationItems)
+        TopBar(scope, scaffoldState, navController, topBarItems)
     }
 }
 

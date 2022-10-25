@@ -35,10 +35,6 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            //Si el usuario esta logueado, carga los lugares en el mapa
-            loginViewModel.currentUser?.let {
-                homeViewModel.getPlaces()
-            }
             AccesibleAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(

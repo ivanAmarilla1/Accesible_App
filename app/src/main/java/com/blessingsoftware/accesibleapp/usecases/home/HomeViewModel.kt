@@ -13,6 +13,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(application: Application, private val db: FirestoreRepository): AndroidViewModel(application) {
+
+
+
     private val locationLiveData = LocationLiveData(application)
     fun getLocationLiveData() = locationLiveData
     fun startLocationUpdates() {
@@ -28,6 +31,10 @@ class HomeViewModel @Inject constructor(application: Application, private val db
 
     fun getPlaces(){
         places.value = db.getAllPlaces()
+    }
+
+    init {
+       getPlaces()
     }
 
 }

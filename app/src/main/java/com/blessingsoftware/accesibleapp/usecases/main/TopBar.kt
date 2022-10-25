@@ -29,7 +29,7 @@ fun TopBar(
     val currentDestination = navBackStackEntry?.destination
 
     val bottomBarDestination =
-        items.any { it.route == currentDestination?.route }//Para mostrar el bottomBar en las pantallas que tenga la lista items
+        items.any { it.route == currentDestination?.route }//Para mostrar el topBar en las pantallas que tenga la lista items
     if (bottomBarDestination) {
         TopAppBar(
             modifier = Modifier.height(50.dp),

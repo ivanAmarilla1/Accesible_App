@@ -2,6 +2,7 @@ package com.blessingsoftware.accesibleapp.usecases.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.AddLocationAlt
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -23,7 +24,8 @@ sealed class AppScreens(
     object SignUpView : AppScreens("signup_view", "Home", null, null)
 
     //Home routes
-    object HomeView : AppScreens("home_view", "Home", Icons.Outlined.Home, Icons.Filled.Home )
+    object HomeView : AppScreens("home_view", "Inicio", Icons.Outlined.Home, Icons.Filled.Home )
+    object MakeSuggestion : AppScreens("make_suggestion", "Hacer Sugerencia", Icons.Outlined.AddLocationAlt, Icons.Filled.AddLocationAlt)
     object RandomView : AppScreens("random_view", "Random", Icons.Outlined.Search, Icons.Filled.Search)
     object ItemOne : AppScreens("item_one", "Item One", Icons.Outlined.Search, Icons.Filled.Search)
     object ItemTwo : AppScreens("item:two", "Item Two", Icons.Outlined.Search, Icons.Filled.Search)

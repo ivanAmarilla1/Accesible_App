@@ -73,7 +73,6 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
     val context = LocalContext.current
     val token = stringResource(R.string.default_web_client_id)
 
-
     //Validacion
     val focusManager = LocalFocusManager.current
     val validateEmail = viewModel.validateEmail.observeAsState()

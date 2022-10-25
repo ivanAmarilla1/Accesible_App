@@ -2,7 +2,9 @@ package com.blessingsoftware.accesibleapp.provider.firestore
 
 import android.util.Log
 import com.blessingsoftware.accesibleapp.model.domain.Place
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import javax.inject.Inject
 
 class FirestoreRepositoryImpl @Inject constructor(
@@ -11,7 +13,11 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     override fun storeUser(email: String, name: String, provider: String) {
         db.collection("users").document(email).set(
-            hashMapOf("name" to name, "provider" to provider)
+            hashMapOf(
+                "name" to name,
+                "provider" to provider,
+                "timestamp" to FieldValue.serverTimestamp()
+            )
         )
     }
 
@@ -21,8 +27,7 @@ class FirestoreRepositoryImpl @Inject constructor(
 
         val ref = db.collection("places")
 
-        ref.addSnapshotListener {
-                snapshot, e ->
+        ref.addSnapshotListener { snapshot, e ->
             // handle the error if there is one, and then return
             if (e != null) {
                 Log.w("Listen failed", e)

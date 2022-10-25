@@ -34,12 +34,7 @@ fun HomeView(viewModel: HomeViewModel, navController: NavHostController) {
 @Composable
 fun MainMap(viewModel: HomeViewModel) {
 
-    //Ubicación del usuario en live data
-    val location by viewModel.getLocationLiveData().observeAsState()
-    var userLocation = LatLng(0.0, 0.0)
-    location?.let {
-        userLocation = LatLng(location!!.latitude.toDouble(), location!!.longitude.toDouble())
-    }
+
 
     //Lugares
     val places by viewModel.places.observeAsState(initial = emptyList())
@@ -53,13 +48,6 @@ fun MainMap(viewModel: HomeViewModel) {
 
     //Composable de Google Maps
     GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPosition) {
-        if (userLocation != LatLng(0.0, 0.0)) {
-            Marker(
-                position = userLocation,
-                title = "Tu ubicación",
-                snippet = "Ubicación en tiempo real",
-            )
-        }
         places.forEach {
                 place ->
             Log.d("NombreLugar", place.placeName)
@@ -74,25 +62,10 @@ fun MainMap(viewModel: HomeViewModel) {
             }
         }
     }
-    GPS(location)
     //TODO Hacer un boton en el mapa que centre la camara en la ubicacion actual del usuario
 }
 
-@Composable
-private fun GPS(location: LocationDetails?) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Spacer(modifier = Modifier.height(50.dp))
-        /*Button(onClick = {
-            throw RuntimeException("Error forzardo")
-        }) {
-            Text("Forzar error", color = MaterialTheme.colors.onBackground)
-        }*/
-        location?.let {
-            Text(text = location.latitude)
-            Text(text = location.longitude)
-        }
-    }
-}
+
 
 
 @Composable
