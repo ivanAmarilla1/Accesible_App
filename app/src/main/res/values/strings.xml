@@ -23,11 +23,14 @@
     <string name="validate_password" tools:ignore="DuplicateDefinition,ExtraTranslation">La contraseña debe contener al menos 6 caracteres</string>
     <string name="validate_password_match" tools:ignore="DuplicateDefinition,ExtraTranslation">Las contraseñas no coinciden</string>
     <string name="validate_name">Ingrese su nombre</string>
+    <string name="validate_suggestion_name" tools:ignore="ExtraTranslation">Por favor ingrese el nombre del lugar</string>
+    <string name="validate_suggestion_description" tools:ignore="DuplicateDefinition,ExtraTranslation">La descripcion no puede estar vacia</string>
 
     //Pantalla sugerencia
     <string name="my_location">Mi ubicación</string>
     <string name="place_name">Nombre del Lugar</string>
     <string name="place_description">Agregue una descripción del Lugar</string>
+    <string name="make_suggestion">Realizar Sugerencia</string>
 
     //Otros
     <string name="edit_account">Editar Perfil</string>

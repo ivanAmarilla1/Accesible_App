@@ -1,6 +1,6 @@
 package com.blessingsoftware.accesibleapp.model.domain
 
-class Suggestion(
+data class Suggestion(
     var suggestionName: String = "",
     var suggestionDescription: String = "",
     var suggestionLat: String = "",

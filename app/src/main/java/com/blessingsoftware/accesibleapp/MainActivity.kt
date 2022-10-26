@@ -20,6 +20,7 @@ import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.main.MainScreen
+import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.util.TrackingUtility
 import com.vmadalin.easypermissions.EasyPermissions
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
 
     private val loginViewModel by viewModels<AuthViewModel>()
     private val homeViewModel by viewModels<HomeViewModel>()
+    private val suggestionViewModel by viewModels<MakeSuggestionViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +47,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                         modifier = Modifier.fillMaxSize(),
                         loginViewModel = loginViewModel,
                         homeViewModel = homeViewModel,
+                        suggestionViewModel = suggestionViewModel,
                         rememberNavController()
                     )
                 }

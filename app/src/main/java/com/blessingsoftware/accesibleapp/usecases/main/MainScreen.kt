@@ -19,6 +19,7 @@ import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.ui.composables.BottomNavigationBar
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
+import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AUTH_ROUTE
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppNavigation
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
@@ -30,6 +31,7 @@ fun MainScreen(
     modifier: Modifier,
     loginViewModel: AuthViewModel,
     homeViewModel: HomeViewModel,
+    suggestionViewModel: MakeSuggestionViewModel,
     navController: NavHostController
 ) {
     rememberSystemUiController().apply {
@@ -73,7 +75,7 @@ fun MainScreen(
         drawerBackgroundColor = MaterialTheme.colors.background,
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen
     ) {
-        AppNavigation(loginViewModel, homeViewModel, navController)
+        AppNavigation(loginViewModel, homeViewModel, suggestionViewModel, navController)
         TopBar(scope, scaffoldState, navController, topBarItems)
     }
 }
