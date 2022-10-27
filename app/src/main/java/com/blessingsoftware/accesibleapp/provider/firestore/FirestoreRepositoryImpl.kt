@@ -2,9 +2,10 @@ package com.blessingsoftware.accesibleapp.provider.firestore
 
 import android.util.Log
 import com.blessingsoftware.accesibleapp.model.domain.Place
+import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.util.await
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import javax.inject.Inject
 
 class FirestoreRepositoryImpl @Inject constructor(
@@ -19,6 +20,33 @@ class FirestoreRepositoryImpl @Inject constructor(
                 "timestamp" to FieldValue.serverTimestamp()
             )
         )
+    }
+
+    override fun storeSuggestion(
+        name: String,
+        description: String,
+        latitude: String,
+        longitude: String,
+        userSuggestion: String
+    ): Resource<String> {
+        return try {
+            db.collection("suggestions").document().set(
+                hashMapOf(
+                    "name" to name,
+                    "description" to description,
+                    "latitude" to latitude,
+                    "longitude" to longitude,
+                    "suggestionAddedBy" to userSuggestion,
+                    "suggestionReviewedBy" to "",
+                    "approved" to false,
+                    "date" to FieldValue.serverTimestamp()
+                )
+            )
+            Resource.Success("Success")
+        }catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
     }
 
     override fun getAllPlaces(): ArrayList<Place> {

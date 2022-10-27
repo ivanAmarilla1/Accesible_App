@@ -4,10 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.blessingsoftware.accesibleapp.usecases.home.HomeView
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
-import com.blessingsoftware.accesibleapp.usecases.home.RandomView
 import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.navigation_graphs.authNavGraph
 import com.blessingsoftware.accesibleapp.usecases.navigation.navigation_graphs.homeNavGraph
@@ -22,6 +20,6 @@ fun AppNavigation(authViewModel: AuthViewModel, homeViewModel: HomeViewModel, su
             SplashScreen(authViewModel, navController)
         }
         authNavGraph(navController, authViewModel)
-        homeNavGraph(navController, homeViewModel, suggestionViewModel)
+        homeNavGraph(navController, homeViewModel, suggestionViewModel, authViewModel.currentUser)
     }
 }
