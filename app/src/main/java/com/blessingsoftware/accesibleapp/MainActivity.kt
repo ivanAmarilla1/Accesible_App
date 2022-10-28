@@ -52,17 +52,17 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                     )
                 }
             }
-            prepLocationUpdates(homeViewModel)
+            prepLocationUpdates()
         }
     }
 
-    private fun prepLocationUpdates(viewModel: HomeViewModel) {
+    private fun prepLocationUpdates() {
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            viewModel.startLocationUpdates()
+            suggestionViewModel.startLocationUpdates()
         } else {
             requestLocationPermissions()
         }
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
 
     private fun requestLocationPermissions() {
         if (TrackingUtility.hasLocationPermissions(this)) {
-            homeViewModel.permissionGrand(true)
+            suggestionViewModel.permissionGrand(true)
             return
         } else {
             EasyPermissions.requestPermissions(
@@ -100,8 +100,8 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
         when (requestCode) {
             0 -> {
-                homeViewModel.permissionGrand(true)
-                homeViewModel.startLocationUpdates()
+                suggestionViewModel.permissionGrand(true)
+                suggestionViewModel.startLocationUpdates()
                 Toast.makeText(this, "Permiso concedido", Toast.LENGTH_LONG).show()
             }
         }

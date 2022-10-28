@@ -1,8 +1,10 @@
 package com.blessingsoftware.accesibleapp.provider.firestore
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.util.await
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,26 +24,11 @@ class FirestoreRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun storeSuggestion(
-        name: String,
-        description: String,
-        latitude: String,
-        longitude: String,
-        userSuggestion: String
+    override suspend fun storeSuggestion(
+        suggestion: Suggestion
     ): Resource<String> {
         return try {
-            db.collection("suggestions").document().set(
-                hashMapOf(
-                    "name" to name,
-                    "description" to description,
-                    "latitude" to latitude,
-                    "longitude" to longitude,
-                    "suggestionAddedBy" to userSuggestion,
-                    "suggestionReviewedBy" to "",
-                    "approved" to false,
-                    "date" to FieldValue.serverTimestamp()
-                )
-            )
+            db.collection("suggestions").add(suggestion).await()
             Resource.Success("Success")
         }catch (e: Exception) {
             e.printStackTrace()

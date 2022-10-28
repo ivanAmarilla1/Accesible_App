@@ -20,6 +20,6 @@ fun AppNavigation(authViewModel: AuthViewModel, homeViewModel: HomeViewModel, su
             SplashScreen(authViewModel, navController)
         }
         authNavGraph(navController, authViewModel)
-        homeNavGraph(navController, homeViewModel, suggestionViewModel, authViewModel.currentUser)
+        homeNavGraph(navController, homeViewModel, suggestionViewModel, authViewModel)
     }
 }

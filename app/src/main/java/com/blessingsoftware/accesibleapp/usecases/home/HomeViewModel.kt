@@ -16,20 +16,10 @@ class HomeViewModel @Inject constructor(application: Application, private val db
 
 
 
-    private val locationLiveData = LocationLiveData(application)
-    fun getLocationLiveData() = locationLiveData
-    fun startLocationUpdates() {
-        locationLiveData.startLocationUpdates()
-    }
-    private var _locationPermissionGranted = MutableLiveData(false)
-    var locationPermissionGranted : LiveData<Boolean> = _locationPermissionGranted
-    fun permissionGrand(setGranted: Boolean) {
-        _locationPermissionGranted.value = setGranted
-    }
 
     var places: MutableLiveData<List<Place>> = MutableLiveData<List<Place>>()
 
-    fun getPlaces(){
+    private fun getPlaces(){
         places.value = db.getAllPlaces()
     }
 

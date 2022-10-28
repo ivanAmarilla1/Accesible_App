@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -18,6 +19,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarHalf
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -34,60 +38,67 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextArea
 import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextField
+import com.blessingsoftware.accesibleapp.ui.composables.RatingBar
+import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
-import com.blessingsoftware.accesibleapp.usecases.navigation.HOME_ROUTE
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.auth.FirebaseUser
 import com.google.maps.android.compose.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import java.lang.Math.ceil
+import java.lang.Math.floor
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MakeSuggestion(
     homeViewModel: HomeViewModel,
     suggestionViewModel: MakeSuggestionViewModel,
-    currentUser: FirebaseUser?
+    navController: NavController,
+    authViewModel: AuthViewModel
 ) {
-
     //Scroll
     var columnScrollingEnabled by remember { mutableStateOf(true) }
 
     //Ubicación del usuario en live data
-    val location by homeViewModel.getLocationLiveData().observeAsState()
+    val location by suggestionViewModel.getLocationLiveData().observeAsState()
     var userLocation = LatLng(0.0, 0.0)
     location?.let {
         userLocation = LatLng(location!!.latitude.toDouble(), location!!.longitude.toDouble())
+    }
+    //Marker
+    val userMarker = suggestionViewModel.markerLocation.observeAsState()
+    if (userMarker.value == null) {
+        suggestionViewModel.setInitialMarker(userLocation)
     }
     //Posicion inicial de la vista del mapa
     val cam = userLocation
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(cam, 16f)
     }
-    var marker = cam
-
+    //Captura el movimiento del mapa, si el mapa se mueve desactiva el verticalScroll, sino lo activa
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
             columnScrollingEnabled = true
             Log.d(TAG, "Map camera stopped moving - Enabling column scrolling...")
         }
     }
-
-    // val suggestion  = suggestionViewModel.suggestion.observeAsState().value
+    //variables capturadas con LiveData
     val name: String by suggestionViewModel.name.observeAsState(initial = "")
     val description: String by suggestionViewModel.description.observeAsState(initial = "")
-
     val suggestionFlow = suggestionViewModel.suggestionFlow.collectAsState()
     val flag = suggestionViewModel.flag.observeAsState()
-
-
+    //Utils
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
-
+    val scope = rememberCoroutineScope()
+    //Validaciones
     val validateName = suggestionViewModel.validateName.observeAsState()
     val validateDescription = suggestionViewModel.validateDescription.observeAsState()
     val validateNameError = stringResource(R.string.validate_suggestion_name)
@@ -115,11 +126,11 @@ fun MakeSuggestion(
                 focusManager
             ) { suggestionViewModel.onFieldsChanged(name, it) }
             Spacer(modifier = Modifier.height(6.dp))
-            MyPlaceRate()
+            MyPlaceRate(Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(6.dp))
             PlaceSelect(
-                homeViewModel,
                 suggestionViewModel,
+                userMarker.value,
                 modifier = Modifier
                     .fillMaxSize()
                     .testTag("Map")
@@ -149,7 +160,6 @@ fun MakeSuggestion(
                 },
                 {
                     suggestionViewModel.setMarker(it)
-                    marker = it
                 }
             ) {
 
@@ -163,10 +173,11 @@ fun MakeSuggestion(
                 sendSuggestionFunction(
                     name,
                     description,
-                    marker,
-                    currentUser?.email.toString(),
+                    userMarker.value!!,
+                    authViewModel.currentUser?.email.toString(),
                     suggestionViewModel,
-                    context
+                    context,
+                    scope
                 )
             }
         }
@@ -176,10 +187,13 @@ fun MakeSuggestion(
         if (flag.value == true) {
             when (it) {
                 is Resource.Success -> {
-                    Toast.makeText(context, "Sugerencia enviada correctamente", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Sugerencia enviada correctamente", Toast.LENGTH_LONG)
+                        .show()
+                    suggestionViewModel.cleanSuggestionFields()
                 }
                 is Resource.Failure -> {
                     Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
+                    suggestionViewModel.cleanSuggestionFields()
                 }
                 Resource.Loading -> {
                     Box(Modifier.fillMaxSize()) {
@@ -194,6 +208,8 @@ fun MakeSuggestion(
 
 
     }
+
+    SuggestionBackHandler(suggestionViewModel, navController)
 
 }
 
@@ -249,16 +265,21 @@ private fun PlaceDescriptionField(
 
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun MyPlaceRate() {
-    Text(text = "hola")
+private fun MyPlaceRate(modifier: Modifier) {
+    Column() {
+        Text(text = "Agregue su calificación personal:")
+        RatingBar(rating = 0)
+    }
+
 }
 
 
 @Composable
 fun PlaceSelect(
-    viewModel: HomeViewModel,
     suggestionViewModel: MakeSuggestionViewModel,
+    userMarker: LatLng?,
     modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState,
     userLocation: LatLng,
@@ -266,7 +287,7 @@ fun PlaceSelect(
     onMapClick: (position: LatLng) -> Unit,
     onMapLoaded: () -> Unit,
 ) {
-    val userMarker = suggestionViewModel.markerLocation.observeAsState()
+
 
     Surface(
         modifier = modifier,
@@ -298,10 +319,10 @@ fun PlaceSelect(
                     }
 
                 ) {
-                    if (userMarker.value != null) {
-                        Log.d("Marker", "usermarker no es nulo ${userMarker.value.toString()}")
+                    if (userMarker != null) {
+                        Log.d("Marker", "usermarker no es nulo $userMarker")
                         Marker(
-                            position = userMarker.value ?: LatLng(0.0, 0.0),
+                            position = userMarker,
                             title = "Ubicacion de Sugerencia",
                             snippet = "Seleccione la ubicacion exacta",
                         )
@@ -373,18 +394,36 @@ private fun SendSuggestionButton(onSendSelected: () -> Unit) {
     }
 }
 
+
 private fun sendSuggestionFunction(
     name: String,
     description: String,
     marker: LatLng,
     user: String,
     viewModel: MakeSuggestionViewModel,
-    context: Context
+    context: Context,
+    scope: CoroutineScope
 ) {
+
     if (viewModel.validateDataMakeSuggestion(name, description)) {
-        viewModel.makeSuggestion(name, description, marker, user)
-        viewModel.cleanSuggestionFields()
+        scope.launch {
+            viewModel.makeSuggestion(name, description, marker, user)
+        }
     } else {
         Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG).show()
     }
+}
+
+@Composable
+private fun SuggestionBackHandler(
+    suggestionViewModel: MakeSuggestionViewModel,
+    navController: NavController
+) {
+    BackHandler(enabled = true, onBack = {
+        navController.navigate(AppScreens.HomeView.route) {
+            popUpTo(AppScreens.HomeView.route) { inclusive = true }
+        }
+        suggestionViewModel.cleanSuggestionFields()
+        //Log.d("BackHandler", "Boton atras")
+    })
 }
