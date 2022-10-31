@@ -43,6 +43,7 @@ import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextArea
 import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextField
+import com.blessingsoftware.accesibleapp.ui.composables.DropDownMenu
 import com.blessingsoftware.accesibleapp.ui.composables.RatingBar
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
@@ -82,7 +83,7 @@ fun MakeSuggestion(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(cam, 16f)
     }
-    //Captura el movimiento del mapa, si el mapa se mueve desactiva el verticalScroll, sino lo activa
+    //Captura el movimiento del mapa, si el mapa se mueve desactiva el verticalScroll, si no, lo activa
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
             columnScrollingEnabled = true
@@ -92,6 +93,8 @@ fun MakeSuggestion(
     //variables capturadas con LiveData
     val name: String by suggestionViewModel.name.observeAsState(initial = "")
     val description: String by suggestionViewModel.description.observeAsState(initial = "")
+    val userRating: Int by suggestionViewModel.rating.observeAsState(initial = 0)
+    val placeType: String by suggestionViewModel.placeType.observeAsState(initial = "Seleccione")
     val suggestionFlow = suggestionViewModel.suggestionFlow.collectAsState()
     val flag = suggestionViewModel.flag.observeAsState()
     //Utils
@@ -126,7 +129,14 @@ fun MakeSuggestion(
                 focusManager
             ) { suggestionViewModel.onFieldsChanged(name, it) }
             Spacer(modifier = Modifier.height(6.dp))
-            MyPlaceRate(Modifier.fillMaxWidth())
+            PlaceType(placeType){
+                suggestionViewModel.setPlaceType(it)
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            RatingBar(rating = userRating) {
+                suggestionViewModel.setRating(it)
+            }
+            //MyPlaceRate(Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(6.dp))
             PlaceSelect(
                 suggestionViewModel,
@@ -160,6 +170,7 @@ fun MakeSuggestion(
                 },
                 {
                     suggestionViewModel.setMarker(it)
+                    columnScrollingEnabled = true
                 }
             ) {
 
@@ -173,6 +184,8 @@ fun MakeSuggestion(
                 sendSuggestionFunction(
                     name,
                     description,
+                    userRating,
+                    placeType,
                     userMarker.value!!,
                     authViewModel.currentUser?.email.toString(),
                     suggestionViewModel,
@@ -208,9 +221,14 @@ fun MakeSuggestion(
 
 
     }
-
     SuggestionBackHandler(suggestionViewModel, navController)
+}
 
+@Composable
+fun PlaceType(placeType: String, onPlaceTypeSelected: (String) -> Unit) {
+    DropDownMenu(placeType, Modifier.fillMaxWidth(0.7f)) {
+        onPlaceTypeSelected(it)
+    }
 }
 
 @Composable
@@ -258,19 +276,23 @@ private fun PlaceDescriptionField(
             imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(
-            onNext = { focusManager.clearFocus() }
+            onDone = { focusManager.clearFocus() },
         )
     )
 
 
 }
 
+
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun MyPlaceRate(modifier: Modifier) {
     Column() {
         Text(text = "Agregue su calificación personal:")
-        RatingBar(rating = 0)
+        RatingBar(rating = 0) {
+
+        }
     }
 
 }
@@ -398,6 +420,8 @@ private fun SendSuggestionButton(onSendSelected: () -> Unit) {
 private fun sendSuggestionFunction(
     name: String,
     description: String,
+    rate: Int,
+    placeType: String,
     marker: LatLng,
     user: String,
     viewModel: MakeSuggestionViewModel,
@@ -407,7 +431,7 @@ private fun sendSuggestionFunction(
 
     if (viewModel.validateDataMakeSuggestion(name, description)) {
         scope.launch {
-            viewModel.makeSuggestion(name, description, marker, user)
+            viewModel.makeSuggestion(name, description, rate, placeType, marker, user)
         }
     } else {
         Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG).show()

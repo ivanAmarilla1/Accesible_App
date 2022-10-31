@@ -34,12 +34,7 @@ fun MainScreen(
     suggestionViewModel: MakeSuggestionViewModel,
     navController: NavHostController
 ) {
-    rememberSystemUiController().apply {
-        setSystemBarsColor(
-            color = Color.Transparent,
-            darkIcons = MaterialTheme.colors.isLight
-        )
-    }
+
     val scaffoldState = rememberScaffoldState(
         drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     )

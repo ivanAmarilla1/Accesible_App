@@ -6,13 +6,15 @@ import java.util.*
 data class Suggestion(
     var suggestionName: String = "",
     var suggestionDescription: String = "",
+    var suggestionRate: Int = 0,
+    var suggestionType: String = "",
     var suggestionLat: String = "",
-    var suggestioneLng: String = "",
-    var suggestioneAproveStatus: Boolean = false,
-    var suggestioneAddedBy: String = "",
-    var suggestioneReviewedBy: String = "",
+    var suggestionLng: String = "",
+    var suggestionApproveStatus: Boolean = false,
+    var suggestionAddedBy: String = "",
+    var suggestionReviewedBy: String = "",
     @ServerTimestamp
-    val timeStamp: Date? = null
+    val suggestionAddDate: Date? = null
 ) {
 
 }

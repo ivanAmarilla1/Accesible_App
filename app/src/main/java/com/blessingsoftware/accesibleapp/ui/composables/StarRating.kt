@@ -52,6 +52,7 @@ fun RatingBar(
                             MotionEvent.ACTION_DOWN -> {
                                 selected = true
                                 ratingState = i
+                                onRatingChange(ratingState)
                             }
                             MotionEvent.ACTION_UP -> {
                                 selected = false

@@ -40,6 +40,10 @@ class MakeSuggestionViewModel @Inject constructor(
     val description : LiveData<String> =_description
     private val _markerLocation = MutableLiveData<LatLng>()
     val markerLocation : LiveData<LatLng> =_markerLocation
+    private val _rating = MutableLiveData<Int>()
+    val rating: LiveData<Int> = _rating
+    private val _placeType = MutableLiveData<String>()
+    val placeType: LiveData<String> = _placeType
     //validacion
     private val _validateName = MutableLiveData<Boolean>()
     val validateName : LiveData<Boolean?> =_validateName
@@ -87,8 +91,8 @@ class MakeSuggestionViewModel @Inject constructor(
     }
 
     //Almacenar la sugerencia en la bd firestore
-    suspend fun makeSuggestion(name: String, description: String, marker: LatLng, user: String) {
-        val suggestion = Suggestion(name,description,marker.latitude.toString(), marker.longitude.toString(), false, user)
+    suspend fun makeSuggestion(name: String, description: String, rate: Int, placetype: String, marker: LatLng, user: String) {
+        val suggestion = Suggestion(name,description, rate, placetype, marker.latitude.toString(), marker.longitude.toString(), false, user)
         _flag.value = true
         _suggestionFlow.value = Resource.Loading
         val result = db.storeSuggestion(suggestion)
@@ -98,6 +102,8 @@ class MakeSuggestionViewModel @Inject constructor(
     fun cleanSuggestionFields() {
         _name.value = ""
         _description.value = ""
+        _rating.value = 0
+        _placeType.value = "Seleccione"
         _validateName.value = true
         _validateDescription.value = true
         _flag.value = false
@@ -110,6 +116,15 @@ class MakeSuggestionViewModel @Inject constructor(
 
     fun setInitialMarker(userLocation: LatLng) {
         _markerLocation.value = userLocation
+    }
+
+    fun setRating(rate: Int) {
+        _rating.value = rate
+    }
+
+    fun setPlaceType(type: String) {
+        _placeType.value = type
+        Log.d("type", _placeType.value.toString())
     }
 
 }

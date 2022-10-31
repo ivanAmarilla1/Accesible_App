@@ -60,7 +60,7 @@ fun CustomOutlinedTextField(
                     contentDescription = "Show error icon"
                 )
                 if (isPasswordField) {
-                    IconButton(onClick = {onVisibilityChanges(!isPasswordVisible)}){
+                    IconButton(onClick = { onVisibilityChanges(!isPasswordVisible) }) {
                         Icon(
                             imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = "Toggle password visibility",
@@ -129,7 +129,7 @@ fun CustomOutlinedTextArea(
                 .fillMaxWidth()
                 .padding(bottom = 10.dp)
                 .heightIn(min = 200.dp, max = 200.dp),
-            label = { Text(label, color = MaterialTheme.colors.secondaryVariant) },
+            placeholder = { Text(label, color = MaterialTheme.colors.secondaryVariant) },
             leadingIcon = {
                 Icon(
                     imageVector = leadingIconImageVector,
@@ -144,7 +144,7 @@ fun CustomOutlinedTextArea(
                     contentDescription = "Show error icon"
                 )
                 if (isPasswordField) {
-                    IconButton(onClick = {onVisibilityChanges(!isPasswordVisible)}){
+                    IconButton(onClick = { onVisibilityChanges(!isPasswordVisible) }) {
                         Icon(
                             imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = "Toggle password visibility",

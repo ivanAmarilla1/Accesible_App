@@ -46,17 +46,19 @@ private val LightColorPalette = lightColors(
 @Composable
 fun AccesibleAppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
 
+    val systemBarColor =  Color.Transparent
     val colors = if (darkTheme) {
         DarkColorPalette
-
     } else {
         LightColorPalette
     }
 
+
     val systemUIController = rememberSystemUiController()
     SideEffect {
-        systemUIController.setSystemBarsColor(
-            color = Color.Transparent
+        systemUIController.setStatusBarColor(
+            color = systemBarColor,
+            darkIcons = !darkTheme,
         )
     }
 

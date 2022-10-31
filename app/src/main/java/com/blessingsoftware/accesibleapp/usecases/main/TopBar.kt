@@ -9,11 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -28,17 +26,26 @@ fun TopBar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val bottomBarDestination =
+    var title = "Asunción Accesible"
+    items.forEach{
+        if (it.route == currentDestination?.route){
+            title = it.tittle
+        }
+    }
+
+    val topBarDestination =
         items.any { it.route == currentDestination?.route }//Para mostrar el topBar en las pantallas que tenga la lista items
-    if (bottomBarDestination) {
+    if (topBarDestination) {
         TopAppBar(
             modifier = Modifier.height(50.dp),
             elevation = 0.dp,
             title = {
-                Text(
-                    text = "",//LocalContext.current.getString(R.string.app_name),
-                    color = MaterialTheme.colors.onSurface
-                )
+                (if (currentDestination?.route != AppScreens.HomeView.route) title else "")?.let {
+                    Text(
+                        text = it,//LocalContext.current.getString(R.string.app_name),
+                        color = MaterialTheme.colors.onSurface
+                    )
+                }
             },//titulo del TopBar
             navigationIcon = {//Icono de 3 lineas de la parte izquierda
                 IconButton(onClick = {
@@ -50,15 +57,15 @@ fun TopBar(
                     Icon(
                         imageVector = Icons.Filled.Menu,
                         contentDescription = "Menu icon",
-                        tint = MaterialTheme.colors.onSurface
+                        tint = if (currentDestination?.route != AppScreens.HomeView.route) MaterialTheme.colors.onBackground else MaterialTheme.colors.onSurface
                     )
                 }
             },
-            actions = {
+            /*actions = {
                 IconButton(onClick = { /*TODO*/ }) {//iconos de la parte derecha del TopBar
                     Icon(imageVector = Icons.Filled.Search, contentDescription = "Menu icon", tint = MaterialTheme.colors.onSurface)
                 }
-            },
+            },*/
             backgroundColor = Color.Transparent//MaterialTheme.colors.onSecondary
         )
     }
