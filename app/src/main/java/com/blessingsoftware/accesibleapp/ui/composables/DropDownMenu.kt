@@ -3,6 +3,7 @@ package com.blessingsoftware.accesibleapp.ui.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -13,23 +14,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DropDownMenu(placeType: String, modifier: Modifier, onPlaceTypeChanged: (String) -> Unit) {
-    val typeList = listOf(
-        "Estacionamiento",
-        "Comercio",
-        "Entidad Pública",
-        "Restaurante",
-        "Hotel",
-        "Zona de Entretenimiento"
-    )
-    //var placeType: String by remember { mutableStateOf(typeList[0]) }
+fun DropDownMenu(selectedItem: String, list: List<String>, modifier: Modifier, onSelectedItemChanged: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-
 
     Row(
         modifier
             .fillMaxSize()
             .height(50.dp)
+            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
             .clickable { // Anchor view
                 expanded = !expanded
             },
@@ -37,7 +29,7 @@ fun DropDownMenu(placeType: String, modifier: Modifier, onPlaceTypeChanged: (Str
     ) { // Anchor view
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = placeType,
+            text = selectedItem,
             modifier = Modifier.fillMaxWidth(0.9f),
             MaterialTheme.colors.secondary,
             style = MaterialTheme.typography.body1
@@ -51,16 +43,16 @@ fun DropDownMenu(placeType: String, modifier: Modifier, onPlaceTypeChanged: (Str
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = modifier
-                .fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
                 .background(MaterialTheme.colors.background)
         ) {
-            typeList.forEach { type ->
+            list.forEach { item ->
                 DropdownMenuItem(onClick = {
                     expanded = false
-                    onPlaceTypeChanged(type)
+                    onSelectedItemChanged(item)
                 }) {
-                    val isSelected = type == placeType
+                    val isSelected = item == selectedItem
                     val style = if (isSelected) {
                         MaterialTheme.typography.body1.copy(
                             fontWeight = FontWeight.Bold,
@@ -72,54 +64,10 @@ fun DropDownMenu(placeType: String, modifier: Modifier, onPlaceTypeChanged: (Str
                             color = MaterialTheme.colors.onSurface
                         )
                     }
-                    Text(type, style = style)
+                    Text(item, style = style)
                 }
             }
 
         }
     }
-
 }
-
-
-/*
-*  var expanded by remember { mutableStateOf(false) }
-    val placeType = listOf("Estacionamiento", "Comercio", "Entidad Pública", "Restaurante", "Hotel", "Zona de Entretenimiento")
-    var selectedType by remember { mutableStateOf("") }
-
-    var textfieldSize by remember { mutableStateOf(Size.Zero)}
-
-    val icon = if (expanded)
-        Icons.Filled.KeyboardArrowUp
-    else
-        Icons.Filled.KeyboardArrowDown
-
-
-    Column() {
-        Text(
-            text = selectedType,
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned { coordinates ->
-                    //This value is used to assign to the DropDown the same width
-                    textfieldSize = coordinates.size.toSize()
-                }
-        )
-        Icon(icon,"contentDescription",
-            Modifier.clickable { expanded = !expanded })
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier
-                .width(with(LocalDensity.current){textfieldSize.width.toDp()})
-        ) {
-            placeType.forEach { label ->
-                DropdownMenuItem(onClick = {
-                    selectedType = label
-                    expanded = false
-                }) {
-                    Text(text = label)
-                }
-            }
-        }
-    }*/

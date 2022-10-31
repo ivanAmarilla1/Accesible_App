@@ -19,9 +19,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.outlined.StarHalf
-import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -41,10 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
-import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextArea
-import com.blessingsoftware.accesibleapp.ui.composables.CustomOutlinedTextField
-import com.blessingsoftware.accesibleapp.ui.composables.DropDownMenu
-import com.blessingsoftware.accesibleapp.ui.composables.RatingBar
+import com.blessingsoftware.accesibleapp.ui.composables.*
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
@@ -53,8 +47,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.lang.Math.ceil
-import java.lang.Math.floor
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -66,7 +58,6 @@ fun MakeSuggestion(
 ) {
     //Scroll
     var columnScrollingEnabled by remember { mutableStateOf(true) }
-
     //Ubicación del usuario en live data
     val location by suggestionViewModel.getLocationLiveData().observeAsState()
     var userLocation = LatLng(0.0, 0.0)
@@ -114,30 +105,29 @@ fun MakeSuggestion(
             .verticalScroll(rememberScrollState(), columnScrollingEnabled)
     ) {
         Column(modifier = Modifier) {
-            Text(text = "Realizar Sugerencia", color = MaterialTheme.colors.secondary)
+            Spacer(modifier = Modifier.height(15.dp))
             PlaceNameField(
                 name,
                 validateName.value,
                 validateNameError,
                 focusManager
             ) { suggestionViewModel.onFieldsChanged(it, description) }
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(15.dp))
             PlaceDescriptionField(
                 description,
                 validateDescription.value,
                 validateDescriptionError,
                 focusManager
             ) { suggestionViewModel.onFieldsChanged(name, it) }
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(15.dp))
             PlaceType(placeType){
                 suggestionViewModel.setPlaceType(it)
             }
-            Spacer(modifier = Modifier.height(6.dp))
-            RatingBar(rating = userRating) {
+            Spacer(modifier = Modifier.height(20.dp))
+            MyPlaceRate(userRating){
                 suggestionViewModel.setRating(it)
             }
-            //MyPlaceRate(Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(15.dp))
             PlaceSelect(
                 suggestionViewModel,
                 userMarker.value,
@@ -175,11 +165,9 @@ fun MakeSuggestion(
             ) {
 
             }
-
-            Spacer(modifier = Modifier.height(6.dp))
-            Spacer(modifier = Modifier.height(6.dp))
-            AddPlaceImages()
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(15.dp))
+            //AddPlaceImages()
+            //Spacer(modifier = Modifier.height(6.dp))
             SendSuggestionButton {
                 sendSuggestionFunction(
                     name,
@@ -192,6 +180,7 @@ fun MakeSuggestion(
                     context,
                     scope
                 )
+                columnScrollingEnabled = true
             }
         }
     }
@@ -226,7 +215,21 @@ fun MakeSuggestion(
 
 @Composable
 fun PlaceType(placeType: String, onPlaceTypeSelected: (String) -> Unit) {
-    DropDownMenu(placeType, Modifier.fillMaxWidth(0.7f)) {
+    val typeList = listOf(
+        "Estacionamiento",
+        "Comercio",
+        "Lugar Público",
+        "Entidad Estatal",
+        "Restaurante",
+        "Hotel",
+        "Punto de Interés",
+        "Zona de Entretenimiento",
+        "Otros"
+    )
+
+    Text(text = "Tipo de Lugar", color = MaterialTheme.colors.secondary)
+    Spacer(modifier = Modifier.height(5.dp))
+    DropDownMenu(placeType, typeList, Modifier.fillMaxWidth()) {
         onPlaceTypeSelected(it)
     }
 }
@@ -239,7 +242,9 @@ private fun PlaceNameField(
     focusManager: FocusManager,
     onTextFieldChanged: (String) -> Unit
 ) {
-    CustomOutlinedTextField(
+    Text(text = "Nombre del Lugar", color = MaterialTheme.colors.secondary)
+    Spacer(modifier = Modifier.height(5.dp))
+    CustomOutlinedTextFieldTwo(
         value = placeName,
         onValueChange = { onTextFieldChanged(it) },
         label = stringResource(R.string.place_name),
@@ -264,10 +269,12 @@ private fun PlaceDescriptionField(
     focusManager: FocusManager,
     onTextFieldChanged: (String) -> Unit
 ) {
+    Text(text = "Descripción del Lugar", color = MaterialTheme.colors.secondary)
+    Spacer(modifier = Modifier.height(5.dp))
     CustomOutlinedTextArea(
         value = placeDescription,
         onValueChange = { onTextFieldChanged(it) },
-        label = stringResource(R.string.place_name),
+        label = stringResource(R.string.place_description),
         showError = !validatePlaceDescription!!,
         errorMessage = validatePlaceDescriptionError,
         leadingIconImageVector = Icons.Default.Description,
@@ -287,11 +294,12 @@ private fun PlaceDescriptionField(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun MyPlaceRate(modifier: Modifier) {
+private fun MyPlaceRate(rating: Int, onRatingChange: (Int) ->Unit,) {
+    Text(text = "Agregue su calificación personal", color = MaterialTheme.colors.secondary)
+    Spacer(modifier = Modifier.height(5.dp))
     Column() {
-        Text(text = "Agregue su calificación personal:")
-        RatingBar(rating = 0) {
-
+        RatingBar(rating = rating) {
+            onRatingChange(it)
         }
     }
 
@@ -309,8 +317,8 @@ fun PlaceSelect(
     onMapClick: (position: LatLng) -> Unit,
     onMapLoaded: () -> Unit,
 ) {
-
-
+    Text(text = "Indique la ubicación del lugar en el mapa", color = MaterialTheme.colors.secondary)
+    Spacer(modifier = Modifier.height(5.dp))
     Surface(
         modifier = modifier,
         color = MaterialTheme.colors.background

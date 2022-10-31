@@ -28,8 +28,8 @@
 
     //Pantalla sugerencia
     <string name="my_location">Mi ubicación</string>
-    <string name="place_name">Nombre del Lugar</string>
-    <string name="place_description">Agregue una descripción del Lugar</string>
+    <string name="place_name">Agregue el nombre del Lugar</string>
+    <string name="place_description">Proporcione una breve descripción del Lugar</string>
     <string name="make_suggestion">Realizar Sugerencia</string>
 
     //Otros

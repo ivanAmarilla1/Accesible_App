@@ -184,6 +184,87 @@ fun CustomOutlinedTextArea(
         }
 
     }
+}
 
+@Composable
+fun CustomOutlinedTextFieldTwo(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String = "",
+    leadingIconImageVector: ImageVector,
+    leadingIconDescription: String = "",
+    isPasswordField: Boolean = false,
+    isPasswordVisible: Boolean = false,
+    onVisibilityChanges: (Boolean) -> Unit = {},
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    showError: Boolean = false,
+    errorMessage: String = ""
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = { onValueChange(it) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 10.dp),
+            placeholder = { Text(label, color = MaterialTheme.colors.secondaryVariant) },
+            leadingIcon = {
+                Icon(
+                    imageVector = leadingIconImageVector,
+                    contentDescription = leadingIconDescription,
+                    tint = if (showError) MaterialTheme.colors.error else MaterialTheme.colors.secondaryVariant
+                )
+            },
+            isError = showError,
+            trailingIcon = {
+                if (showError && !isPasswordField) Icon(
+                    imageVector = Icons.Filled.Error,
+                    contentDescription = "Show error icon"
+                )
+                if (isPasswordField) {
+                    IconButton(onClick = { onVisibilityChanges(!isPasswordVisible) }) {
+                        Icon(
+                            imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = "Toggle password visibility",
+                            tint = if (showError) MaterialTheme.colors.error else MaterialTheme.colors.secondaryVariant
+                        )
+                    }
 
+                }
+            },
+            visualTransformation = when {
+                isPasswordField && isPasswordVisible -> VisualTransformation.None
+                isPasswordField -> PasswordVisualTransformation()
+                else -> VisualTransformation.None
+            },
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = MaterialTheme.colors.secondary,
+                backgroundColor = MaterialTheme.colors.onSecondary,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(20.dp),
+            singleLine = true,
+            maxLines = 1,
+        )
+        if (showError) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .offset(y = (-8).dp)
+                    .fillMaxWidth(0.9f)
+            )
+        }
+
+    }
 }

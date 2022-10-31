@@ -21,24 +21,22 @@ import com.blessingsoftware.accesibleapp.R
 fun RatingBar(
     modifier: Modifier = Modifier,
     rating: Int,
-    onRatingChange: (Int) ->Unit,//TODO Asociar el rating a un livedata
+    onRatingChange: (Int) ->Unit,
 ) {
-    var ratingState by remember {
-        mutableStateOf(rating)
-    }
+    var ratingState = rating
 
     var selected by remember {
         mutableStateOf(false)
     }
     val size by animateDpAsState(
-        targetValue = if (selected) 65.dp else 60.dp,
+        targetValue = if (selected) 50.dp else 45.dp,
         spring(Spring.DampingRatioMediumBouncy)
     )
 
     Row(
         modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Start
     ) {
         for (i in 1..5) {
             Icon(
