@@ -49,6 +49,10 @@ class MakeSuggestionViewModel @Inject constructor(
     val validateName : LiveData<Boolean?> =_validateName
     private val _validateDescription = MutableLiveData<Boolean>()
     val validateDescription : LiveData<Boolean?> =_validateDescription
+    private val _validateType = MutableLiveData<Boolean>()
+    val validateType : LiveData<Boolean?> =_validateType
+    private val _validateRate = MutableLiveData<Boolean>()
+    val validateRate : LiveData<Boolean?> =_validateRate
     //Variable de control para los callbacks del servidor
     private val _suggestionFlow = MutableStateFlow<Resource<String>?>(null)
     val suggestionFlow: StateFlow<Resource<String>?> = _suggestionFlow
@@ -72,6 +76,8 @@ class MakeSuggestionViewModel @Inject constructor(
         //seteo de variables para evitar nullPointerExeption
         _validateName.value = true
         _validateDescription.value = true
+        _validateType.value = true
+        _validateRate.value = true
         //Se llama a la ubicacion del usuario
         startLocationUpdates()
     }
@@ -84,10 +90,12 @@ class MakeSuggestionViewModel @Inject constructor(
     }
 
     //validacion de que los campos no esten vacios
-    fun validateDataMakeSuggestion(name: String, description: String): Boolean {
+    fun validateDataMakeSuggestion(name: String, description: String, placeType: String, rate: Int): Boolean {
         _validateName.value = name.isNotEmpty()
         _validateDescription.value = description.isNotEmpty()
-        return _validateName.value!! && _validateDescription.value!!
+        _validateType.value = placeType != "Seleccione"
+        _validateRate.value = (rate in 1..5)
+        return _validateName.value!! && _validateDescription.value!! && _validateType.value!! && _validateRate.value!!
     }
 
     //Almacenar la sugerencia en la bd firestore
@@ -106,6 +114,8 @@ class MakeSuggestionViewModel @Inject constructor(
         _placeType.value = "Seleccione"
         _validateName.value = true
         _validateDescription.value = true
+        _validateType.value = true
+        _validateRate.value = true
         _flag.value = false
 
     }

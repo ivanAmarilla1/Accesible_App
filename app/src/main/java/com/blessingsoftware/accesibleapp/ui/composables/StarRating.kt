@@ -4,8 +4,13 @@ import android.view.MotionEvent
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -21,6 +26,8 @@ import com.blessingsoftware.accesibleapp.R
 fun RatingBar(
     modifier: Modifier = Modifier,
     rating: Int,
+    validateRate: Boolean,
+    validateRateError: String,
     onRatingChange: (Int) ->Unit,
 ) {
     var ratingState = rating
@@ -34,7 +41,9 @@ fun RatingBar(
     )
 
     Row(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(0.65f)
+        .border(if (validateRate) BorderStroke(2.dp, MaterialTheme.colors.error) else BorderStroke(2.dp, Color.Transparent), shape = RoundedCornerShape(10.dp)
+    ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
@@ -61,5 +70,17 @@ fun RatingBar(
                 tint = if (i <= ratingState) Color(0xFFFFD700) else Color(0xFFA2ADB1)
             )
         }
+    }
+    Spacer(modifier = Modifier.height(10.dp))
+    if (validateRate) {
+        Text(
+            text = validateRateError,
+            color = MaterialTheme.colors.error,
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .offset(y = (-8).dp)
+                .fillMaxWidth(0.9f)
+        )
     }
 }

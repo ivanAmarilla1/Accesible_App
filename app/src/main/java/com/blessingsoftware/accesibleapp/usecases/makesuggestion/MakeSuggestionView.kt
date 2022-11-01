@@ -54,7 +54,8 @@ fun MakeSuggestion(
     homeViewModel: HomeViewModel,
     suggestionViewModel: MakeSuggestionViewModel,
     navController: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    scaffoldState: ScaffoldState
 ) {
     //Scroll
     var columnScrollingEnabled by remember { mutableStateOf(true) }
@@ -95,8 +96,12 @@ fun MakeSuggestion(
     //Validaciones
     val validateName = suggestionViewModel.validateName.observeAsState()
     val validateDescription = suggestionViewModel.validateDescription.observeAsState()
+    val validateType = suggestionViewModel.validateType.observeAsState()
+    val validateRate = suggestionViewModel.validateRate.observeAsState()
     val validateNameError = stringResource(R.string.validate_suggestion_name)
     val validateDescriptionError = stringResource(R.string.validate_suggestion_description)
+    val validateTypeError = stringResource(R.string.validate_suggestion_type)
+    val validateRateError = stringResource(R.string.validate_suggestion_rate)
 
     Box(
         modifier = Modifier
@@ -120,11 +125,11 @@ fun MakeSuggestion(
                 focusManager
             ) { suggestionViewModel.onFieldsChanged(name, it) }
             Spacer(modifier = Modifier.height(15.dp))
-            PlaceType(placeType){
+            PlaceType(placeType, validateType.value, validateTypeError) {
                 suggestionViewModel.setPlaceType(it)
             }
             Spacer(modifier = Modifier.height(20.dp))
-            MyPlaceRate(userRating){
+            MyPlaceRate(userRating, validateRate.value, validateRateError) {
                 suggestionViewModel.setRating(it)
             }
             Spacer(modifier = Modifier.height(15.dp))
@@ -210,11 +215,16 @@ fun MakeSuggestion(
 
 
     }
-    SuggestionBackHandler(suggestionViewModel, navController)
+    SuggestionBackHandler(suggestionViewModel, navController, scaffoldState, scope)
 }
 
 @Composable
-fun PlaceType(placeType: String, onPlaceTypeSelected: (String) -> Unit) {
+fun PlaceType(
+    placeType: String,
+    validateType: Boolean?,
+    validateTypeError: String,
+    onPlaceTypeSelected: (String) -> Unit
+) {
     val typeList = listOf(
         "Estacionamiento",
         "Comercio",
@@ -229,7 +239,7 @@ fun PlaceType(placeType: String, onPlaceTypeSelected: (String) -> Unit) {
 
     Text(text = "Tipo de Lugar", color = MaterialTheme.colors.secondary)
     Spacer(modifier = Modifier.height(5.dp))
-    DropDownMenu(placeType, typeList, Modifier.fillMaxWidth()) {
+    DropDownMenu(placeType, typeList, !validateType!!, validateTypeError, Modifier.fillMaxWidth()) {
         onPlaceTypeSelected(it)
     }
 }
@@ -291,14 +301,22 @@ private fun PlaceDescriptionField(
 }
 
 
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun MyPlaceRate(rating: Int, onRatingChange: (Int) ->Unit,) {
+private fun MyPlaceRate(
+    rating: Int,
+    validateRate: Boolean?,
+    validateRateError: String,
+    onRatingChange: (Int) -> Unit
+) {
     Text(text = "Agregue su calificación personal", color = MaterialTheme.colors.secondary)
     Spacer(modifier = Modifier.height(5.dp))
     Column() {
-        RatingBar(rating = rating) {
+        RatingBar(
+            rating = rating,
+            validateRate = !validateRate!!,
+            validateRateError = validateRateError
+        ) {
             onRatingChange(it)
         }
     }
@@ -437,7 +455,7 @@ private fun sendSuggestionFunction(
     scope: CoroutineScope
 ) {
 
-    if (viewModel.validateDataMakeSuggestion(name, description)) {
+    if (viewModel.validateDataMakeSuggestion(name, description, placeType, rate)) {
         scope.launch {
             viewModel.makeSuggestion(name, description, rate, placeType, marker, user)
         }
@@ -449,13 +467,22 @@ private fun sendSuggestionFunction(
 @Composable
 private fun SuggestionBackHandler(
     suggestionViewModel: MakeSuggestionViewModel,
-    navController: NavController
+    navController: NavController,
+    scaffoldState: ScaffoldState,
+    scope: CoroutineScope
 ) {
-    BackHandler(enabled = true, onBack = {
-        navController.navigate(AppScreens.HomeView.route) {
-            popUpTo(AppScreens.HomeView.route) { inclusive = true }
-        }
-        suggestionViewModel.cleanSuggestionFields()
-        //Log.d("BackHandler", "Boton atras")
-    })
+    if (scaffoldState.drawerState.isOpen) {
+        BackHandler(enabled = true, onBack = {
+            scope.launch {
+                scaffoldState.drawerState.close()
+            }
+        })
+    } else {
+        BackHandler(enabled = true, onBack = {
+            navController.navigate(AppScreens.HomeView.route) {
+                popUpTo(AppScreens.HomeView.route) { inclusive = true }
+            }
+            suggestionViewModel.cleanSuggestionFields()
+        })
+    }
 }

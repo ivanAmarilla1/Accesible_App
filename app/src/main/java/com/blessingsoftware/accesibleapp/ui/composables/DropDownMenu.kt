@@ -1,6 +1,8 @@
 package com.blessingsoftware.accesibleapp.ui.composables
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,7 +16,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DropDownMenu(selectedItem: String, list: List<String>, modifier: Modifier, onSelectedItemChanged: (String) -> Unit) {
+fun DropDownMenu(
+    selectedItem: String,
+    list: List<String>,
+    validateData: Boolean?,
+    validateDataError: String,
+    modifier: Modifier,
+    onSelectedItemChanged: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
@@ -22,23 +31,28 @@ fun DropDownMenu(selectedItem: String, list: List<String>, modifier: Modifier, o
             .fillMaxSize()
             .height(50.dp)
             .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
+            .border(if (validateData!!) BorderStroke(2.dp, MaterialTheme.colors.error) else BorderStroke(2.dp, MaterialTheme.colors.onSecondary), shape = RoundedCornerShape(10.dp))
             .clickable { // Anchor view
                 expanded = !expanded
             },
         verticalAlignment = Alignment.CenterVertically
     ) { // Anchor view
         Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            text = selectedItem,
-            modifier = Modifier.fillMaxWidth(0.9f),
-            MaterialTheme.colors.secondary,
-            style = MaterialTheme.typography.body1
-        ) //label
-        Icon(
-            imageVector = Icons.Filled.ArrowDropDown,
-            "ArrowDropDown",
-            tint = MaterialTheme.colors.secondary
-        )
+        Column {
+            Row {
+                Text(
+                    text = selectedItem,
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    MaterialTheme.colors.secondary,
+                    style = MaterialTheme.typography.body1
+                )
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    "ArrowDropDown",
+                    tint = MaterialTheme.colors.secondary
+                )
+            }
+        }
 
         DropdownMenu(
             expanded = expanded,
@@ -70,4 +84,17 @@ fun DropDownMenu(selectedItem: String, list: List<String>, modifier: Modifier, o
 
         }
     }
+    Spacer(modifier = Modifier.height(10.dp))
+    if (validateData) {
+        Text(
+            text = validateDataError,
+            color = MaterialTheme.colors.error,
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .offset(y = (-8).dp)
+                .fillMaxWidth(0.9f)
+        )
+    }
+
 }

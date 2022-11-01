@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.usecases.navigation.navigation_graphs
 
+import androidx.compose.material.ScaffoldState
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -21,6 +22,7 @@ fun NavGraphBuilder.homeNavGraph(
     homeViewModel: HomeViewModel,
     suggestionViewModel: MakeSuggestionViewModel,
     authViewModel: AuthViewModel,
+    scaffoldState: ScaffoldState,
 ) {
     navigation(startDestination = AppScreens.HomeView.route, route = HOME_ROUTE) {
         composable(route = AppScreens.HomeView.route) {
@@ -30,7 +32,7 @@ fun NavGraphBuilder.homeNavGraph(
             RandomView(navController)
         }
         composable(AppScreens.MakeSuggestion.route) {
-            MakeSuggestion(homeViewModel, suggestionViewModel, navController, authViewModel)
+            MakeSuggestion(homeViewModel, suggestionViewModel, navController, authViewModel, scaffoldState)
         }
         composable(AppScreens.ItemOne.route) {
             ItemOne(navController)
