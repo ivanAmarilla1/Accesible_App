@@ -14,6 +14,7 @@ import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppNavigation
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
+import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ReviewSuggestionViewModel
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -23,6 +24,7 @@ fun MainScreen(
     loginViewModel: AuthViewModel,
     homeViewModel: HomeViewModel,
     suggestionViewModel: MakeSuggestionViewModel,
+    reviewSuggestionViewModel: ReviewSuggestionViewModel,
     navController: NavHostController
 ) {
 
@@ -34,14 +36,14 @@ fun MainScreen(
     val drawerItems = listOf(
         AppScreens.HomeView,
         AppScreens.MakeSuggestion,
-        AppScreens.ItemOne,
+        AppScreens.SuggestionList,
         AppScreens.ItemTwo,
         AppScreens.ItemThree
     )
     val topBarItems = listOf(
         AppScreens.HomeView,
         AppScreens.MakeSuggestion,
-        AppScreens.ItemOne,
+        AppScreens.SuggestionList,
         AppScreens.ItemTwo,
         AppScreens.ItemThree,
         AppScreens.RandomView
@@ -62,7 +64,7 @@ fun MainScreen(
         drawerBackgroundColor = MaterialTheme.colors.background,
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen
     ) {
-        AppNavigation(loginViewModel, homeViewModel, suggestionViewModel, navController, scaffoldState)
+        AppNavigation(loginViewModel, homeViewModel, suggestionViewModel, reviewSuggestionViewModel, navController, scaffoldState)
         TopBar(scope, scaffoldState, navController, topBarItems)
     }
 

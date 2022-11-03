@@ -13,6 +13,9 @@ import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestion
 import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.blessingsoftware.accesibleapp.usecases.navigation.HOME_ROUTE
+import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ReviewSuggestionViewModel
+import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ViewSuggestionDetail
+import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ViewSuggestionList
 import com.blessingsoftware.accesibleapp.usecases.test.ItemOne
 import com.blessingsoftware.accesibleapp.usecases.test.ItemThree
 import com.blessingsoftware.accesibleapp.usecases.test.ItemTwo
@@ -22,6 +25,7 @@ fun NavGraphBuilder.homeNavGraph(
     homeViewModel: HomeViewModel,
     suggestionViewModel: MakeSuggestionViewModel,
     authViewModel: AuthViewModel,
+    reviewSuggestionViewModel: ReviewSuggestionViewModel,
     scaffoldState: ScaffoldState,
 ) {
     navigation(startDestination = AppScreens.HomeView.route, route = HOME_ROUTE) {
@@ -34,8 +38,11 @@ fun NavGraphBuilder.homeNavGraph(
         composable(AppScreens.MakeSuggestion.route) {
             MakeSuggestion(homeViewModel, suggestionViewModel, navController, authViewModel, scaffoldState)
         }
-        composable(AppScreens.ItemOne.route) {
-            ItemOne(navController)
+        composable(AppScreens.SuggestionList.route) {
+            ViewSuggestionList(reviewSuggestionViewModel)
+        }
+        composable(AppScreens.SuggestionDetail.route) {
+            ViewSuggestionDetail(reviewSuggestionViewModel)
         }
         composable(AppScreens.ItemTwo.route) {
             ItemTwo(navController)

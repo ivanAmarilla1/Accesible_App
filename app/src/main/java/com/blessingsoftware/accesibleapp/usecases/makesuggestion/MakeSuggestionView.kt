@@ -61,7 +61,7 @@ fun MakeSuggestion(
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     //Ubicación del usuario en live data
     val location by suggestionViewModel.getLocationLiveData().observeAsState()
-    var userLocation = LatLng(0.0, 0.0)
+    var userLocation: LatLng? = null
     location?.let {
         userLocation = LatLng(location!!.latitude.toDouble(), location!!.longitude.toDouble())
     }
@@ -71,10 +71,17 @@ fun MakeSuggestion(
         suggestionViewModel.setInitialMarker(userLocation)
     }
     //Posicion inicial de la vista del mapa
-    val cam = userLocation
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(cam, 16f)
+    var cam = LatLng(-25.28269856303251, -57.60271740849931)
+    var cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(cam, 10f)
     }
+    userLocation?.let {
+        cam = userLocation as LatLng
+        cameraPositionState = rememberCameraPositionState {
+            position = CameraPosition.fromLatLngZoom(cam, 16f)
+        }
+    }
+
     //Captura el movimiento del mapa, si el mapa se mueve desactiva el verticalScroll, si no, lo activa
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
@@ -88,6 +95,7 @@ fun MakeSuggestion(
     val userRating: Int by suggestionViewModel.rating.observeAsState(initial = 0)
     val placeType: String by suggestionViewModel.placeType.observeAsState(initial = "Seleccione")
     val suggestionFlow = suggestionViewModel.suggestionFlow.collectAsState()
+    val isGPSOn = suggestionViewModel.isGPSOn.observeAsState()
     val flag = suggestionViewModel.flag.observeAsState()
     //Utils
     val focusManager = LocalFocusManager.current
@@ -159,7 +167,7 @@ fun MakeSuggestion(
                 cameraPositionState = cameraPositionState,
                 userLocation,
                 {
-                    cameraPositionState.position = CameraPosition.fromLatLngZoom(cam, 16f)
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(cam, 10f)
                     suggestionViewModel.setMarker(userLocation)
 
                 },
@@ -330,7 +338,7 @@ fun PlaceSelect(
     userMarker: LatLng?,
     modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState,
-    userLocation: LatLng,
+    userLocation: LatLng?,
     onMyPositionButtonClicked: () -> Unit,
     onMapClick: (position: LatLng) -> Unit,
     onMapLoaded: () -> Unit,
@@ -406,7 +414,7 @@ fun PlaceSelect(
                 )
             ) {
                 Text(
-                    stringResource(R.string.my_location),
+                    text = if (userLocation != null) stringResource(R.string.my_location) else "Reiniciar cámara",
                     color = MaterialTheme.colors.onBackground
                 )
                 Icon(

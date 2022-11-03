@@ -10,6 +10,7 @@ import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.navigation_graphs.authNavGraph
 import com.blessingsoftware.accesibleapp.usecases.navigation.navigation_graphs.homeNavGraph
+import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ReviewSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.splashscreen.SplashScreen
 
 
@@ -18,6 +19,7 @@ fun AppNavigation(
     authViewModel: AuthViewModel,
     homeViewModel: HomeViewModel,
     suggestionViewModel: MakeSuggestionViewModel,
+    reviewSuggestionViewModel: ReviewSuggestionViewModel,
     navController: NavHostController,
     scaffoldState: ScaffoldState
 ) {
@@ -27,6 +29,6 @@ fun AppNavigation(
             SplashScreen(authViewModel, navController)
         }
         authNavGraph(navController, authViewModel)
-        homeNavGraph(navController, homeViewModel, suggestionViewModel, authViewModel, scaffoldState)
+        homeNavGraph(navController, homeViewModel, suggestionViewModel, authViewModel, reviewSuggestionViewModel,scaffoldState)
     }
 }

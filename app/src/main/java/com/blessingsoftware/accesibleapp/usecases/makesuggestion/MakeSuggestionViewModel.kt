@@ -1,21 +1,15 @@
 package com.blessingsoftware.accesibleapp.usecases.makesuggestion
 
-import android.Manifest
 import android.app.Application
-import android.content.pm.PackageManager
 import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.blessingsoftware.accesibleapp.model.domain.LocationLiveData
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
-import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,6 +50,9 @@ class MakeSuggestionViewModel @Inject constructor(
     //Variable de control para los callbacks del servidor
     private val _suggestionFlow = MutableStateFlow<Resource<String>?>(null)
     val suggestionFlow: StateFlow<Resource<String>?> = _suggestionFlow
+    //Variable de control para saber si el GPS esta encendido o no
+    private val _isGPSOn = MutableLiveData<Boolean>()
+    val isGPSOn : LiveData<Boolean?> =_isGPSOn
     //Bandera para entrar a las funciones de de los callbacks
     private val _flag = MutableLiveData<Boolean>()
     val flag: LiveData<Boolean> = _flag
@@ -78,6 +75,7 @@ class MakeSuggestionViewModel @Inject constructor(
         _validateDescription.value = true
         _validateType.value = true
         _validateRate.value = true
+        _isGPSOn.value = false
         //Se llama a la ubicacion del usuario
         startLocationUpdates()
     }
@@ -120,13 +118,25 @@ class MakeSuggestionViewModel @Inject constructor(
 
     }
     //Colocar el marcador en el mapa con el Livedata
-    fun setMarker(markerLocation: LatLng) {
-        _markerLocation.value = markerLocation
+    fun setMarker(markerLocation: LatLng?) {
+        if (markerLocation != null) {
+            _markerLocation.value = markerLocation!!
+        }
+
     }
 
-    fun setInitialMarker(userLocation: LatLng) {
-        _markerLocation.value = userLocation
+    fun setInitialMarker(userLocation: LatLng?) {
+        if (userLocation != null){
+            _markerLocation.value = userLocation!!
+        } else {
+            Log.d("Location", "Ubicacion desactivada")
+        }
+
     }
+
+
+
+   // open fun isProviderEnabled(provider: String): Boolean {}
 
     fun setRating(rate: Int) {
         _rating.value = rate
@@ -135,6 +145,10 @@ class MakeSuggestionViewModel @Inject constructor(
 
     fun setPlaceType(type: String) {
         _placeType.value = type
+    }
+
+    fun setGPSStatus(status: Boolean) {
+        _isGPSOn.value = status
     }
 
 }

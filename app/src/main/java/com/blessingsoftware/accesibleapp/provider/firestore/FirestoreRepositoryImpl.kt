@@ -36,6 +36,42 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getAllSuggestions(): ArrayList<Suggestion> {
+        //Inicializa una lista de objetos tipo Place en la que se guardaran todos los lugares
+        val suggestions = ArrayList<Suggestion>()
+        val ref = db.collection("suggestions")
+
+        val results = ref.get().await()
+
+        for (document in results) {
+            val suggestion = document.toObject(Suggestion::class.java)
+            suggestion?.let {
+                suggestions.add(it)
+            }
+        }
+        return suggestions
+
+        /*ref.addSnapshotListener { snapshot, e ->
+            // handle the error if there is one, and then return
+            if (e != null) {
+                Log.w("Listen failed", e)
+                return@addSnapshotListener
+            }
+            // if we reached this point , there was not an error
+            snapshot?.let {
+                val documents = snapshot.documents
+                documents.forEach {
+                    val suggestion = it.toObject(Suggestion::class.java)
+                    //Log.d("Place name", place!!.placeName)
+                    suggestion?.let {
+                        suggestions.add(it)
+                    }
+                }
+            }
+        }*/
+    }
+
+
     override fun getAllPlaces(): ArrayList<Place> {
         //Inicializa una lista de objetos tipo Place en la que se guardaran todos los lugares
         val places = ArrayList<Place>()
@@ -64,7 +100,8 @@ class FirestoreRepositoryImpl @Inject constructor(
     }
 }
 
-/*ref.get().addOnSuccessListener { result ->
+/*
+* ref.get().addOnSuccessListener { result ->
             for (document in result) {
                 val place = document.toObject<Place>()
                 places.add(place)

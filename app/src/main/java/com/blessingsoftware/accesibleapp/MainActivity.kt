@@ -1,8 +1,11 @@
 package com.blessingsoftware.accesibleapp
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,13 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.model.domain.Constants.REQUEST_CODE_LOCATION_PERMISSION
-import com.blessingsoftware.accesibleapp.model.domain.Constants.SHOW_CURRENT_LOCATION
-import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.main.MainScreen
 import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
+import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ReviewSuggestionViewModel
 import com.blessingsoftware.accesibleapp.util.TrackingUtility
 import com.vmadalin.easypermissions.EasyPermissions
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,6 +35,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     private val loginViewModel by viewModels<AuthViewModel>()
     private val homeViewModel by viewModels<HomeViewModel>()
     private val suggestionViewModel by viewModels<MakeSuggestionViewModel>()
+    private val reviewSuggestionViewModel by viewModels<ReviewSuggestionViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,10 +51,12 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                         loginViewModel = loginViewModel,
                         homeViewModel = homeViewModel,
                         suggestionViewModel = suggestionViewModel,
+                        reviewSuggestionViewModel = reviewSuggestionViewModel,
                         rememberNavController()
                     )
                 }
             }
+            //isLocationOn(suggestionViewModel)
             prepLocationUpdates()
         }
     }
@@ -114,6 +119,15 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
+
+    private fun isLocationOn(suggestionViewModel: MakeSuggestionViewModel): Boolean {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val mGPS = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        suggestionViewModel.setGPSStatus(mGPS)
+        Log.d("gps ", mGPS.toString())
+        return mGPS
     }
 
 }
