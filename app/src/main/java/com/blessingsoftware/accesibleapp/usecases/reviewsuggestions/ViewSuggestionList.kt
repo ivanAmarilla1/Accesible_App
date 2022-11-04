@@ -1,7 +1,7 @@
 package com.blessingsoftware.accesibleapp.usecases.reviewsuggestions
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +45,5 @@ fun SuggestionList(viewModel: ReviewSuggestionViewModel, scope: CoroutineScope) 
             Spacer(modifier = Modifier.height(5.dp))
         }
     }
-
-
 }
+

@@ -2,7 +2,6 @@ package com.blessingsoftware.accesibleapp.usecases.reviewsuggestions
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository

@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.blessingsoftware.accesibleapp.model.domain.LocationLiveData
 import com.blessingsoftware.accesibleapp.model.domain.Place
+import com.blessingsoftware.accesibleapp.model.domain.User
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -14,13 +15,17 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(application: Application, private val db: FirestoreRepository): AndroidViewModel(application) {
 
-
-
-
     var places: MutableLiveData<List<Place>> = MutableLiveData<List<Place>>()
+
+    private val _selectedPlace = MutableLiveData<Place>()
+    val selectedPlace: LiveData<Place> = _selectedPlace
 
     private fun getPlaces(){
         places.value = db.getAllPlaces()
+    }
+
+    fun setSelectedPlace(place: Place) {
+        _selectedPlace.value = place
     }
 
     init {

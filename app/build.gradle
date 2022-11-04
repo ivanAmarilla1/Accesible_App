@@ -77,7 +77,7 @@ dependencies {
     //Google services
     implementation 'com.google.android.gms:play-services-auth:20.3.0'
     //Maps
-    implementation "com.google.maps.android:maps-compose:1.0.0"
+    implementation "com.google.maps.android:maps-compose:1.2.0"
     implementation "com.google.android.gms:play-services-maps:18.1.0"
     //Location
     implementation "com.google.android.gms:play-services-location:21.0.0"

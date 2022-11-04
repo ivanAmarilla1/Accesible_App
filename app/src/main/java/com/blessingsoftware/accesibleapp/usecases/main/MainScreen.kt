@@ -27,7 +27,6 @@ fun MainScreen(
     reviewSuggestionViewModel: ReviewSuggestionViewModel,
     navController: NavHostController
 ) {
-
     val scaffoldState = rememberScaffoldState(
         drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     )
