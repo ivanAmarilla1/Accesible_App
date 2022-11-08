@@ -1,6 +1,7 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
 import android.app.Activity
+import android.graphics.Paint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,9 +9,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.blessingsoftware.accesibleapp.model.domain.Place
@@ -23,7 +26,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeView(viewModel: HomeViewModel, navController: NavHostController) {
-    Box(modifier = Modifier.padding(bottom = 50.dp)){
+    Box(modifier = Modifier.padding(bottom = 50.dp)) {
         PlaceBottomDrawer(viewModel)
     }
 }
@@ -92,12 +95,29 @@ fun MainMap(viewModel: HomeViewModel, onMarkerClicked: (Place) -> Boolean) {
 private fun DrawerContent(selectedPlace: Place?) {
     Column(
         Modifier
-            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colors.onSecondary)
             .fillMaxWidth()
             .height(400.dp)
     ) {
         if (selectedPlace != null) {
-            Text(selectedPlace.placeName)
+            Spacer(modifier = Modifier.height(15.dp))
+            Text(
+                selectedPlace.placeName,
+                modifier = Modifier.fillMaxWidth(0.9f),
+                MaterialTheme.colors.secondary,
+                style = MaterialTheme.typography.h6,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                selectedPlace.placeDescription,
+                modifier = Modifier.fillMaxWidth(0.9f),
+                MaterialTheme.colors.secondary,
+                style = MaterialTheme.typography.body1,
+                textAlign = TextAlign.Start,
+            )
+
+
         }
 
     }

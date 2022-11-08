@@ -24,7 +24,7 @@ sealed class AppScreens(
     //Home routes
     object HomeView : AppScreens("home_view", "Inicio", Icons.Outlined.Home, Icons.Filled.Home )
     object MakeSuggestion : AppScreens("make_suggestion", "Realizar Sugerencia", Icons.Outlined.AddLocationAlt, Icons.Filled.AddLocationAlt)
-    object RandomView : AppScreens("random_view", "Random", Icons.Outlined.Search, Icons.Filled.Search)
+    object RandomView : AppScreens("random_view", "Buscar", Icons.Outlined.Search, Icons.Filled.Search)
     object SuggestionList : AppScreens("suggestion_list", "Lista de Sugerencias", Icons.Outlined.List, Icons.Filled.List)
     object SuggestionDetail : AppScreens("suggestion_detail", "Detalle de Sugerencia", Icons.Outlined.Details, Icons.Filled.Details)
 

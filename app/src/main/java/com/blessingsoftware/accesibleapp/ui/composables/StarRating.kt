@@ -20,6 +20,7 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.blessingsoftware.accesibleapp.R
+import org.intellij.lang.annotations.JdkConstants
 
 @ExperimentalComposeUiApi
 @Composable
@@ -82,5 +83,25 @@ fun RatingBar(
                 .offset(y = (-8).dp)
                 .fillMaxWidth(0.9f)
         )
+    }
+}
+
+@Composable
+fun StarRate(suggestionRate: Int, modifier: Modifier, verticalAlignment: Alignment.Vertical, horizontalAlignment: Arrangement.Horizontal) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = verticalAlignment,
+        horizontalArrangement = horizontalAlignment
+    ) {
+        for (i in 1..5) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_baseline_star_24),
+                contentDescription = "star",
+                modifier = Modifier
+                    .width(30.dp)
+                    .height(30.dp),
+                tint = if (i <= suggestionRate) Color(0xFFFFD700) else Color(0xFFA2ADB1)
+            )
+        }
     }
 }

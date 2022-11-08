@@ -113,7 +113,7 @@ fun NavigationDrawer(
 }
 
 @Composable
-fun DrawerItem(
+private fun DrawerItem(
     item: AppScreens,
     selected: Boolean,
     onItemClick: (AppScreens) -> Unit
@@ -145,7 +145,7 @@ fun DrawerItem(
 }
 
 @Composable
-fun UserImage() {
+private fun UserImage() {
     Image(//llamada a una imagen para mostrar en pantalla
         painter = painterResource(R.drawable.user_ic),//TODO agregar imagen de usuario
         contentDescription = "User image",

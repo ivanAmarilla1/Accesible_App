@@ -16,7 +16,7 @@ import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 fun RandomView(navController: NavController) {
     Box(modifier = Modifier.padding(0.dp, 50.dp, 0.dp, 50.dp)) {
         Column(modifier = Modifier) {
-            Text("Random Screen", color = MaterialTheme.colors.secondary)
+            Text("Pantalla de Busqueda", color = MaterialTheme.colors.secondary)
         }
     }
 }

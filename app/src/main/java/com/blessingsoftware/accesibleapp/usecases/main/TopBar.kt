@@ -57,7 +57,7 @@ fun TopBar(
                     Icon(
                         imageVector = Icons.Filled.Menu,
                         contentDescription = "Menu icon",
-                        tint = if (currentDestination?.route != AppScreens.HomeView.route) MaterialTheme.colors.onBackground else MaterialTheme.colors.onSurface
+                        tint = if (currentDestination?.route != AppScreens.HomeView.route) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface
                     )
                 }
             },
