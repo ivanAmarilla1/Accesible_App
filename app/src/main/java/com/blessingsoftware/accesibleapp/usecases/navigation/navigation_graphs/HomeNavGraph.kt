@@ -39,7 +39,7 @@ fun NavGraphBuilder.homeNavGraph(
             MakeSuggestion(homeViewModel, suggestionViewModel, navController, authViewModel, scaffoldState)
         }
         composable(AppScreens.SuggestionList.route) {
-            ViewSuggestionList(reviewSuggestionViewModel)
+            ViewSuggestionList(reviewSuggestionViewModel, navController)
         }
         composable(AppScreens.SuggestionDetail.route) {
             ViewSuggestionDetail(reviewSuggestionViewModel)

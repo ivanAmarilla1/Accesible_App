@@ -3,6 +3,7 @@ package com.blessingsoftware.accesibleapp.usecases.main
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
@@ -22,9 +23,12 @@ fun TopBar(
     scaffoldState: ScaffoldState,
     navController: NavHostController,
     items: List<AppScreens>,
+    drawerItems: List<AppScreens>,
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    val drawerDestination = drawerItems.any { it.route == currentDestination?.route }
 
     var title = "Asunción Accesible"
     items.forEach{
@@ -48,18 +52,34 @@ fun TopBar(
                 }
             },//titulo del TopBar
             navigationIcon = {//Icono de 3 lineas de la parte izquierda
-                IconButton(onClick = {
-                    //al hacer click se abre el drawer
-                    scope.launch {
-                        scaffoldState.drawerState.open()
+                if (drawerDestination){
+                    IconButton(onClick = {
+                        //al hacer click se abre el drawer
+                        scope.launch {
+                            scaffoldState.drawerState.open()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Menu,
+                            contentDescription = "Menu icon",
+                            tint = if (currentDestination?.route != AppScreens.HomeView.route) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface
+                        )
                     }
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Menu,
-                        contentDescription = "Menu icon",
-                        tint = if (currentDestination?.route != AppScreens.HomeView.route) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface
-                    )
+                } else {
+                    IconButton(onClick = {
+                        //al hacer click se abre el drawer
+                        navController.popBackStack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Menu icon",
+                            tint = MaterialTheme.colors.secondary
+                        )
+                    }
                 }
+
+
+
             },
             /*actions = {
                 IconButton(onClick = { /*TODO*/ }) {//iconos de la parte derecha del TopBar

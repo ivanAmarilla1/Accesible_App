@@ -29,7 +29,7 @@ fun RatingBar(
     rating: Int,
     validateRate: Boolean,
     validateRateError: String,
-    onRatingChange: (Int) ->Unit,
+    onRatingChange: (Int) -> Unit,
 ) {
     var ratingState = rating
 
@@ -42,9 +42,14 @@ fun RatingBar(
     )
 
     Row(
-        modifier = Modifier.fillMaxSize(0.65f)
-        .border(if (validateRate) BorderStroke(2.dp, MaterialTheme.colors.error) else BorderStroke(2.dp, Color.Transparent), shape = RoundedCornerShape(10.dp)
-    ),
+        modifier = Modifier
+            .fillMaxSize(0.65f)
+            .border(
+                if (validateRate) BorderStroke(
+                    2.dp,
+                    MaterialTheme.colors.error
+                ) else BorderStroke(2.dp, Color.Transparent), shape = RoundedCornerShape(10.dp)
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
@@ -87,7 +92,12 @@ fun RatingBar(
 }
 
 @Composable
-fun StarRate(suggestionRate: Int, modifier: Modifier, verticalAlignment: Alignment.Vertical, horizontalAlignment: Arrangement.Horizontal) {
+fun StarRate(
+    rate: Int,
+    modifier: Modifier = Modifier,
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    horizontalAlignment: Arrangement.Horizontal = Arrangement.Start
+) {
     Row(
         modifier = modifier,
         verticalAlignment = verticalAlignment,
@@ -100,7 +110,7 @@ fun StarRate(suggestionRate: Int, modifier: Modifier, verticalAlignment: Alignme
                 modifier = Modifier
                     .width(30.dp)
                     .height(30.dp),
-                tint = if (i <= suggestionRate) Color(0xFFFFD700) else Color(0xFFA2ADB1)
+                tint = if (i <= rate) Color(0xFFFFD700) else Color(0xFFA2ADB1)
             )
         }
     }

@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.model.domain
 
+import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.*
 
@@ -14,7 +15,9 @@ data class Suggestion(
     var suggestionAddedBy: String = "",
     var suggestionReviewedBy: String = "",
     @ServerTimestamp
-    val suggestionAddDate: Date? = null
+    val suggestionAddDate: Date? = null,
+    @DocumentId
+    var suggestionId: String = "",
 ) {
 
 }

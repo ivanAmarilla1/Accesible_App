@@ -46,6 +46,7 @@ class FirestoreRepositoryImpl @Inject constructor(
         for (document in results) {
             val suggestion = document.toObject(Suggestion::class.java)
             suggestion?.let {
+                //suggestion.suggestionId = document.id
                 suggestions.add(it)
             }
         }

@@ -45,7 +45,8 @@ fun MainScreen(
         AppScreens.SuggestionList,
         AppScreens.ItemTwo,
         AppScreens.ItemThree,
-        AppScreens.RandomView
+        AppScreens.RandomView,
+        AppScreens.SuggestionDetail
     )
     Scaffold(
         scaffoldState = scaffoldState,
@@ -64,7 +65,7 @@ fun MainScreen(
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen
     ) {
         AppNavigation(loginViewModel, homeViewModel, suggestionViewModel, reviewSuggestionViewModel, navController, scaffoldState)
-        TopBar(scope, scaffoldState, navController, topBarItems)
+        TopBar(scope, scaffoldState, navController, topBarItems, drawerItems)
     }
 
     BackHandler(enabled = scaffoldState.drawerState.isOpen, onBack = {

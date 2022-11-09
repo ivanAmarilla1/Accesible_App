@@ -24,14 +24,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
+import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel) {
+fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel, navController: NavController) {
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -46,24 +48,36 @@ fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel) {
             .padding(0.dp, 50.dp, 0.dp, 0.dp)
     ) {
         Spacer(modifier = Modifier.height(5.dp))
-        SuggestionList(viewModel, scope)
+        SuggestionList(viewModel) {
+            viewModel.setSelectedSuggestion(it)
+            navController.navigate(AppScreens.SuggestionDetail.route) {
+                launchSingleTop = true
+            }
+        }
     }
 }
 
+
+/*
+**/
+
 @Composable
-fun SuggestionList(viewModel: ReviewSuggestionViewModel, scope: CoroutineScope) {
+fun SuggestionList(
+    viewModel: ReviewSuggestionViewModel,
+    onSuggestionSelected: (Suggestion) -> Unit
+) {
     //Lugares
     val suggestions by viewModel.suggestions.observeAsState(initial = emptyList())
     Column(Modifier.verticalScroll(rememberScrollState())) {
         for (item in suggestions) {
-            Suggestion(item)
+            Suggestion(item) { onSuggestionSelected(item) }
             Spacer(modifier = Modifier.height(5.dp))
         }
     }
 }
 
 @Composable
-private fun Suggestion(item: Suggestion) {
+private fun Suggestion(item: Suggestion, onSuggestionClick: () -> Unit) {
     Column() {
         Row(
             modifier = Modifier
@@ -71,7 +85,7 @@ private fun Suggestion(item: Suggestion) {
                 .fillMaxWidth()
                 .padding(10.dp, 10.dp, 10.dp, 10.dp)
                 .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
-                .clickable { Log.d("Click", "Clickable") }
+                .clickable { onSuggestionClick() }
 
         ) {
             SuggestionImage(item.suggestionType)
@@ -103,7 +117,7 @@ private fun Suggestion(item: Suggestion) {
 @Composable
 private fun PreliminaryRate(suggestionRate: Int) {
     StarRate(
-        suggestionRate = suggestionRate,
+        rate = suggestionRate,
         modifier = Modifier
             .fillMaxSize()
             .padding(end = 8.dp, bottom = 12.dp),

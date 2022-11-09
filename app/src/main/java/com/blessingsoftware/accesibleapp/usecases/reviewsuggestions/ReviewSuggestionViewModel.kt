@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.usecases.reviewsuggestions
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
@@ -16,6 +17,14 @@ class ReviewSuggestionViewModel @Inject constructor(
 ) :
     ViewModel() {
     var suggestions: MutableLiveData<List<Suggestion>> = MutableLiveData<List<Suggestion>>()
+
+    private val _selectedSuggestion = MutableLiveData<Suggestion>()
+    val selectedSuggestion: LiveData<Suggestion> = _selectedSuggestion
+
+    fun setSelectedSuggestion(suggestion: Suggestion){
+        _selectedSuggestion.value = suggestion
+    }
+
 
     suspend fun getSuggestions() {
         suggestions.value = db.getAllSuggestions()
