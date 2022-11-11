@@ -3,26 +3,25 @@ package com.blessingsoftware.accesibleapp.usecases.reviewsuggestions
 import android.content.ContentValues
 import android.util.Log
 import android.view.MotionEvent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.blessingsoftware.accesibleapp.R
+import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -30,32 +29,46 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.launch
 import java.util.*
+
+@Composable
+fun ViewSuggestionDetail(viewModel: ReviewSuggestionViewModel) {
+    ShowSuggestionDetails(viewModel = viewModel)
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ViewSuggestionDetail(viewModel: ReviewSuggestionViewModel) {
-
+private fun ShowSuggestionDetails(viewModel: ReviewSuggestionViewModel) {
+    //Coroutine Scope
+    val scope = rememberCoroutineScope()
+    //Para el callback
+    val aproveSuggestionFlow = viewModel.approveSuggestionFlow.collectAsState()
+    val flag = viewModel.approveSuggestionFlag.observeAsState()
+    //Utils
+    val context = LocalContext.current
     //Scroll
     var columnScrollingEnabled by remember { mutableStateOf(true) }
-
+    //sugerencia seleccionada
     val suggestion = viewModel.selectedSuggestion.observeAsState()
-
+    //posicion para el mapa
     val suggestionPosition = LatLng(
         suggestion.value!!.suggestionLat.toDouble(),
         suggestion.value!!.suggestionLng.toDouble()
     )
+    //posicion de la camara del mapa
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(suggestionPosition, 16f)
     }
-
+    //Para activar y desactivar el scroll cuando se mueve la camara del mapa
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
             columnScrollingEnabled = true
-            Log.d(ContentValues.TAG, "Map camera stopped moving - Enabling column scrolling...")
+            //Log.d(ContentValues.TAG, "Map camera stopped moving - Enabling column scrolling...")
         }
     }
-
+    //Mensaje
+    val message = viewModel.message.observeAsState(initial = "")
 
     Column(
         modifier = Modifier
@@ -97,18 +110,50 @@ fun ViewSuggestionDetail(viewModel: ReviewSuggestionViewModel) {
         SuggestionImages()
         ApproveOrDeclineButtons(
             Modifier,
-            { Log.d("Boton", "Rechazado")}
+            {
+                scope.launch {
+                    viewModel.declineSuggestion(suggestion.value!!)
+                }
+            }
         ) {
-            Log.d("Boton", "Aprobado")
+            scope.launch {
+                viewModel.approveSuggestion(suggestion.value!!)
+            }
         }
 
-
-        // Text(text = " La sugerencia seleccionada es ${suggestion.value!!.suggestionId}")
     }
+    aproveSuggestionFlow.value.let {
+        if (flag.value == true) {
+            when (it) {
+                is Resource.Success -> {
+                    Toast.makeText(context, message.value, Toast.LENGTH_LONG).show()
+                    viewModel.clean()
+                }
+                is Resource.Failure -> {
+                    Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
+                    viewModel.clean()
+                }
+                Resource.Loading -> {
+                    Box(Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    }
+                }
+                else -> {
+                    throw IllegalStateException("Error de al procesar sugerencia")
+                }
+            }
+        }
+    }
+
+
 }
 
 @Composable
-fun ApproveOrDeclineButtons(modifier: Modifier, onDeclineSelected: () -> Unit, onApproveSelected: () -> Unit) {
+fun ApproveOrDeclineButtons(
+    modifier: Modifier,
+    onDeclineSelected: () -> Unit,
+    onApproveSelected: () -> Unit
+) {
     Spacer(modifier = Modifier.height(15.dp))
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         Button(

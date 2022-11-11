@@ -98,7 +98,7 @@ class MakeSuggestionViewModel @Inject constructor(
 
     //Almacenar la sugerencia en la bd firestore
     suspend fun makeSuggestion(name: String, description: String, rate: Int, placetype: String, marker: LatLng, user: String) {
-        val suggestion = Suggestion(name,description, rate, placetype, marker.latitude.toString(), marker.longitude.toString(), false, user)
+        val suggestion = Suggestion(name,description, rate, placetype, marker.latitude.toString(), marker.longitude.toString(), 1, user)
         _flag.value = true
         _suggestionFlow.value = Resource.Loading
         val result = db.storeSuggestion(suggestion)

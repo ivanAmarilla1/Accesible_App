@@ -1,11 +1,22 @@
 package com.blessingsoftware.accesibleapp.model.domain
 
+import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.ServerTimestamp
+import java.util.*
+
 data class Place(
     var placeName: String = "",
     var placeDescription: String = "",
     var placeLat: String = "",
     var placeLng: String = "",
-    //var id: String = ""
+    var placeAddedBy: String = "",
+    var placeReviewedBy: String = "",
+    var placeRate: Int = 0,
+    var placeType: String = "",
+    @ServerTimestamp
+    val placeAddDate: Date? = null,
+    @DocumentId
+    var placeId: String = "",
 ) {
 
 }

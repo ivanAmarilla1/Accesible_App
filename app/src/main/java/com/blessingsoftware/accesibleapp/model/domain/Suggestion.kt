@@ -11,7 +11,7 @@ data class Suggestion(
     var suggestionType: String = "",
     var suggestionLat: String = "",
     var suggestionLng: String = "",
-    var suggestionApproveStatus: Boolean = false,
+    var suggestionApproveStatus: Int = 1,//1= No revisado, 2 = Aprobado, 3 = Rechazado
     var suggestionAddedBy: String = "",
     var suggestionReviewedBy: String = "",
     @ServerTimestamp

@@ -2,6 +2,7 @@ package com.blessingsoftware.accesibleapp.usecases.reviewsuggestions
 
 import android.util.Log
 import android.view.MotionEvent
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,23 +10,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.R
+import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
@@ -34,14 +35,44 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel, navController: NavController) {
-    val scope = rememberCoroutineScope()
 
+    //Corrutina que hace la consulta para obtener las sugerencias
+    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         scope.launch {
             viewModel.getSuggestions()
         }
     }
 
+    val getSuggestionFlow = viewModel.getSuggestionFlow.collectAsState()
+    getSuggestionFlow.value.let {
+        Log.d("Valor", "Entrando en flow")
+        when (it) {
+            is Resource.Success -> {
+                ShowAllSuggestions(viewModel, navController)
+            }
+            is Resource.Failure -> {
+                val context = LocalContext.current
+                Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
+            }
+            Resource.Loading -> {
+                Log.d("Flow", "Entro en Loading")
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                ) {
+                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                }
+            }
+            else -> {
+                throw IllegalStateException("Error al obtener Sugerencias")
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShowAllSuggestions(viewModel: ReviewSuggestionViewModel, navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -57,23 +88,51 @@ fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel, navController: NavC
     }
 }
 
-
-/*
-**/
-
 @Composable
 fun SuggestionList(
     viewModel: ReviewSuggestionViewModel,
     onSuggestionSelected: (Suggestion) -> Unit
 ) {
+    val unReviewedSuggestion = ArrayList<Suggestion>()
+    val approvedSuggestion = ArrayList<Suggestion>()
+    val declinedSuggestion = ArrayList<Suggestion>()
     //Lugares
     val suggestions by viewModel.suggestions.observeAsState(initial = emptyList())
-    Column(Modifier.verticalScroll(rememberScrollState())) {
-        for (item in suggestions) {
-            Suggestion(item) { onSuggestionSelected(item) }
-            Spacer(modifier = Modifier.height(5.dp))
+    //Discrimina el tipo de sugerencia, si ya ha sido revisada, aprobada o rechazada
+    for (item in suggestions) {
+        if (item.suggestionApproveStatus == 1) {
+            unReviewedSuggestion.add(item)
+        } else if (item.suggestionApproveStatus == 2) {
+            approvedSuggestion.add(item)
+        } else if (item.suggestionApproveStatus == 3) {
+            declinedSuggestion.add(item)
         }
     }
+    //si no hay sugerencias para revisar se muestra un mensaje, si no se muestran las sugerencias
+    if (unReviewedSuggestion.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+
+        ) {
+            Text(
+                text = "No hay sugerencias",
+                style = MaterialTheme.typography.h6,
+                textAlign = TextAlign.Center
+            )
+        }
+    } else {
+        Column(Modifier.verticalScroll(rememberScrollState())) {
+            for (item in unReviewedSuggestion) {
+                Suggestion(item) { onSuggestionSelected(item) }
+                Spacer(modifier = Modifier.height(5.dp))
+            }
+        }
+    }
+
+
 }
 
 @Composable

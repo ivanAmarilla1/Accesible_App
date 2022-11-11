@@ -24,16 +24,45 @@ class FirestoreRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun storePlace(place: Place): Resource<String> {
+        return try {
+            db.collection("places").add(place).await()
+            Resource.Success("Success")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
     override suspend fun storeSuggestion(
         suggestion: Suggestion
     ): Resource<String> {
         return try {
             db.collection("suggestions").add(suggestion).await()
             Resource.Success("Success")
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             Resource.Failure(e)
         }
+    }
+
+    override suspend fun updateSuggestion(
+        suggestion: Suggestion,
+        reviewer: String
+    ): Resource<String> {
+        return try {
+            db.collection("suggestions").document(suggestion.suggestionId).update(
+                hashMapOf(
+                    "suggestionApproveStatus" to suggestion.suggestionApproveStatus,
+                    "suggestionReviewedBy" to reviewer,
+                ) as Map<String, Any>
+            ).await()
+            Resource.Success("Success")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+
     }
 
     override suspend fun getAllSuggestions(): ArrayList<Suggestion> {

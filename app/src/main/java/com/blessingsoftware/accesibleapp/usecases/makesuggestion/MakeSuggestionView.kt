@@ -220,8 +220,6 @@ fun MakeSuggestion(
                 }
             }
         }
-
-
     }
     SuggestionBackHandler(suggestionViewModel, navController, scaffoldState, scope)
 }
