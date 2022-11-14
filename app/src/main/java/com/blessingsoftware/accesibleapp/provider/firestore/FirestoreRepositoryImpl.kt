@@ -5,6 +5,7 @@ import android.util.Log
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
+import com.blessingsoftware.accesibleapp.model.domain.User
 import com.blessingsoftware.accesibleapp.util.await
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,7 +20,8 @@ class FirestoreRepositoryImpl @Inject constructor(
             hashMapOf(
                 "name" to name,
                 "provider" to provider,
-                "timestamp" to FieldValue.serverTimestamp()
+                "admin" to false,
+                "added" to FieldValue.serverTimestamp()
             )
         )
     }
@@ -100,6 +102,11 @@ class FirestoreRepositoryImpl @Inject constructor(
             }
         }*/
     }
+/*
+    override suspend fun getUser(id: String): User {
+        val ref = db.collection("users")
+
+    }*/
 
 
     override fun getAllPlaces(): ArrayList<Place> {

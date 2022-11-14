@@ -26,18 +26,26 @@ class ReviewSuggestionViewModel @Inject constructor(
 
     private val _selectedSuggestion = MutableLiveData<Suggestion>()
     val selectedSuggestion: LiveData<Suggestion> = _selectedSuggestion
+
     //Para el callback de traer todas las sugerencias
     private val _getSuggestionFlow = MutableStateFlow<Resource<String>?>(null)
     val getSuggestionFlow: StateFlow<Resource<String>?> = _getSuggestionFlow
+
     //Para el callback de aproba/rechazar sugerencia
     private val _approveSuggestionFlow = MutableStateFlow<Resource<String>?>(null)
     val approveSuggestionFlow: StateFlow<Resource<String>?> = _approveSuggestionFlow
+
     //Bandera
     private val _approveSuggestionFlag = MutableLiveData<Boolean>()
     val approveSuggestionFlag: LiveData<Boolean> = _approveSuggestionFlag
+
     //Mensaje para el toast
     private val _message = MutableLiveData<String>()
     val message: LiveData<String> = _message
+
+    //Dialg de probrar o rechazar
+    private val _showDialog = MutableLiveData<Boolean>()
+    val showDialog: LiveData<Boolean> = _showDialog
 
     init {
         _getSuggestionFlow.value = Resource.Loading
@@ -45,6 +53,7 @@ class ReviewSuggestionViewModel @Inject constructor(
 
     fun setSelectedSuggestion(suggestion: Suggestion) {
         _selectedSuggestion.value = suggestion
+        _showDialog.value = false
     }
 
 
@@ -54,46 +63,63 @@ class ReviewSuggestionViewModel @Inject constructor(
         suggestions.value = db.getAllSuggestions()
         _getSuggestionFlow.value = Resource.Success("Success")
     }
+
     //TODO Evitar que se puedan tocar de nuevo los botones de aceptar o rechazar cuando ya se acepto/rechazo la solicitud
     suspend fun approveSuggestion(suggestion: Suggestion) {
-        suggestion.suggestionApproveStatus = 2
-        val place = Place(
-            suggestion.suggestionName,
-            suggestion.suggestionDescription,
-            suggestion.suggestionLat,
-            suggestion.suggestionLng,
-            suggestion.suggestionAddedBy,
-            repository.currentUser!!.uid,
-            suggestion.suggestionRate,
-            suggestion.suggestionType
-        )
-        _message.value = "Sugerencia aprobada correctamente"
-        _approveSuggestionFlag.value = true
-        _approveSuggestionFlow.value = Resource.Loading
-        val storePlace = db.storePlace(place)
-        if (storePlace == Resource.Success("Success")){
-            val updateSuggestion = db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
-            _approveSuggestionFlow.value = updateSuggestion
-            Log.d("Hola", _approveSuggestionFlow.value.toString())
-        } else {
-            _approveSuggestionFlow.value = storePlace
+        if (suggestion.suggestionApproveStatus == 1) {
+            setShowDialogFalse()
+            suggestion.suggestionApproveStatus = 2
+            val place = Place(
+                suggestion.suggestionName,
+                suggestion.suggestionDescription,
+                suggestion.suggestionLat,
+                suggestion.suggestionLng,
+                suggestion.suggestionAddedBy,
+                repository.currentUser!!.uid,
+                suggestion.suggestionRate,
+                suggestion.suggestionType
+            )
+            _message.value = "Sugerencia aprobada correctamente"
+            _approveSuggestionFlag.value = true
+            _approveSuggestionFlow.value = Resource.Loading
+            val storePlace = db.storePlace(place)
+            if (storePlace == Resource.Success("Success")) {
+                val updateSuggestion =
+                    db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
+                _approveSuggestionFlow.value = updateSuggestion
+                Log.d("Hola", _approveSuggestionFlow.value.toString())
+            } else {
+                _approveSuggestionFlow.value = storePlace
+            }
         }
-
 
     }
 
     suspend fun declineSuggestion(suggestion: Suggestion) {
-        _message.value = "Sugerencia rechazada correctamente"
-        _approveSuggestionFlag.value = true
-        _approveSuggestionFlow.value = Resource.Loading
-        suggestion.suggestionApproveStatus = 3
-        val updateSuggestion = db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
-        _approveSuggestionFlow.value = updateSuggestion
+        if (suggestion.suggestionApproveStatus == 1) {
+            setShowDialogFalse()
+            _message.value = "Sugerencia rechazada correctamente"
+            _approveSuggestionFlag.value = true
+            _approveSuggestionFlow.value = Resource.Loading
+            suggestion.suggestionApproveStatus = 3
+            val updateSuggestion =
+                db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
+            _approveSuggestionFlow.value = updateSuggestion
+        }
     }
 
-    fun clean(){
+    fun clean() {
         _approveSuggestionFlag.value = false
         _message.value = ""
+        _showDialog.value = false
+    }
+
+    fun setShowDialogTrue() {
+        _showDialog.value = true
+    }
+
+    fun setShowDialogFalse() {
+        _showDialog.value = false
     }
 
 

@@ -5,9 +5,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.blessingsoftware.accesibleapp.model.domain.LocationLiveData
 import com.blessingsoftware.accesibleapp.model.domain.Place
-import com.blessingsoftware.accesibleapp.model.domain.User
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

@@ -12,16 +12,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.model.domain.Suggestion
+import com.blessingsoftware.accesibleapp.ui.composables.CustomDialog
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -29,6 +35,7 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -45,6 +52,9 @@ private fun ShowSuggestionDetails(viewModel: ReviewSuggestionViewModel) {
     //Para el callback
     val aproveSuggestionFlow = viewModel.approveSuggestionFlow.collectAsState()
     val flag = viewModel.approveSuggestionFlag.observeAsState()
+    //Para el dialog
+    val showDialog = viewModel.showDialog.observeAsState()
+    var approveOrDeclineDialog by rememberSaveable { mutableStateOf(false) }
     //Utils
     val context = LocalContext.current
     //Scroll
@@ -108,18 +118,30 @@ private fun ShowSuggestionDetails(viewModel: ReviewSuggestionViewModel) {
                 )
         )
         SuggestionImages()
-        ApproveOrDeclineButtons(
-            Modifier,
-            {
+        SuggestionStatus(suggestion.value!!.suggestionApproveStatus)
+        if (suggestion.value!!.suggestionApproveStatus == 1) {
+            ApproveOrDeclineButtons(
+                Modifier,
+                {
+                    scope.launch {
+                        //Cuando se da click en rechazar
+                        approveOrDeclineDialog = false
+                        viewModel.setShowDialogTrue()
+
+                    }
+                }
+            ) {
                 scope.launch {
-                    viewModel.declineSuggestion(suggestion.value!!)
+                    //Cuando se da click en Aprobar
+                    approveOrDeclineDialog = true
+                    viewModel.setShowDialogTrue()
+                    //viewModel.approveSuggestion(suggestion.value!!)
                 }
             }
-        ) {
-            scope.launch {
-                viewModel.approveSuggestion(suggestion.value!!)
-            }
         }
+
+
+        SuggestionDialog(viewModel, scope, showDialog.value!!, approveOrDeclineDialog, suggestion)
 
     }
     aproveSuggestionFlow.value.let {
@@ -146,6 +168,54 @@ private fun ShowSuggestionDetails(viewModel: ReviewSuggestionViewModel) {
     }
 
 
+}
+
+
+@Composable
+fun SuggestionDialog(
+    viewModel: ReviewSuggestionViewModel,
+    scope: CoroutineScope,
+    showDialog: Boolean?,
+    approveOrDecline: Boolean,
+    suggestion: State<Suggestion?>
+) {
+    val buttonText: String
+    val title: String
+    val text: String
+    val image: Painter
+
+    if (approveOrDecline) {//si es true es aprobar
+        buttonText = "Aprobar"
+        title = "Aprobar Sugerencia"
+        text = "Esta seguro de que desea aprobar esta sugerencia?"
+        image = painterResource(id = R.drawable.checked)
+    } else {//si es falso es rechazar
+        buttonText = "Rechazar"
+        title = "Rechazar Sugerencia"
+        text = "Esta seguro de que desea rechazar esta sugerencia?"
+        image = painterResource(id = R.drawable.close)
+    }
+
+
+    if (showDialog == true) {
+        CustomDialog(
+            buttonText = buttonText,
+            tittle = title,
+            text = text,
+            image = image,
+            onDismissRequest = { viewModel.setShowDialogFalse() })
+        {
+            if (approveOrDecline) {//Si es true es aprobar
+                scope.launch {
+                    viewModel.approveSuggestion(suggestion.value!!)
+                }
+            } else {//si es false es rechazar
+                scope.launch {
+                    viewModel.declineSuggestion(suggestion.value!!)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -193,6 +263,27 @@ fun ApproveOrDeclineButtons(
 }
 
 @Composable
+fun SuggestionStatus(suggestionStatus: Int) {
+
+    val status = when (suggestionStatus) {
+        1 -> "Pendiente"
+        2 -> "Aprobado"
+        else -> "Rechazado"
+    }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
+            .padding(10.dp, 10.dp, 10.dp, 10.dp)
+    ) {
+        Text(text = "Estado de la sugerencia", style = MaterialTheme.typography.body1)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(text = status, style = MaterialTheme.typography.h5, fontSize = 20.sp)
+    }
+    Spacer(modifier = Modifier.height(15.dp))
+}
+
+@Composable
 private fun SuggestionImages() {
 
 }
@@ -214,6 +305,7 @@ private fun SuggestionLocation(
             Marker(position = LatLng(suggestionLat, suggestionLng))
         }
     }
+    Spacer(modifier = Modifier.height(15.dp))
 }
 
 @Composable
@@ -310,3 +402,31 @@ private fun SuggestionName(suggestionName: String) {
     }
     Spacer(modifier = Modifier.height(15.dp))
 }
+
+
+/*
+* AlertDialog(
+            onDismissRequest = { viewModel.setShowDialogFalse() },
+            modifier = Modifier.background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp)),
+            confirmButton = {
+                TextButton(onClick = {
+                    if (approveOrDecline) {
+                        scope.launch {
+                            viewModel.approveSuggestion(suggestion.value!!)
+                        }
+                    } else {
+                        scope.launch {
+                            viewModel.declineSuggestion(suggestion.value!!)
+                        }
+                    }
+                }) {
+                    Text(text = buttonText)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.setShowDialogFalse() }) {
+                    Text(text = "Cancelar")
+                }
+            },
+            title = { Text(text = title) },
+            text = { Text(text = text) })*/

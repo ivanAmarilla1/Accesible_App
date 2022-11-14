@@ -56,6 +56,9 @@ class MakeSuggestionViewModel @Inject constructor(
     //Bandera para entrar a las funciones de de los callbacks
     private val _flag = MutableLiveData<Boolean>()
     val flag: LiveData<Boolean> = _flag
+    //Dialg de probrar o rechazar
+    private val _showDialog = MutableLiveData<Boolean>()
+    val showDialog: LiveData<Boolean> = _showDialog
     //Control de permisos (creo que no se usa ahora)
     private var _locationPermissionGranted = MutableLiveData(false)
     var locationPermissionGranted : LiveData<Boolean> = _locationPermissionGranted
@@ -76,6 +79,7 @@ class MakeSuggestionViewModel @Inject constructor(
         _validateType.value = true
         _validateRate.value = true
         _isGPSOn.value = false
+        _showDialog.value = false
         //Se llama a la ubicacion del usuario
         startLocationUpdates()
     }
@@ -98,6 +102,7 @@ class MakeSuggestionViewModel @Inject constructor(
 
     //Almacenar la sugerencia en la bd firestore
     suspend fun makeSuggestion(name: String, description: String, rate: Int, placetype: String, marker: LatLng, user: String) {
+        _showDialog.value = false
         val suggestion = Suggestion(name,description, rate, placetype, marker.latitude.toString(), marker.longitude.toString(), 1, user)
         _flag.value = true
         _suggestionFlow.value = Resource.Loading
@@ -115,6 +120,7 @@ class MakeSuggestionViewModel @Inject constructor(
         _validateType.value = true
         _validateRate.value = true
         _flag.value = false
+        _showDialog.value = false
 
     }
     //Colocar el marcador en el mapa con el Livedata
@@ -122,7 +128,6 @@ class MakeSuggestionViewModel @Inject constructor(
         if (markerLocation != null) {
             _markerLocation.value = markerLocation!!
         }
-
     }
 
     fun setInitialMarker(userLocation: LatLng?) {
@@ -133,10 +138,6 @@ class MakeSuggestionViewModel @Inject constructor(
         }
 
     }
-
-
-
-   // open fun isProviderEnabled(provider: String): Boolean {}
 
     fun setRating(rate: Int) {
         _rating.value = rate
@@ -149,6 +150,14 @@ class MakeSuggestionViewModel @Inject constructor(
 
     fun setGPSStatus(status: Boolean) {
         _isGPSOn.value = status
+    }
+
+
+    fun setShowDialogTrue() {
+        _showDialog.value = true
+    }
+    fun setShowDialogFalse() {
+        _showDialog.value = false
     }
 
 }

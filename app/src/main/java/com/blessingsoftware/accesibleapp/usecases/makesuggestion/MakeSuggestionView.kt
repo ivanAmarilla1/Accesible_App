@@ -31,6 +31,7 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -73,7 +74,7 @@ fun MakeSuggestion(
     //Posicion inicial de la vista del mapa
     var cam = LatLng(-25.28269856303251, -57.60271740849931)
     var cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(cam, 10f)
+        position = CameraPosition.fromLatLngZoom(cam, 12f)
     }
     userLocation?.let {
         cam = userLocation as LatLng
@@ -110,6 +111,9 @@ fun MakeSuggestion(
     val validateDescriptionError = stringResource(R.string.validate_suggestion_description)
     val validateTypeError = stringResource(R.string.validate_suggestion_type)
     val validateRateError = stringResource(R.string.validate_suggestion_rate)
+
+    //Dialog
+    val showDialog = suggestionViewModel.showDialog.observeAsState()
 
     Box(
         modifier = Modifier
@@ -167,7 +171,8 @@ fun MakeSuggestion(
                 cameraPositionState = cameraPositionState,
                 userLocation,
                 {
-                    cameraPositionState.position = CameraPosition.fromLatLngZoom(cam, 10f)
+                    val zoom: Float = if (userLocation == null) 12f else 16f
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(cam, zoom)
                     suggestionViewModel.setMarker(userLocation)
 
                 },
@@ -187,15 +192,25 @@ fun MakeSuggestion(
                     description,
                     userRating,
                     placeType,
-                    userMarker.value!!,
-                    authViewModel.currentUser?.email.toString(),
+                    userMarker.value,
                     suggestionViewModel,
                     context,
-                    scope
                 )
                 columnScrollingEnabled = true
             }
         }
+
+        SendSuggestionDialog(
+            suggestionViewModel,
+            scope,
+            name,
+            description,
+            userRating,
+            placeType,
+            userMarker.value,
+            authViewModel.currentUser?.email.toString(),
+            showDialog.value
+        )
     }
 
     suggestionFlow.value.let {
@@ -222,6 +237,39 @@ fun MakeSuggestion(
         }
     }
     SuggestionBackHandler(suggestionViewModel, navController, scaffoldState, scope)
+}
+
+@Composable
+fun SendSuggestionDialog(
+    viewModel: MakeSuggestionViewModel,
+    scope: CoroutineScope,
+    name: String,
+    description: String,
+    rate: Int,
+    placeType: String,
+    marker: LatLng?,
+    user: String,
+    showDialog: Boolean?,
+) {
+    val buttonText = "Enviar"
+    val title = "Enviar Sugerencia"
+    val text =
+        "La sugerencia será evaluada por un administrador antes de incluir el lugar en la aplicación"
+    val image = painterResource(id = R.drawable.send)
+    if (showDialog == true) {
+        CustomDialog(
+            buttonText = buttonText,
+            tittle = title,
+            text = text,
+            image = image,
+            onDismissRequest = { viewModel.setShowDialogFalse() }) {
+            scope.launch {
+                viewModel.makeSuggestion(name, description, rate, placeType, marker!!, user)
+            }
+        }
+    }
+
+
 }
 
 @Composable
@@ -374,14 +422,13 @@ fun PlaceSelect(
 
                 ) {
                     if (userMarker != null) {
-                        Log.d("Marker", "usermarker no es nulo $userMarker")
+                        //Log.d("Marker", "usermarker no es nulo $userMarker")
                         Marker(
                             position = userMarker,
                             title = "Ubicacion de Sugerencia",
                             snippet = "Seleccione la ubicacion exacta",
                         )
                     }
-
                 }
                 if (!isMapLoaded) {
                     androidx.compose.animation.AnimatedVisibility(
@@ -412,7 +459,7 @@ fun PlaceSelect(
                 )
             ) {
                 Text(
-                    text = if (userLocation != null) stringResource(R.string.my_location) else "Reiniciar cámara",
+                    text = if (userLocation != null) stringResource(R.string.my_location) else "Reiniciar",
                     color = MaterialTheme.colors.onBackground
                 )
                 Icon(
@@ -448,26 +495,26 @@ private fun SendSuggestionButton(onSendSelected: () -> Unit) {
     }
 }
 
-
 private fun sendSuggestionFunction(
     name: String,
     description: String,
     rate: Int,
     placeType: String,
-    marker: LatLng,
-    user: String,
+    userMarker: LatLng?,
     viewModel: MakeSuggestionViewModel,
     context: Context,
-    scope: CoroutineScope
 ) {
 
-    if (viewModel.validateDataMakeSuggestion(name, description, placeType, rate)) {
-        scope.launch {
-            viewModel.makeSuggestion(name, description, rate, placeType, marker, user)
+    if (userMarker != null) {
+        if (viewModel.validateDataMakeSuggestion(name, description, placeType, rate)) {
+            viewModel.setShowDialogTrue()
+        } else {
+            Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG).show()
         }
     } else {
-        Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "Seleccione una ubicación en el mapa", Toast.LENGTH_LONG).show()
     }
+
 }
 
 @Composable

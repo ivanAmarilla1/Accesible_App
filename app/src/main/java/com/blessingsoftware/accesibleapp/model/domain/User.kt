@@ -1,17 +1,20 @@
 package com.blessingsoftware.accesibleapp.model.domain
 
+import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.ServerTimestamp
 
 
 data class User(
-    var email: String,
-    var password: String,
-    var confirmPassword: String,
-    @ServerTimestamp
+    var admin: Boolean,
     var name: String,
+    var provider: String,
+    @ServerTimestamp
+    var added: String,
+    @DocumentId
+    var userId: String = "",
 
     ) {
 
-    constructor(): this("","","","")
+    constructor(): this(false,"","","")
 
 }
