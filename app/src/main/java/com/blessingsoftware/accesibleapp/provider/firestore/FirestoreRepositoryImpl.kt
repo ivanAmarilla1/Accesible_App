@@ -1,6 +1,5 @@
 package com.blessingsoftware.accesibleapp.provider.firestore
 
-import android.content.ContentValues.TAG
 import android.util.Log
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
@@ -9,15 +8,17 @@ import com.blessingsoftware.accesibleapp.model.domain.User
 import com.blessingsoftware.accesibleapp.util.await
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObject
 import javax.inject.Inject
 
 class FirestoreRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore
 ) : FirestoreRepository {
 
-    override fun storeUser(email: String, name: String, provider: String) {
-        db.collection("users").document(email).set(
+    override fun storeUser(uid: String, email: String, name: String, provider: String) {
+        db.collection("users").document(uid).set(
             hashMapOf(
+                "email" to email,
                 "name" to name,
                 "provider" to provider,
                 "admin" to false,
@@ -102,11 +103,14 @@ class FirestoreRepositoryImpl @Inject constructor(
             }
         }*/
     }
-/*
-    override suspend fun getUser(id: String): User {
-        val ref = db.collection("users")
 
-    }*/
+    override suspend fun checkUser(id: String): User? {
+        val docRef = db.collection("users").document(id)
+        val document = docRef.get().await()
+        //Log.d("Usuario bd", document.toString())
+        return document.toObject<User>()
+
+    }
 
 
     override fun getAllPlaces(): ArrayList<Place> {

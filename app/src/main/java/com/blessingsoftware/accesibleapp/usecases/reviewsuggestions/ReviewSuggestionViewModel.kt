@@ -121,6 +121,4 @@ class ReviewSuggestionViewModel @Inject constructor(
     fun setShowDialogFalse() {
         _showDialog.value = false
     }
-
-
 }

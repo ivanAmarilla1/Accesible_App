@@ -26,12 +26,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepository, private val db: FirestoreRepository) :
+class AuthViewModel @Inject constructor(
+    private val repository: FirebaseAuthRepository,
+    private val db: FirestoreRepository
+) :
     ViewModel() {
 
     //TODO Encapsular datos de usuario en un data class
     private val _user = MutableLiveData<User>()
     val user: LiveData<User> = _user
+
     //Datos de usuario
     private val _email = MutableLiveData<String>()
     private val _password = MutableLiveData<String>()
@@ -103,26 +107,30 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
         _loginFlow.value = result
     }
 
-    //funcion de registro
+    //funcion de registro con email y password
     fun signUp(name: String, email: String, password: String) = viewModelScope.launch {
         _flag.value = true
         _signUpFlow.value = Resource.Loading
         val result = repository.signUp(name, email, password)
         _signUpFlow.value = result
+
         //guardar al usuario en la db
-        db.storeUser(email, name, "EMAIL")
+        storeFirestoreUser(email, name, "EMAIL")
     }
 
     //funcion de ingreso con Google
-    fun signUpWithGoogle(credential: AuthCredential, userEmail: String, userName: String, source: Int) = viewModelScope.launch {
+    fun signUpWithGoogle(
+        credential: AuthCredential,
+        userEmail: String,
+        userName: String,
+        source: Int
+    ) = viewModelScope.launch {
         _flag.value = true
-        when (source) {//variable que indica de que pantalla viene la solicitud, para modificaar el flow correspondiente
+        when (source) {//variable que indica de que pantalla viene la solicitud, para modificar el flow correspondiente
             1 -> {
                 _loginFlow.value = Resource.Loading
                 val result = repository.signUpWithGoogle(credential)
                 _loginFlow.value = result
-                //guardar al usuario en la db
-                db.storeUser(userEmail.toString(), userName.toString(), "GOOGLE")
             }
             2 -> {
                 _signUpFlow.value = Resource.Loading
@@ -133,7 +141,22 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
                 Log.d("Error", "error de la fuente de informacion de inicio de sesion")
             }
         }
+        //guardar al usuario en la db
+        storeFirestoreUser(userEmail, userName, "GOOGLE")
+    }
 
+    private suspend fun storeFirestoreUser(email: String, name: String, provider: String) {
+
+        val check = repository.currentUser?.let { db.checkUser(it.uid) } //comprueba si el usuario ya esta almacenado en la db
+
+        if (check != null) {
+            Log.d("Check", "Este usuario ya esta registrado en la bd firestore")
+        } else {// si no esta almacenado lo guarda
+            if (repository.currentUser != null) {
+                val uid = repository.currentUser!!.uid
+                db.storeUser(uid, email, name, provider)
+            }
+        }
     }
 
     //funcion de cierre de sesion
@@ -214,10 +237,11 @@ class AuthViewModel @Inject constructor(private val repository: FirebaseAuthRepo
 
 
     //Mostrar u ocultar la contraseña
-    fun  onPasswordVisibilityChanges(passwordVisibility: Boolean) {
+    fun onPasswordVisibilityChanges(passwordVisibility: Boolean) {
         _passwordVisibility.value = passwordVisibility
     }
-    fun  onConfirmPasswordVisibilityChanges(confirmPasswordVisibility: Boolean) {
+
+    fun onConfirmPasswordVisibilityChanges(confirmPasswordVisibility: Boolean) {
         _confirmPasswordVisibility.value = confirmPasswordVisibility
     }
 
