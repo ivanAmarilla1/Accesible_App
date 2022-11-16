@@ -71,7 +71,6 @@ fun MainMap(viewModel: HomeViewModel, onMarkerClicked: (Place) -> Boolean) {
     //Composable de Google Maps
     GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPosition) {
         places.forEach { place ->
-            Log.d("NombreLugar", place.placeName)
             if (place.placeLat.isNotEmpty() && place.placeLng.isNotEmpty()) {
                 val placePosition =
                     LatLng(place.placeLat.toDouble(), place.placeLng.toDouble())

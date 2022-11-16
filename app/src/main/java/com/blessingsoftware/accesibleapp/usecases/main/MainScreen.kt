@@ -1,9 +1,12 @@
 package com.blessingsoftware.accesibleapp.usecases.main
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
@@ -14,7 +17,9 @@ import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppNavigation
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
+import com.blessingsoftware.accesibleapp.usecases.navigation.HOME_ROUTE
 import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ReviewSuggestionViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -27,18 +32,33 @@ fun MainScreen(
     reviewSuggestionViewModel: ReviewSuggestionViewModel,
     navController: NavHostController
 ) {
+    val scope = rememberCoroutineScope()
+    //Checkea si el usuario es administrador
+    val isAdmin = loginViewModel.isUserAdmin.observeAsState()
+
+
     val scaffoldState = rememberScaffoldState(
         drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     )
-    val scope = rememberCoroutineScope()
+
     val bottomNavigationItems = listOf(AppScreens.HomeView, AppScreens.RandomView)
-    val drawerItems = listOf(
-        AppScreens.HomeView,
-        AppScreens.MakeSuggestion,
-        AppScreens.SuggestionList,
-        AppScreens.ItemTwo,
-        AppScreens.ItemThree
-    )
+    val drawerItems = if (isAdmin.value == true) {
+        listOf(
+            AppScreens.HomeView,
+            AppScreens.MakeSuggestion,
+            AppScreens.SuggestionList,
+            AppScreens.ItemTwo,
+            AppScreens.ItemThree,
+        )
+    } else {
+        listOf(
+            AppScreens.HomeView,
+            AppScreens.MakeSuggestion,
+            AppScreens.ItemTwo,
+            AppScreens.ItemThree,
+        )
+    }
+
     val topBarItems = listOf(
         AppScreens.HomeView,
         AppScreens.MakeSuggestion,
@@ -64,7 +84,14 @@ fun MainScreen(
         drawerBackgroundColor = MaterialTheme.colors.background,
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen
     ) {
-        AppNavigation(loginViewModel, homeViewModel, suggestionViewModel, reviewSuggestionViewModel, navController, scaffoldState)
+        AppNavigation(
+            loginViewModel,
+            homeViewModel,
+            suggestionViewModel,
+            reviewSuggestionViewModel,
+            navController,
+            scaffoldState
+        )
         TopBar(scope, scaffoldState, navController, topBarItems, drawerItems)
     }
 

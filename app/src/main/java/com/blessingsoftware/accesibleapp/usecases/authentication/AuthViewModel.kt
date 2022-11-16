@@ -3,8 +3,6 @@ package com.blessingsoftware.accesibleapp.usecases.authentication
 import android.content.Context
 import android.util.Log
 import android.util.Patterns
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,10 +10,11 @@ import androidx.lifecycle.viewModelScope
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.User
+import com.blessingsoftware.accesibleapp.model.session.Constants.APP_FIRST_RUN
 import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
+import com.blessingsoftware.accesibleapp.provider.userDatastore.DataStoreRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
@@ -23,19 +22,16 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: FirebaseAuthRepository,
-    private val db: FirestoreRepository
+    private val db: FirestoreRepository,
+    private val dataStoreRepository: DataStoreRepository
 ) :
     ViewModel() {
-
-    //TODO Encapsular datos de usuario en un data class
-    private val _user = MutableLiveData<User>()
-    val user: LiveData<User> = _user
-
     //Datos de usuario
     private val _email = MutableLiveData<String>()
     private val _password = MutableLiveData<String>()
@@ -68,6 +64,10 @@ class AuthViewModel @Inject constructor(
     private val _flag = MutableLiveData<Boolean>()
     val flag: LiveData<Boolean> = _flag
 
+    //Si el usuario es admin
+    private val _isUserAdmin = MutableLiveData<Boolean>()
+    val isUserAdmin: LiveData<Boolean> = _isUserAdmin
+
     //flujo de login, variable que recupera el usuario al iniciar sesion
     private val _loginFlow = MutableStateFlow<Resource<FirebaseUser>?>(null)
     val loginFlow: StateFlow<Resource<FirebaseUser>?> = _loginFlow
@@ -76,12 +76,41 @@ class AuthViewModel @Inject constructor(
     private val _signUpFlow = MutableStateFlow<Resource<FirebaseUser>?>(null)
     val signUpFlow: StateFlow<Resource<FirebaseUser>?> = _signUpFlow
 
-
     //Recupera usuario actual del servidor de firebase
     val currentUser: FirebaseUser?
         get() = repository.currentUser
 
+    //Store user preferences. Para conocer si es la primera vez que se ejecuta la app mediante el datastore
+    private fun setPreference(key: String, value: Boolean) = runBlocking {
+        dataStoreRepository.putBoolean(key, value)
+    }
+
+    private fun getPreference(key: String): Boolean? = runBlocking {
+        dataStoreRepository.getBoolean(key)
+    }
+
+    fun clearPreferences(key: String) = runBlocking {
+        dataStoreRepository.clearPreferences(key)
+    }
+
+    //Comprueba si es el primer inicio
+    private val _firstStart = MutableLiveData<Boolean>()
+    //val firstStart: LiveData<Boolean> = _firstStart
+
+
     init {
+        if (getPreference(APP_FIRST_RUN) == null) {
+            setPreference(APP_FIRST_RUN, true)
+        }
+        if (getPreference(APP_FIRST_RUN) == true) {
+            Log.d("Inicio", "Es el primer inicio ")
+            _firstStart.value = true
+            setPreference(APP_FIRST_RUN, false)
+        } else if (getPreference(APP_FIRST_RUN) == false) {
+            _firstStart.value = false
+            Log.d("Inicio", "NO es el primer inicio ")
+        }
+
         //datos de validacion porque si no me da null pointer exception
         _validateEmail.value = true
         _validatePassword.value = true
@@ -90,12 +119,18 @@ class AuthViewModel @Inject constructor(
         _validatePasswordsEquals.value = true
         _passwordVisibility.value = false
         _confirmPasswordVisibility.value = false
+        _isUserAdmin.value = false
 
         //al iniciar la app se recupera la sesion del usuario registrado
-        if (repository.currentUser != null) {
-            _flag.value = true
-            Log.d("currentUser", currentUser?.displayName.toString())
-            _loginFlow.value = Resource.Success(repository.currentUser!!)
+        if (_firstStart.value == true) {//Para el primer inicio de la app el login siempre es null
+            _loginFlow.value = null
+        } else {//Sino se recupera la sesion iniciada si la hay
+            if (currentUser != null) {
+                _flag.value = true
+                _loginFlow.value = Resource.Success(repository.currentUser!!)
+            } else {
+                _loginFlow.value = null
+            }
         }
     }
 
@@ -146,9 +181,8 @@ class AuthViewModel @Inject constructor(
     }
 
     private suspend fun storeFirestoreUser(email: String, name: String, provider: String) {
-
-        val check = repository.currentUser?.let { db.checkUser(it.uid) } //comprueba si el usuario ya esta almacenado en la db
-
+        val check = repository.currentUser?.let { db.checkUser(it.uid) }
+        //comprueba si el usuario ya esta almacenado en la db
         if (check != null) {
             Log.d("Check", "Este usuario ya esta registrado en la bd firestore")
         } else {// si no esta almacenado lo guarda
@@ -159,11 +193,15 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    suspend fun checkIfUserIsAdmin() {
+        val user = repository.currentUser?.let { db.checkUser(it.uid) }
+        _isUserAdmin.value = user?.admin ?: false
+    }
+
     //funcion de cierre de sesion
     fun logOut(context: Context) {
         repository.logOut()
         cleanFields()
-
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(R.string.default_web_client_id.toString())
             .requestEmail()

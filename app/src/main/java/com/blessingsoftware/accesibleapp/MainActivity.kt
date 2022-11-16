@@ -16,7 +16,7 @@ import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
-import com.blessingsoftware.accesibleapp.model.domain.Constants.REQUEST_CODE_LOCATION_PERMISSION
+import com.blessingsoftware.accesibleapp.model.session.Constants.REQUEST_CODE_LOCATION_PERMISSION
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel

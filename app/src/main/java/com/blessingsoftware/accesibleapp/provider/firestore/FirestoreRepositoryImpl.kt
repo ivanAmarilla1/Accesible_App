@@ -112,7 +112,6 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     }
 
-
     override fun getAllPlaces(): ArrayList<Place> {
         //Inicializa una lista de objetos tipo Place en la que se guardaran todos los lugares
         val places = ArrayList<Place>()

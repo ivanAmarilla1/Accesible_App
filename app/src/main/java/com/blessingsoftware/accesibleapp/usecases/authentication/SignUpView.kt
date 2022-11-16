@@ -163,6 +163,7 @@ private fun SignUp(modifier: Modifier, viewModel: AuthViewModel, navController: 
             when (it) {
                 is Resource.Success -> {
                     LaunchedEffect(Unit) {
+                        viewModel.checkIfUserIsAdmin()
                         navController.navigate(HOME_ROUTE) {
                             popUpTo(AppScreens.LoginView.route) { inclusive = true }
                         }

@@ -9,6 +9,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import com.google.android.gms.location.*
 
+//Obtiene la ubicacion actual y lo devuelve en formato live data del objeto LocationDetails que yo creé
 class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
 
     private val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)

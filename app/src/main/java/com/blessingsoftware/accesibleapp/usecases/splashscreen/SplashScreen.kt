@@ -39,6 +39,7 @@ fun SplashScreen(authViewModel: AuthViewModel?, navController: NavController) {
         if (loginFlow?.value != null) {
             when (loginFlow.value) {
                 is Resource.Success -> {
+                    authViewModel.checkIfUserIsAdmin()
                     navController.navigate(HOME_ROUTE) {
                         popUpTo(AppScreens.SplashScreen.route) { inclusive = true }
                     }
