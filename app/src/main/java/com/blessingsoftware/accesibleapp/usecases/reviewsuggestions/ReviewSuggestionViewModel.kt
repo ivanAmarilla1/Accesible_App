@@ -10,9 +10,9 @@ import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.lang.Exception
 import javax.inject.Inject
 
 
@@ -47,6 +47,10 @@ class ReviewSuggestionViewModel @Inject constructor(
     private val _showDialog = MutableLiveData<Boolean>()
     val showDialog: LiveData<Boolean> = _showDialog
 
+    //Para el drop down menu
+    private val _suggestionViewType = MutableLiveData<String>()
+    val suggestionViewType: LiveData<String> = _suggestionViewType
+
     init {
         _getSuggestionFlow.value = Resource.Loading
     }
@@ -64,52 +68,68 @@ class ReviewSuggestionViewModel @Inject constructor(
         _getSuggestionFlow.value = Resource.Success("Success")
     }
 
-    //TODO Evitar que se puedan tocar de nuevo los botones de aceptar o rechazar cuando ya se acepto/rechazo la solicitud
-    suspend fun approveSuggestion(suggestion: Suggestion) {
-        if (suggestion.suggestionApproveStatus == 1) {
-            setShowDialogFalse()
-            suggestion.suggestionApproveStatus = 2
-            val place = Place(
-                suggestion.suggestionName,
-                suggestion.suggestionDescription,
-                suggestion.suggestionLat,
-                suggestion.suggestionLng,
-                suggestion.suggestionAddedBy,
-                repository.currentUser!!.uid,
-                suggestion.suggestionRate,
-                suggestion.suggestionType
-            )
-            _message.value = "Sugerencia aprobada correctamente"
-            _approveSuggestionFlag.value = true
-            _approveSuggestionFlow.value = Resource.Loading
-            val storePlace = db.storePlace(place)
-            if (storePlace == Resource.Success("Success")) {
-                val updateSuggestion =
-                    db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
-                _approveSuggestionFlow.value = updateSuggestion
-                Log.d("Hola", _approveSuggestionFlow.value.toString())
-            } else {
-                _approveSuggestionFlow.value = storePlace
-            }
-        }
+    private suspend fun checkIfUserIsAdminSuggestion(): Boolean {
+        val user = repository.currentUser?.let { db.checkUser(it.uid) }
+        return user?.admin ?: false
+    }
 
+    suspend fun approveSuggestion(suggestion: Suggestion) {
+        setShowDialogFalse()
+        _approveSuggestionFlow.value = Resource.Loading
+        if (checkIfUserIsAdminSuggestion()) {
+            if (suggestion.suggestionApproveStatus == 1) {
+                suggestion.suggestionApproveStatus = 2
+                val place = Place(
+                    suggestion.suggestionName,
+                    suggestion.suggestionDescription,
+                    suggestion.suggestionLat,
+                    suggestion.suggestionLng,
+                    suggestion.suggestionAddedBy,
+                    repository.currentUser!!.uid,
+                    suggestion.suggestionRate,
+                    suggestion.suggestionType
+                )
+                _message.value = "Sugerencia aprobada correctamente"
+                _approveSuggestionFlag.value = true
+                val storePlace = db.storePlace(place)
+                if (storePlace == Resource.Success("Success")) {
+                    val updateSuggestion =
+                        db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
+                    _approveSuggestionFlow.value = updateSuggestion
+                    Log.d("Hola", _approveSuggestionFlow.value.toString())
+                } else {
+                    _approveSuggestionFlow.value = storePlace
+                }
+            }
+        } else {
+            _approveSuggestionFlag.value = true
+            _approveSuggestionFlow.value =
+                Resource.Failure(exception = Exception("Usted no es un administrador"))
+        }
     }
 
     suspend fun declineSuggestion(suggestion: Suggestion) {
-        if (suggestion.suggestionApproveStatus == 1) {
-            setShowDialogFalse()
-            _message.value = "Sugerencia rechazada correctamente"
+        setShowDialogFalse()
+        _approveSuggestionFlow.value = Resource.Loading
+        if (checkIfUserIsAdminSuggestion()) {
+            if (suggestion.suggestionApproveStatus == 1) {
+                _message.value = "Sugerencia rechazada correctamente"
+                _approveSuggestionFlag.value = true
+                suggestion.suggestionApproveStatus = 3
+                val updateSuggestion =
+                    db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
+                _approveSuggestionFlow.value = updateSuggestion
+            }
+        } else {
             _approveSuggestionFlag.value = true
-            _approveSuggestionFlow.value = Resource.Loading
-            suggestion.suggestionApproveStatus = 3
-            val updateSuggestion =
-                db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
-            _approveSuggestionFlow.value = updateSuggestion
+            _approveSuggestionFlow.value =
+                Resource.Failure(exception = Exception("Usted no es un administrador"))
         }
     }
 
     fun clean() {
         _approveSuggestionFlag.value = false
+        _approveSuggestionFlow.value = null
         _message.value = ""
         _showDialog.value = false
     }
@@ -120,5 +140,9 @@ class ReviewSuggestionViewModel @Inject constructor(
 
     fun setShowDialogFalse() {
         _showDialog.value = false
+    }
+
+    fun setSuggestionViewType(type: String) {
+        _suggestionViewType.value = type
     }
 }

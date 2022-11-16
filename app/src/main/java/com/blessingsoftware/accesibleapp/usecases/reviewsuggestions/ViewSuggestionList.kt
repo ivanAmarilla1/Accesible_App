@@ -1,7 +1,6 @@
 package com.blessingsoftware.accesibleapp.usecases.reviewsuggestions
 
 import android.util.Log
-import android.view.MotionEvent
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -16,21 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
+import com.blessingsoftware.accesibleapp.ui.composables.DropDownMenu
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -93,6 +89,9 @@ fun SuggestionList(
     viewModel: ReviewSuggestionViewModel,
     onSuggestionSelected: (Suggestion) -> Unit
 ) {
+    //El tipo de lista de sugerencias a ser mostrada, si son las pendientes, aprobadas o rechazadas
+    val suggestionViewType = viewModel.suggestionViewType.observeAsState(initial = "Pendientes")
+    //Arraylist que contienen los 3 tipos de sugerencias
     val unReviewedSuggestion = ArrayList<Suggestion>()
     val approvedSuggestion = ArrayList<Suggestion>()
     val declinedSuggestion = ArrayList<Suggestion>()
@@ -108,24 +107,35 @@ fun SuggestionList(
             declinedSuggestion.add(item)
         }
     }
-    //si no hay sugerencias para revisar se muestra un mensaje, si no se muestran las sugerencias
-    if (unReviewedSuggestion.isEmpty()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
 
-        ) {
-            Text(
-                text = "No hay sugerencias",
-                style = MaterialTheme.typography.h6,
-                textAlign = TextAlign.Center
-            )
+
+    Column(Modifier.verticalScroll(rememberScrollState())) {
+        SelectSuggestionType(suggestionViewType.value) {
+            viewModel.setSuggestionViewType(it)
         }
-    } else {
-        Column(Modifier.verticalScroll(rememberScrollState())) {
-            for (item in unReviewedSuggestion) {
+        var viewList = ArrayList<Suggestion>()
+        when(suggestionViewType.value) {
+            "Pendientes"-> viewList = unReviewedSuggestion
+            "Aprobados"-> viewList = approvedSuggestion
+            "Rechazados"-> viewList = declinedSuggestion
+        }
+        //si no hay sugerencias para revisar se muestra un mensaje, si no se muestran las sugerencias
+        if (viewList.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+
+            ) {
+                Text(
+                    text = "No hay sugerencias",
+                    style = MaterialTheme.typography.h6,
+                    textAlign = TextAlign.Center
+                )
+            }
+        } else {
+            for (item in viewList) {
                 Suggestion(item) { onSuggestionSelected(item) }
                 Spacer(modifier = Modifier.height(5.dp))
             }
@@ -133,6 +143,18 @@ fun SuggestionList(
     }
 
 
+}
+
+@Composable
+fun SelectSuggestionType(selectedItem: String, onSuggestionTypeSelected: (String) -> Unit) {
+    val typeList = listOf(
+        "Pendientes",
+        "Aprobados",
+        "Rechazados",
+    )
+    DropDownMenu(selectedItem, typeList, false, "", Modifier.fillMaxWidth().background(Color.Transparent)) {
+        onSuggestionTypeSelected(it)
+    }
 }
 
 @Composable

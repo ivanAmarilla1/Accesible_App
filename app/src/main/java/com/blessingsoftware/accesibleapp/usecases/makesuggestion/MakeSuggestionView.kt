@@ -208,7 +208,7 @@ fun MakeSuggestion(
             userRating,
             placeType,
             userMarker.value,
-            authViewModel.currentUser?.email.toString(),
+            authViewModel.currentUser?.uid.toString(),
             showDialog.value
         )
     }
@@ -293,7 +293,15 @@ fun PlaceType(
 
     Text(text = "Tipo de Lugar", color = MaterialTheme.colors.secondary)
     Spacer(modifier = Modifier.height(5.dp))
-    DropDownMenu(placeType, typeList, !validateType!!, validateTypeError, Modifier.fillMaxWidth()) {
+    DropDownMenu(
+        placeType,
+        typeList,
+        !validateType!!,
+        validateTypeError,
+        Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
+    ) {
         onPlaceTypeSelected(it)
     }
 }

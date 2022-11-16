@@ -30,7 +30,6 @@ fun DropDownMenu(
         modifier
             .fillMaxSize()
             .height(50.dp)
-            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
             .border(if (validateData!!) BorderStroke(2.dp, MaterialTheme.colors.error) else BorderStroke(2.dp, MaterialTheme.colors.onSecondary), shape = RoundedCornerShape(10.dp))
             .clickable { // Anchor view
                 expanded = !expanded
