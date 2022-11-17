@@ -68,6 +68,23 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     }
 
+    override suspend fun getSuggestions(key: String, value: Int): ArrayList<Suggestion> {
+        //Inicializa una lista de objetos tipo Place en la que se guardaran todos los lugares
+        val suggestions = ArrayList<Suggestion>()
+        val ref = db.collection("suggestions").whereEqualTo(key, value)
+
+        val results = ref.get().await()
+
+        for (document in results) {
+            val suggestion = document.toObject(Suggestion::class.java)
+            suggestion?.let {
+                //suggestion.suggestionId = document.id
+                suggestions.add(it)
+            }
+        }
+        return suggestions
+    }
+
     override suspend fun getAllSuggestions(): ArrayList<Suggestion> {
         //Inicializa una lista de objetos tipo Place en la que se guardaran todos los lugares
         val suggestions = ArrayList<Suggestion>()

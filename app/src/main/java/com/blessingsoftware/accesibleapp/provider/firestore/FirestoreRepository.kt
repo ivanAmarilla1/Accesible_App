@@ -10,6 +10,7 @@ interface FirestoreRepository {
     suspend fun storePlace(place: Place) : Resource<String>
     suspend fun storeSuggestion(suggestion: Suggestion) : Resource<String>
     suspend fun updateSuggestion(suggestion: Suggestion, reviewer: String) : Resource<String>
+    suspend fun getSuggestions(key: String, value: Int) : ArrayList<Suggestion>
     suspend fun getAllSuggestions() : ArrayList<Suggestion>
     suspend fun checkUser(id: String) : User?
     fun getAllPlaces() : ArrayList<Place>

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
@@ -12,6 +13,7 @@ import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -48,8 +50,8 @@ class ReviewSuggestionViewModel @Inject constructor(
     val showDialog: LiveData<Boolean> = _showDialog
 
     //Para el drop down menu
-    private val _suggestionViewType = MutableLiveData<String>()
-    val suggestionViewType: LiveData<String> = _suggestionViewType
+    private val _suggestionViewType = MutableLiveData<Int>()
+    val suggestionViewType: LiveData<Int> = _suggestionViewType
 
     init {
         _getSuggestionFlow.value = Resource.Loading
@@ -61,11 +63,15 @@ class ReviewSuggestionViewModel @Inject constructor(
     }
 
 
-    suspend fun getSuggestions() {
+    suspend fun getSuggestions(suggestionApproveStatus: Int) {
+        Log.d("Dentro del viewmodel", suggestionApproveStatus.toString())
         _getSuggestionFlow.value = Resource.Loading
-        //Log.d("Valor", "${_getSuggestionFlow.value}")
-        suggestions.value = db.getAllSuggestions()
-        _getSuggestionFlow.value = Resource.Success("Success")
+        suggestions.value = db.getSuggestions("suggestionApproveStatus", suggestionApproveStatus)
+        if (suggestions.value.isNullOrEmpty()) {
+            _getSuggestionFlow.value = Resource.Failure(Exception("Failure "))
+        } else {
+            _getSuggestionFlow.value = Resource.Success("Success")
+        }
     }
 
     private suspend fun checkIfUserIsAdminSuggestion(): Boolean {
@@ -142,7 +148,7 @@ class ReviewSuggestionViewModel @Inject constructor(
         _showDialog.value = false
     }
 
-    fun setSuggestionViewType(type: String) {
+    fun setSuggestionViewType(type: Int) {
         _suggestionViewType.value = type
     }
 }

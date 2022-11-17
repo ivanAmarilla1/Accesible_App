@@ -27,100 +27,78 @@ import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.ui.composables.DropDownMenu
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
-import kotlinx.coroutines.launch
 
 @Composable
 fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel, navController: NavController) {
 
+    //Sugerencias
+    val suggestions by viewModel.suggestions.observeAsState(initial = emptyList())
+    //El tipo de lista de sugerencias a ser mostrada, si son las pendientes, aprobadas o rechazadas
+    val suggestionViewType = viewModel.suggestionViewType.observeAsState(initial = 1)
     //Corrutina que hace la consulta para obtener las sugerencias
-    val scope = rememberCoroutineScope()
-    LaunchedEffect(Unit) {
-        scope.launch {
-            viewModel.getSuggestions()
-        }
+    LaunchedEffect(key1 = suggestionViewType.value) {//Cada vez que cambia la key se ejecuta el launched effect
+        viewModel.getSuggestions(suggestionViewType.value)
     }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(0.dp, 50.dp, 0.dp, 0.dp)
+    ) {
+        SelectSuggestionType(suggestionViewType.value) {
+            viewModel.setSuggestionViewType(it)
+        }
 
-    val getSuggestionFlow = viewModel.getSuggestionFlow.collectAsState()
-    getSuggestionFlow.value.let {
-        Log.d("Valor", "Entrando en flow")
-        when (it) {
-            is Resource.Success -> {
-                ShowAllSuggestions(viewModel, navController)
-            }
-            is Resource.Failure -> {
-                val context = LocalContext.current
-                Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
-            }
-            Resource.Loading -> {
-                Log.d("Flow", "Entro en Loading")
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                ) {
-                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+        val getSuggestionFlow = viewModel.getSuggestionFlow.collectAsState()
+        getSuggestionFlow.value.let {
+            Log.d("Valor", "Entrando en flow")
+            when (it) {
+                is Resource.Success -> {
+                    ShowAllSuggestions(viewModel, navController, suggestions)
                 }
-            }
-            else -> {
-                throw IllegalStateException("Error al obtener Sugerencias")
+                is Resource.Failure -> {
+                    val context = LocalContext.current
+                    Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
+                }
+                Resource.Loading -> {
+                    Log.d("Flow", "Entro en Loading")
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                    ) {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    }
+                }
+                else -> {
+                    throw IllegalStateException("Error al obtener Sugerencias")
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ShowAllSuggestions(viewModel: ReviewSuggestionViewModel, navController: NavController) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(0.dp, 50.dp, 0.dp, 0.dp)
-    ) {
-        Spacer(modifier = Modifier.height(5.dp))
-        SuggestionList(viewModel) {
-            viewModel.setSelectedSuggestion(it)
-            navController.navigate(AppScreens.SuggestionDetail.route) {
-                launchSingleTop = true
-            }
+private fun ShowAllSuggestions(
+    viewModel: ReviewSuggestionViewModel,
+    navController: NavController,
+    suggestions: List<Suggestion>,
+) {
+    Spacer(modifier = Modifier.height(5.dp))
+    SuggestionList(suggestions) {
+        viewModel.setSelectedSuggestion(it)
+        navController.navigate(AppScreens.SuggestionDetail.route) {
+            launchSingleTop = true
         }
     }
 }
 
 @Composable
 fun SuggestionList(
-    viewModel: ReviewSuggestionViewModel,
+    suggestions: List<Suggestion>,
     onSuggestionSelected: (Suggestion) -> Unit
 ) {
-    //El tipo de lista de sugerencias a ser mostrada, si son las pendientes, aprobadas o rechazadas
-    val suggestionViewType = viewModel.suggestionViewType.observeAsState(initial = "Pendientes")
-    //Arraylist que contienen los 3 tipos de sugerencias
-    val unReviewedSuggestion = ArrayList<Suggestion>()
-    val approvedSuggestion = ArrayList<Suggestion>()
-    val declinedSuggestion = ArrayList<Suggestion>()
-    //Lugares
-    val suggestions by viewModel.suggestions.observeAsState(initial = emptyList())
-    //Discrimina el tipo de sugerencia, si ya ha sido revisada, aprobada o rechazada
-    for (item in suggestions) {
-        if (item.suggestionApproveStatus == 1) {
-            unReviewedSuggestion.add(item)
-        } else if (item.suggestionApproveStatus == 2) {
-            approvedSuggestion.add(item)
-        } else if (item.suggestionApproveStatus == 3) {
-            declinedSuggestion.add(item)
-        }
-    }
-
-
     Column(Modifier.verticalScroll(rememberScrollState())) {
-        SelectSuggestionType(suggestionViewType.value) {
-            viewModel.setSuggestionViewType(it)
-        }
-        var viewList = ArrayList<Suggestion>()
-        when(suggestionViewType.value) {
-            "Pendientes"-> viewList = unReviewedSuggestion
-            "Aprobados"-> viewList = approvedSuggestion
-            "Rechazados"-> viewList = declinedSuggestion
-        }
         //si no hay sugerencias para revisar se muestra un mensaje, si no se muestran las sugerencias
-        if (viewList.isEmpty()) {
+        if (suggestions.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -135,25 +113,35 @@ fun SuggestionList(
                 )
             }
         } else {
-            for (item in viewList) {
+            for (item in suggestions) {
                 Suggestion(item) { onSuggestionSelected(item) }
                 Spacer(modifier = Modifier.height(5.dp))
             }
         }
     }
-
-
 }
 
 @Composable
-fun SelectSuggestionType(selectedItem: String, onSuggestionTypeSelected: (String) -> Unit) {
+fun SelectSuggestionType(selectedItem: Int, onSuggestionTypeSelected: (Int) -> Unit) {
     val typeList = listOf(
         "Pendientes",
         "Aprobados",
         "Rechazados",
     )
-    DropDownMenu(selectedItem, typeList, false, "", Modifier.fillMaxWidth().background(Color.Transparent)) {
-        onSuggestionTypeSelected(it)
+    DropDownMenu(
+        typeList[selectedItem - 1], typeList, false, "",
+        Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .background(Color.Transparent)
+    ) {
+        val x: Int = when (it) {
+            "Pendientes" -> 1
+            "Aprobados" -> 2
+            "Rechazados" -> 3
+            else -> 1
+        }
+        onSuggestionTypeSelected(x)
     }
 }
 
@@ -209,9 +197,7 @@ private fun PreliminaryRate(suggestionRate: Int) {
 
 @Composable
 fun SuggestionImage(suggestionType: String) {
-
     var img = Icons.Filled.LocalParking
-
     when (suggestionType) {
         "Estacionamiento" -> img = Icons.Filled.WheelchairPickup
         "Comercio" -> img = Icons.Filled.Store
@@ -224,8 +210,6 @@ fun SuggestionImage(suggestionType: String) {
         "Otros" -> img = Icons.Filled.Business
 
     }
-
-
     Box(modifier = Modifier.padding(start = 10.dp, top = 25.dp)) {
         Icon(
             img,
@@ -238,6 +222,5 @@ fun SuggestionImage(suggestionType: String) {
                 .padding(15.dp),
         )
     }
-
 }
 
