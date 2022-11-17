@@ -152,7 +152,6 @@ class MakeSuggestionViewModel @Inject constructor(
         _isGPSOn.value = status
     }
 
-
     fun setShowDialogTrue() {
         _showDialog.value = true
     }

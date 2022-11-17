@@ -49,6 +49,16 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteSuggestion(uid: String): Resource<String> {
+        return try {
+            db.collection("suggestions").document(uid).delete().await()
+            Resource.Success("Success")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
     override suspend fun updateSuggestion(
         suggestion: Suggestion,
         reviewer: String
@@ -100,25 +110,6 @@ class FirestoreRepositoryImpl @Inject constructor(
             }
         }
         return suggestions
-
-        /*ref.addSnapshotListener { snapshot, e ->
-            // handle the error if there is one, and then return
-            if (e != null) {
-                Log.w("Listen failed", e)
-                return@addSnapshotListener
-            }
-            // if we reached this point , there was not an error
-            snapshot?.let {
-                val documents = snapshot.documents
-                documents.forEach {
-                    val suggestion = it.toObject(Suggestion::class.java)
-                    //Log.d("Place name", place!!.placeName)
-                    suggestion?.let {
-                        suggestions.add(it)
-                    }
-                }
-            }
-        }*/
     }
 
     override suspend fun checkUser(id: String): User? {
@@ -156,15 +147,3 @@ class FirestoreRepositoryImpl @Inject constructor(
         return places
     }
 }
-
-/*
-* ref.get().addOnSuccessListener { result ->
-            for (document in result) {
-                val place = document.toObject<Place>()
-                places.add(place)
-                Log.d("Place name", place.name)
-            }
-        }
-            .addOnFailureListener { exception ->
-                Log.d(TAG, "Error getting documents: ", exception)
-            }*/

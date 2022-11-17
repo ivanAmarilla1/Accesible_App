@@ -41,6 +41,11 @@ class ReviewSuggestionViewModel @Inject constructor(
     private val _approveSuggestionFlag = MutableLiveData<Boolean>()
     val approveSuggestionFlag: LiveData<Boolean> = _approveSuggestionFlag
 
+    //Variable para saber si la sugerencia fue eliminada
+    //Bandera
+    private val _isSuggestionEliminated = MutableLiveData<Boolean>()
+    val isSuggestionEliminated: LiveData<Boolean> = _isSuggestionEliminated
+
     //Mensaje para el toast
     private val _message = MutableLiveData<String>()
     val message: LiveData<String> = _message
@@ -55,6 +60,7 @@ class ReviewSuggestionViewModel @Inject constructor(
 
     init {
         _getSuggestionFlow.value = Resource.Loading
+        _isSuggestionEliminated.value = false
     }
 
     fun setSelectedSuggestion(suggestion: Suggestion) {
@@ -67,11 +73,7 @@ class ReviewSuggestionViewModel @Inject constructor(
         Log.d("Dentro del viewmodel", suggestionApproveStatus.toString())
         _getSuggestionFlow.value = Resource.Loading
         suggestions.value = db.getSuggestions("suggestionApproveStatus", suggestionApproveStatus)
-        if (suggestions.value.isNullOrEmpty()) {
-            _getSuggestionFlow.value = Resource.Failure(Exception("Failure "))
-        } else {
-            _getSuggestionFlow.value = Resource.Success("Success")
-        }
+        _getSuggestionFlow.value = Resource.Success("Success")
     }
 
     private suspend fun checkIfUserIsAdminSuggestion(): Boolean {
@@ -133,11 +135,31 @@ class ReviewSuggestionViewModel @Inject constructor(
         }
     }
 
+    suspend fun deleteMySuggestion(suggestion: Suggestion) {
+        setShowDialogFalse()
+        _approveSuggestionFlow.value = Resource.Loading
+        if (checkIfUserIsAdminSuggestion()) {
+            if (suggestion.suggestionApproveStatus != 1) {
+                _isSuggestionEliminated.value = true
+                _message.value = "Sugerencia eliminada correctamente"
+                _approveSuggestionFlag.value = true
+                val deleteSuggestion =
+                    db.deleteSuggestion(suggestion.suggestionId)
+                _approveSuggestionFlow.value = deleteSuggestion
+            }
+        } else {
+            _approveSuggestionFlag.value = true
+            _approveSuggestionFlow.value =
+                Resource.Failure(exception = Exception("Usted no es un administrador"))
+        }
+    }
+
     fun clean() {
         _approveSuggestionFlag.value = false
         _approveSuggestionFlow.value = null
         _message.value = ""
         _showDialog.value = false
+        _isSuggestionEliminated.value = false
     }
 
     fun setShowDialogTrue() {

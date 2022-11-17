@@ -185,6 +185,4 @@ private fun LogOutButton(
     ) {
         Text(stringResource(R.string.logout), color = MaterialTheme.colors.onBackground)
     }
-
-
 }

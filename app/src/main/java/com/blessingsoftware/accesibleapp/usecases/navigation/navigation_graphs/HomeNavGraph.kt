@@ -42,7 +42,7 @@ fun NavGraphBuilder.homeNavGraph(
             ViewSuggestionList(reviewSuggestionViewModel, navController)
         }
         composable(AppScreens.SuggestionDetail.route) {
-            ViewSuggestionDetail(reviewSuggestionViewModel)
+            ViewSuggestionDetail(reviewSuggestionViewModel, navController)
         }
         composable(AppScreens.ItemTwo.route) {
             ItemTwo(navController)
