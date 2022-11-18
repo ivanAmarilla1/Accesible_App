@@ -30,12 +30,10 @@ import pub.devrel.easypermissions.AppSettingsDialog
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
-
-
     private val loginViewModel by viewModels<AuthViewModel>()
-    private val homeViewModel by viewModels<HomeViewModel>()
-    private val suggestionViewModel by viewModels<MakeSuggestionViewModel>()
-    private val reviewSuggestionViewModel by viewModels<ReviewSuggestionViewModel>()
+    //private val homeViewModel by viewModels<HomeViewModel>()
+    //private val suggestionViewModel by viewModels<MakeSuggestionViewModel>()
+    //private val reviewSuggestionViewModel by viewModels<ReviewSuggestionViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,12 +44,9 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
+                    //Composable que contiene la el navigator y la pantalla principal de la aplicación
                     MainScreen(
-                        modifier = Modifier.fillMaxSize(),
                         loginViewModel = loginViewModel,
-                        homeViewModel = homeViewModel,
-                        suggestionViewModel = suggestionViewModel,
-                        reviewSuggestionViewModel = reviewSuggestionViewModel,
                         rememberNavController()
                     )
                 }
@@ -67,7 +62,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            suggestionViewModel.startLocationUpdates()
+            //suggestionViewModel.startLocationUpdates()
         } else {
             requestLocationPermissions()
         }
@@ -75,7 +70,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
 
     private fun requestLocationPermissions() {
         if (TrackingUtility.hasLocationPermissions(this)) {
-            suggestionViewModel.permissionGrand(true)
+            //suggestionViewModel.permissionGrand(true)
             return
         } else {
             EasyPermissions.requestPermissions(
@@ -105,8 +100,8 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
         when (requestCode) {
             0 -> {
-                suggestionViewModel.permissionGrand(true)
-                suggestionViewModel.startLocationUpdates()
+                //suggestionViewModel.permissionGrand(true)
+                //suggestionViewModel.startLocationUpdates()
                 Toast.makeText(this, "Permiso concedido", Toast.LENGTH_LONG).show()
             }
         }

@@ -16,7 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-//Investigar que es esto xd
+//Inyeccion de dependencias, se usa para enviar dependencia de los repositorios a los ViewModels
 @InstallIn(SingletonComponent::class)
 @Module
 class AppModule {
@@ -36,6 +36,5 @@ class AppModule {
     @Singleton
     @Provides
     fun provideDataStoreRepository(@ApplicationContext context: Context): DataStoreRepository = DataStoreRepositoryImpl(context)
-
 
 }

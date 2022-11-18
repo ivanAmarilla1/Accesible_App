@@ -45,6 +45,7 @@ import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.FirebaseUser
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -52,10 +53,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MakeSuggestion(
-    homeViewModel: HomeViewModel,
     suggestionViewModel: MakeSuggestionViewModel,
     navController: NavController,
-    authViewModel: AuthViewModel,
+    currentUser: FirebaseUser?,
     scaffoldState: ScaffoldState
 ) {
     //Scroll
@@ -200,17 +200,20 @@ fun MakeSuggestion(
             }
         }
 
-        SendSuggestionDialog(
-            suggestionViewModel,
-            scope,
-            name,
-            description,
-            userRating,
-            placeType,
-            userMarker.value,
-            authViewModel.currentUser?.uid.toString(),
-            showDialog.value
-        )
+        Log.d("currentUser xd", currentUser.toString())
+        if (currentUser != null) {
+            SendSuggestionDialog(
+                suggestionViewModel,
+                scope,
+                name,
+                description,
+                userRating,
+                placeType,
+                userMarker.value,
+                currentUser.uid,
+                showDialog.value
+            )
+        }
     }
 
     suggestionFlow.value.let {

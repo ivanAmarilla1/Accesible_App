@@ -10,6 +10,7 @@ import com.blessingsoftware.accesibleapp.usecases.authentication.SignUpView
 import com.blessingsoftware.accesibleapp.usecases.navigation.AUTH_ROUTE
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 
+
 fun NavGraphBuilder.authNavGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel

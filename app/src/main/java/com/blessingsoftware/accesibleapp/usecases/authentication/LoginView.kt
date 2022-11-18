@@ -58,7 +58,6 @@ fun LoginView(viewModel: AuthViewModel, navController: NavController) {
     ) {
         Login(Modifier.align(Alignment.Center), viewModel, navController)
     }
-
 }
 
 @Composable

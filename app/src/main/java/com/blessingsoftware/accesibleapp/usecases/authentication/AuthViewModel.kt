@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
-import com.blessingsoftware.accesibleapp.model.domain.User
 import com.blessingsoftware.accesibleapp.model.session.Constants.APP_FIRST_RUN
 import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
@@ -80,7 +79,7 @@ class AuthViewModel @Inject constructor(
     val currentUser: FirebaseUser?
         get() = repository.currentUser
 
-    //Store user preferences. Para conocer si es la primera vez que se ejecuta la app mediante el datastore
+    //Store user preferences. Para conocer si es la primera vez que se ejecuta la app mediante el datastore.
     private fun setPreference(key: String, value: Boolean) = runBlocking {
         dataStoreRepository.putBoolean(key, value)
     }

@@ -1,6 +1,7 @@
 package com.blessingsoftware.accesibleapp.usecases.navigation.navigation_graphs
 
 import androidx.compose.material.ScaffoldState
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -16,9 +17,9 @@ import com.blessingsoftware.accesibleapp.usecases.navigation.HOME_ROUTE
 import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ReviewSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ViewSuggestionDetail
 import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ViewSuggestionList
-import com.blessingsoftware.accesibleapp.usecases.test.ItemOne
 import com.blessingsoftware.accesibleapp.usecases.test.ItemThree
 import com.blessingsoftware.accesibleapp.usecases.test.ItemTwo
+import com.google.firebase.auth.FirebaseUser
 
 fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
@@ -36,7 +37,7 @@ fun NavGraphBuilder.homeNavGraph(
             RandomView(navController)
         }
         composable(AppScreens.MakeSuggestion.route) {
-            MakeSuggestion(homeViewModel, suggestionViewModel, navController, authViewModel, scaffoldState)
+            MakeSuggestion(suggestionViewModel, navController, authViewModel.currentUser, scaffoldState)
         }
         composable(AppScreens.SuggestionList.route) {
             ViewSuggestionList(reviewSuggestionViewModel, navController)

@@ -25,11 +25,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun MainScreen(
-    modifier: Modifier,
     loginViewModel: AuthViewModel,
-    homeViewModel: HomeViewModel,
-    suggestionViewModel: MakeSuggestionViewModel,
-    reviewSuggestionViewModel: ReviewSuggestionViewModel,
     navController: NavHostController
 ) {
     val scope = rememberCoroutineScope()
@@ -86,9 +82,6 @@ fun MainScreen(
     ) {
         AppNavigation(
             loginViewModel,
-            homeViewModel,
-            suggestionViewModel,
-            reviewSuggestionViewModel,
             navController,
             scaffoldState
         )
