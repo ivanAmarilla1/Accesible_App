@@ -3,6 +3,9 @@ package com.blessingsoftware.accesibleapp.usecases.main
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,11 +29,16 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     loginViewModel: AuthViewModel,
+    homeViewModel: HomeViewModel,
     navController: NavHostController
 ) {
     val scope = rememberCoroutineScope()
     //Checkea si el usuario es administrador
     val isAdmin = loginViewModel.isUserAdmin.observeAsState()
+
+
+    //Muestra u oculta el BottomBar
+    val isBottomBarVisible = homeViewModel.isBottomBarVisible.observeAsState(initial = true)
 
 
     val scaffoldState = rememberScaffoldState(
@@ -64,28 +72,31 @@ fun MainScreen(
         AppScreens.RandomView,
         AppScreens.SuggestionDetail
     )
-    Scaffold(
-        scaffoldState = scaffoldState,
-        bottomBar = { BottomNavigationBar(navController, items = bottomNavigationItems) },
-        //topBar = {  },
-        drawerContent = {
-            NavigationDrawer(
-                scope,
-                scaffoldState,
+    Box(modifier = Modifier.fillMaxSize()){
+        Scaffold(
+            scaffoldState = scaffoldState,
+            bottomBar = { if (isBottomBarVisible.value == true) {BottomNavigationBar(navController, items = bottomNavigationItems)} },
+            //topBar = {  },
+            drawerContent = {
+                NavigationDrawer(
+                    scope,
+                    scaffoldState,
+                    navController,
+                    drawerItems,
+                    loginViewModel
+                )
+            },
+            drawerBackgroundColor = MaterialTheme.colors.background,
+            drawerGesturesEnabled = scaffoldState.drawerState.isOpen
+        ) {
+            AppNavigation(
+                loginViewModel,
+                homeViewModel,
                 navController,
-                drawerItems,
-                loginViewModel
+                scaffoldState
             )
-        },
-        drawerBackgroundColor = MaterialTheme.colors.background,
-        drawerGesturesEnabled = scaffoldState.drawerState.isOpen
-    ) {
-        AppNavigation(
-            loginViewModel,
-            navController,
-            scaffoldState
-        )
-        TopBar(scope, scaffoldState, navController, topBarItems, drawerItems)
+            TopBar(scope, scaffoldState, navController, topBarItems, drawerItems)
+        }
     }
 
     BackHandler(enabled = scaffoldState.drawerState.isOpen, onBack = {

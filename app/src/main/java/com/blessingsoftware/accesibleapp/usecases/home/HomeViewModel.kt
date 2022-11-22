@@ -14,9 +14,12 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(application: Application, private val db: FirestoreRepository): AndroidViewModel(application) {
 
     var places: MutableLiveData<List<Place>> = MutableLiveData<List<Place>>()
-
+    //Lugar seleccionado en el mapa
     private val _selectedPlace = MutableLiveData<Place>()
     val selectedPlace: LiveData<Place> = _selectedPlace
+    //Muestra y esconde el bottomBar
+    private val _isBottomBarVisible = MutableLiveData<Boolean>()
+    val isBottomBarVisible : LiveData<Boolean?> =_isBottomBarVisible
 
     private fun getPlaces(){
         places.value = db.getAllPlaces()
@@ -24,6 +27,10 @@ class HomeViewModel @Inject constructor(application: Application, private val db
 
     fun setSelectedPlace(place: Place) {
         _selectedPlace.value = place
+    }
+
+    fun setBottomBarVisible(boolean: Boolean) {
+        _isBottomBarVisible.value = boolean
     }
 
     init {

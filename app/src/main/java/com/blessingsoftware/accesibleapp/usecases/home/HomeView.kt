@@ -26,7 +26,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeView(viewModel: HomeViewModel, navController: NavHostController) {
-    Box(modifier = Modifier.padding(bottom = 50.dp)) {
+
+    Box(modifier = Modifier.background(MaterialTheme.colors.onSecondary)) {
         PlaceBottomDrawer(viewModel)
     }
 }
@@ -37,6 +38,13 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
     val bottomDrawerState = rememberBottomDrawerState(BottomDrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val selectedPlace = viewModel.selectedPlace.observeAsState()
+
+    //Muestra y oculta el Bottom drawer (botones de buscar y home de la parte de abajo) si se abre el modal
+    if (bottomDrawerState.isOpen) {
+        viewModel.setBottomBarVisible(false)
+    } else {
+        viewModel.setBottomBarVisible(true)
+    }
 
 
     //TODO Centrar la camara en el marcador seleccionado
@@ -69,7 +77,7 @@ fun MainMap(viewModel: HomeViewModel, onMarkerClicked: (Place) -> Boolean) {
         position = CameraPosition.fromLatLngZoom(cam, 14f)
     }
     //Composable de Google Maps
-    GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPosition) {
+    GoogleMap(modifier = Modifier.fillMaxSize().padding(bottom = 50.dp), cameraPositionState = cameraPosition) {
         places.forEach { place ->
             if (place.placeLat.isNotEmpty() && place.placeLng.isNotEmpty()) {
                 val placePosition =
@@ -115,6 +123,9 @@ private fun DrawerContent(selectedPlace: Place?) {
                 style = MaterialTheme.typography.body1,
                 textAlign = TextAlign.Start,
             )
+            Button(onClick = { Log.d("TAG", "DrawerContent: ") }) {
+                Text(text = "Hola")
+            }
 
 
         }

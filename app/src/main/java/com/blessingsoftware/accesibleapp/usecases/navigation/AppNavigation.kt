@@ -18,10 +18,10 @@ import com.blessingsoftware.accesibleapp.usecases.splashscreen.SplashScreen
 @Composable
 fun AppNavigation(
     authViewModel: AuthViewModel,
+    homeViewModel: HomeViewModel,
     navController: NavHostController,
     scaffoldState: ScaffoldState
 ) {
-    val homeViewModel = hiltViewModel<HomeViewModel>()
     val makeSuggestionViewModel = hiltViewModel<MakeSuggestionViewModel>()
     val reviewSuggestionViewModel = hiltViewModel<ReviewSuggestionViewModel>()
 

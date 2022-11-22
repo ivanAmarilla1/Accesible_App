@@ -31,7 +31,7 @@ import pub.devrel.easypermissions.AppSettingsDialog
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     private val loginViewModel by viewModels<AuthViewModel>()
-    //private val homeViewModel by viewModels<HomeViewModel>()
+    private val homeViewModel by viewModels<HomeViewModel>()
     //private val suggestionViewModel by viewModels<MakeSuggestionViewModel>()
     //private val reviewSuggestionViewModel by viewModels<ReviewSuggestionViewModel>()
 
@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                     //Composable que contiene la el navigator y la pantalla principal de la aplicación
                     MainScreen(
                         loginViewModel = loginViewModel,
+                        homeViewModel = homeViewModel,
                         rememberNavController()
                     )
                 }
