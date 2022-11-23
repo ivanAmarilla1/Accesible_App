@@ -1,6 +1,7 @@
 package com.blessingsoftware.accesibleapp.usecases.makesuggestion
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -59,6 +60,9 @@ class MakeSuggestionViewModel @Inject constructor(
     //Dialg de probrar o rechazar
     private val _showDialog = MutableLiveData<Boolean>()
     val showDialog: LiveData<Boolean> = _showDialog
+    //Imagen
+    private val _imageUri = MutableLiveData<List<Uri>?>(null)
+    val imageUri: LiveData<List<Uri>?> = _imageUri
     //Control de permisos (creo que no se usa ahora)
     private var _locationPermissionGranted = MutableLiveData(false)
     var locationPermissionGranted : LiveData<Boolean> = _locationPermissionGranted
@@ -66,10 +70,6 @@ class MakeSuggestionViewModel @Inject constructor(
         _locationPermissionGranted.value = setGranted
     }
 
-    /*
-    private val _suggestion = MutableLiveData<Suggestion>()
-    val suggestion: LiveData<Suggestion>
-        get() = _suggestion*/
 
     //al inicio del viewmodel
     init {
@@ -121,6 +121,7 @@ class MakeSuggestionViewModel @Inject constructor(
         _validateRate.value = true
         _flag.value = false
         _showDialog.value = false
+        _imageUri.value = null
 
     }
     //Colocar el marcador en el mapa con el Livedata
@@ -157,6 +158,15 @@ class MakeSuggestionViewModel @Inject constructor(
     }
     fun setShowDialogFalse() {
         _showDialog.value = false
+    }
+
+    fun setImages(images: List<@JvmSuppressWildcards Uri>) {
+        if (_imageUri.value != null){
+            _imageUri.value = _imageUri.value?.plus(images)
+        } else {
+            _imageUri.value = images
+        }
+
     }
 
 }

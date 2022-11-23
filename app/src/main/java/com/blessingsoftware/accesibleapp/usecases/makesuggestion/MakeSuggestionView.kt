@@ -2,22 +2,26 @@ package com.blessingsoftware.accesibleapp.usecases.makesuggestion
 
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -28,20 +32,23 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.*
-import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
-import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -90,6 +97,10 @@ fun MakeSuggestion(
             Log.d(TAG, "Map camera stopped moving - Enabling column scrolling...")
         }
     }
+
+    //Imagenes
+    val placeImages = suggestionViewModel.imageUri.observeAsState()
+
     //variables capturadas con LiveData
     val name: String by suggestionViewModel.name.observeAsState(initial = "")
     val description: String by suggestionViewModel.description.observeAsState(initial = "")
@@ -184,7 +195,8 @@ fun MakeSuggestion(
 
             }
             Spacer(modifier = Modifier.height(15.dp))
-            //AddPlaceImages()
+            ImageGrid(placeImages.value)
+            AddPlaceImages(suggestionViewModel)
             //Spacer(modifier = Modifier.height(6.dp))
             SendSuggestionButton {
                 sendSuggestionFunction(
@@ -483,10 +495,33 @@ fun PlaceSelect(
     }
 }
 
+@Composable
+private fun ImageGrid(placeImages: List<Uri>?) {
+
+    if (placeImages != null) {
+        for (item in placeImages) {
+            AsyncImage(model = item, contentDescription = "Image")
+        }
+    }
+}
+
 
 @Composable
-fun AddPlaceImages() {
-    Text(text = "hola")
+fun AddPlaceImages(suggestionViewModel: MakeSuggestionViewModel) {
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) {
+            suggestionViewModel.setImages(it)
+        }
+    Spacer(modifier = Modifier.height(10.dp))
+    IconButton(
+        onClick = { launcher.launch("image/*") },
+        modifier = Modifier
+            .width(50.dp)
+            .height(50.dp)
+    ) {
+        Icon(imageVector = Icons.Filled.ImageSearch, contentDescription = "Image Search")
+    }
+    Spacer(modifier = Modifier.height(10.dp))
 }
 
 

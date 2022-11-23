@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.provider.firestore
 
+import android.net.Uri
 import android.util.Log
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
@@ -9,10 +10,12 @@ import com.blessingsoftware.accesibleapp.util.await
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.storage.FirebaseStorage
 import javax.inject.Inject
 
 class FirestoreRepositoryImpl @Inject constructor(
-    private val db: FirebaseFirestore
+    private val db: FirebaseFirestore,
+    private val storage: FirebaseStorage
 ) : FirestoreRepository {
 
     override fun storeUser(uid: String, email: String, name: String, provider: String) {
@@ -42,6 +45,17 @@ class FirestoreRepositoryImpl @Inject constructor(
     ): Resource<String> {
         return try {
             db.collection("suggestions").add(suggestion).await()
+            Resource.Success("Success")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
+    override suspend fun storeImages(mainImg: Uri): Resource<String> {
+        return try {
+            storage.reference.child("placeImages")
+                .putFile(mainImg).await()
             Resource.Success("Success")
         } catch (e: Exception) {
             e.printStackTrace()

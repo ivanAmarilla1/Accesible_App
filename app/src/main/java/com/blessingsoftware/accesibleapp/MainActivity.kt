@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     //private val suggestionViewModel by viewModels<MakeSuggestionViewModel>()
     //private val reviewSuggestionViewModel by viewModels<ReviewSuggestionViewModel>()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
