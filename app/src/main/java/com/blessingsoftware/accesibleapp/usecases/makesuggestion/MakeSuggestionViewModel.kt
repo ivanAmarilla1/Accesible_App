@@ -103,12 +103,27 @@ class MakeSuggestionViewModel @Inject constructor(
     //Almacenar la sugerencia en la bd firestore
     suspend fun makeSuggestion(name: String, description: String, rate: Int, placetype: String, marker: LatLng, user: String) {
         _showDialog.value = false
+        _suggestionFlow.value = Resource.Loading
         val suggestion = Suggestion(name,description, rate, placetype, marker.latitude.toString(), marker.longitude.toString(), 1, user)
         _flag.value = true
-        _suggestionFlow.value = Resource.Loading
         val result = db.storeSuggestion(suggestion)
-        _suggestionFlow.value = result
+        _suggestionFlow.value = result.keys.first()
+        if (_suggestionFlow.value == Resource.Success("Success")) {
+            saveImages(result[_suggestionFlow.value])
+        }
+        //result[_suggestionFlow.value]?.let { Log.d("Id de Resultado", it) }
     }
+
+    //Funcion de guardado de imágenes
+    private suspend fun saveImages(placeId: String?) {
+        if (_imageUri.value != null && placeId != null){
+            db.storeImages(_imageUri.value!!, placeId)
+        } else {
+            Log.d("ERROR", "Error inesperado")
+        }
+    }
+
+
     //Limpiar campos y reiniciar variables
     fun cleanSuggestionFields() {
         _name.value = ""

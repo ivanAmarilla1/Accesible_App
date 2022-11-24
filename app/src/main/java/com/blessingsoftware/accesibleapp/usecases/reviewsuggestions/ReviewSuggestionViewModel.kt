@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.usecases.reviewsuggestions
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -58,6 +59,12 @@ class ReviewSuggestionViewModel @Inject constructor(
     private val _suggestionViewType = MutableLiveData<Int>()
     val suggestionViewType: LiveData<Int> = _suggestionViewType
 
+    //El listado de url de imagenes
+    private val _imageList = MutableLiveData<ArrayList<Uri>?>(null)
+    val imageList: LiveData<ArrayList<Uri>?> = _imageList
+
+
+
     init {
         _getSuggestionFlow.value = Resource.Loading
         _isSuggestionEliminated.value = false
@@ -114,6 +121,10 @@ class ReviewSuggestionViewModel @Inject constructor(
             _approveSuggestionFlow.value =
                 Resource.Failure(exception = Exception("Usted no es un administrador"))
         }
+    }
+
+    suspend fun getSuggestionImages (uid: String) {
+        _imageList.value = db.getImages(uid)
     }
 
     suspend fun declineSuggestion(suggestion: Suggestion) {

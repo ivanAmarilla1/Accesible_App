@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -25,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
@@ -73,6 +75,7 @@ private fun ShowSuggestionDetails(
         suggestion.value!!.suggestionLat.toDouble(),
         suggestion.value!!.suggestionLng.toDouble()
     )
+
     //posicion de la camara del mapa
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(suggestionPosition, 16f)
@@ -87,12 +90,16 @@ private fun ShowSuggestionDetails(
     //Mensaje
     val message = viewModel.message.observeAsState(initial = "")
 
+
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp, 50.dp, 16.dp, 0.dp)
             .verticalScroll(rememberScrollState(), columnScrollingEnabled)
     ) {
+        SuggestionImages(viewModel, suggestion.value!!.suggestionId, scope)
         SuggestionName(suggestion.value!!.suggestionName)
         SuggestionDesctiption(suggestion.value!!.suggestionDescription)
         SuggestionType(suggestion.value!!.suggestionType)
@@ -124,7 +131,6 @@ private fun ShowSuggestionDetails(
                     }
                 )
         )
-        SuggestionImages()
         SuggestionStatus(suggestion.value!!.suggestionApproveStatus)
         if (suggestion.value!!.suggestionApproveStatus == 1) {
             ApproveOrDeclineButtons(
@@ -351,7 +357,17 @@ fun SuggestionStatus(suggestionStatus: Int) {
 }
 
 @Composable
-private fun SuggestionImages() {
+private fun SuggestionImages(viewModel: ReviewSuggestionViewModel, suggestionId: String, scope: CoroutineScope) {
+    LaunchedEffect(Unit) {
+        viewModel.getSuggestionImages(suggestionId)
+    }
+    val images = viewModel.imageList.observeAsState()
+
+    if (images.value != null) {
+        for (item in images.value!!) {
+            AsyncImage(model = item, contentDescription = "Image")
+        }
+    }
 
 }
 

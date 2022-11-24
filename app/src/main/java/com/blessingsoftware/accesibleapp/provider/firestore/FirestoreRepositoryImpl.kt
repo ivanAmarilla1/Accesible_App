@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import javax.inject.Inject
 
 class FirestoreRepositoryImpl @Inject constructor(
@@ -42,9 +43,28 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     override suspend fun storeSuggestion(
         suggestion: Suggestion
-    ): Resource<String> {
+    ): HashMap<Resource<String>, String> {
+        val result = HashMap<Resource<String>, String>()
         return try {
-            db.collection("suggestions").add(suggestion).await()
+            val x = db.collection("suggestions").add(suggestion).await()
+            result[Resource.Success("Success")] = x.id
+            result
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            result[Resource.Failure(e)] = "Failure"
+            result
+        }
+    }
+
+    override suspend fun storeImages(imgList: List<Uri>, placeId: String): Resource<String> {
+        return try {
+            val folder: StorageReference = storage.reference.child("suggestionImages")
+            val folderId: StorageReference = folder.child(placeId)
+            for (item in imgList) {
+                val fileName: StorageReference = folderId.child("file" + item.lastPathSegment)
+                fileName.putFile(item).await()
+            }
             Resource.Success("Success")
         } catch (e: Exception) {
             e.printStackTrace()
@@ -52,14 +72,18 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun storeImages(mainImg: Uri): Resource<String> {
+    override suspend fun getImages(placeId: String): ArrayList<Uri>? {
+        val folder: StorageReference = storage.reference.child("suggestionImages")
+        val folderId = folder.child(placeId).listAll().await()
+        val images = ArrayList<Uri>()
         return try {
-            storage.reference.child("placeImages")
-                .putFile(mainImg).await()
-            Resource.Success("Success")
+            for (item in folderId.items) {
+                images.add(item.downloadUrl.await())
+            }
+            images
         } catch (e: Exception) {
             e.printStackTrace()
-            Resource.Failure(e)
+            null
         }
     }
 

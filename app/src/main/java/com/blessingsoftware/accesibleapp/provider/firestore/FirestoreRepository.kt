@@ -16,14 +16,15 @@ interface FirestoreRepository {
     fun getAllPlaces() : ArrayList<Place>
 
     //Suggestions
-    suspend fun storeSuggestion(suggestion: Suggestion) : Resource<String>
+    suspend fun storeSuggestion(suggestion: Suggestion) : HashMap<Resource<String>, String>//Resource<String>//, String
     suspend fun deleteSuggestion(uid: String) : Resource<String>
     suspend fun updateSuggestion(suggestion: Suggestion, reviewer: String) : Resource<String>
     suspend fun getSuggestions(key: String, value: Int) : ArrayList<Suggestion>
     suspend fun getAllSuggestions() : ArrayList<Suggestion>
 
     //Images
-    suspend fun storeImages(mainImg: Uri) : Resource<String>
+    suspend fun storeImages(imgList: List<Uri>, placeId: String) : Resource<String>
+    suspend fun getImages(placeId: String) : ArrayList<Uri>?
 
 
 
