@@ -1,12 +1,18 @@
 package com.blessingsoftware.accesibleapp.usecases.makesuggestion
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.blessingsoftware.accesibleapp.model.domain.LocationLiveData
+import com.blessingsoftware.accesibleapp.model.domain.ImageList
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
@@ -14,6 +20,7 @@ import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,44 +35,52 @@ class MakeSuggestionViewModel @Inject constructor(
     fun startLocationUpdates() {
         locationLiveData.startLocationUpdates()
     }
+
     //variables Livedata para el almacenar los datos del formulario
     private val _name = MutableLiveData<String>()
-    val name : LiveData<String> =_name
+    val name: LiveData<String> = _name
     private val _description = MutableLiveData<String>()
-    val description : LiveData<String> =_description
+    val description: LiveData<String> = _description
     private val _markerLocation = MutableLiveData<LatLng>()
-    val markerLocation : LiveData<LatLng> =_markerLocation
+    val markerLocation: LiveData<LatLng> = _markerLocation
     private val _rating = MutableLiveData<Int>()
     val rating: LiveData<Int> = _rating
     private val _placeType = MutableLiveData<String>()
     val placeType: LiveData<String> = _placeType
+
     //validacion
     private val _validateName = MutableLiveData<Boolean>()
-    val validateName : LiveData<Boolean?> =_validateName
+    val validateName: LiveData<Boolean?> = _validateName
     private val _validateDescription = MutableLiveData<Boolean>()
-    val validateDescription : LiveData<Boolean?> =_validateDescription
+    val validateDescription: LiveData<Boolean?> = _validateDescription
     private val _validateType = MutableLiveData<Boolean>()
-    val validateType : LiveData<Boolean?> =_validateType
+    val validateType: LiveData<Boolean?> = _validateType
     private val _validateRate = MutableLiveData<Boolean>()
-    val validateRate : LiveData<Boolean?> =_validateRate
+    val validateRate: LiveData<Boolean?> = _validateRate
+
     //Variable de control para los callbacks del servidor
     private val _suggestionFlow = MutableStateFlow<Resource<String>?>(null)
     val suggestionFlow: StateFlow<Resource<String>?> = _suggestionFlow
+
     //Variable de control para saber si el GPS esta encendido o no
     private val _isGPSOn = MutableLiveData<Boolean>()
-    val isGPSOn : LiveData<Boolean?> =_isGPSOn
+    val isGPSOn: LiveData<Boolean?> = _isGPSOn
+
     //Bandera para entrar a las funciones de de los callbacks
     private val _flag = MutableLiveData<Boolean>()
     val flag: LiveData<Boolean> = _flag
+
     //Dialg de probrar o rechazar
     private val _showDialog = MutableLiveData<Boolean>()
     val showDialog: LiveData<Boolean> = _showDialog
+
     //Imagen
     private val _imageUri = MutableLiveData<List<Uri>?>(null)
     val imageUri: LiveData<List<Uri>?> = _imageUri
+
     //Control de permisos (creo que no se usa ahora)
     private var _locationPermissionGranted = MutableLiveData(false)
-    var locationPermissionGranted : LiveData<Boolean> = _locationPermissionGranted
+    var locationPermissionGranted: LiveData<Boolean> = _locationPermissionGranted
     fun permissionGrand(setGranted: Boolean) {
         _locationPermissionGranted.value = setGranted
     }
@@ -92,7 +107,12 @@ class MakeSuggestionViewModel @Inject constructor(
     }
 
     //validacion de que los campos no esten vacios
-    fun validateDataMakeSuggestion(name: String, description: String, placeType: String, rate: Int): Boolean {
+    fun validateDataMakeSuggestion(
+        name: String,
+        description: String,
+        placeType: String,
+        rate: Int
+    ): Boolean {
         _validateName.value = name.isNotEmpty()
         _validateDescription.value = description.isNotEmpty()
         _validateType.value = placeType != "Seleccione"
@@ -101,10 +121,26 @@ class MakeSuggestionViewModel @Inject constructor(
     }
 
     //Almacenar la sugerencia en la bd firestore
-    suspend fun makeSuggestion(name: String, description: String, rate: Int, placetype: String, marker: LatLng, user: String) {
+    suspend fun makeSuggestion(
+        name: String,
+        description: String,
+        rate: Int,
+        placetype: String,
+        marker: LatLng,
+        user: String
+    ) {
         _showDialog.value = false
         _suggestionFlow.value = Resource.Loading
-        val suggestion = Suggestion(name,description, rate, placetype, marker.latitude.toString(), marker.longitude.toString(), 1, user)
+        val suggestion = Suggestion(
+            name,
+            description,
+            rate,
+            placetype,
+            marker.latitude.toString(),
+            marker.longitude.toString(),
+            1,
+            user
+        )
         _flag.value = true
         val result = db.storeSuggestion(suggestion)
         _suggestionFlow.value = result.keys.first()
@@ -112,15 +148,6 @@ class MakeSuggestionViewModel @Inject constructor(
             saveImages(result[_suggestionFlow.value])
         }
         //result[_suggestionFlow.value]?.let { Log.d("Id de Resultado", it) }
-    }
-
-    //Funcion de guardado de imágenes
-    private suspend fun saveImages(placeId: String?) {
-        if (_imageUri.value != null && placeId != null){
-            db.storeImages(_imageUri.value!!, placeId)
-        } else {
-            Log.d("ERROR", "Error inesperado")
-        }
     }
 
 
@@ -137,8 +164,10 @@ class MakeSuggestionViewModel @Inject constructor(
         _flag.value = false
         _showDialog.value = false
         _imageUri.value = null
+        resetImages()
 
     }
+
     //Colocar el marcador en el mapa con el Livedata
     fun setMarker(markerLocation: LatLng?) {
         if (markerLocation != null) {
@@ -147,7 +176,7 @@ class MakeSuggestionViewModel @Inject constructor(
     }
 
     fun setInitialMarker(userLocation: LatLng?) {
-        if (userLocation != null){
+        if (userLocation != null) {
             _markerLocation.value = userLocation!!
         } else {
             Log.d("Location", "Ubicacion desactivada")
@@ -171,15 +200,55 @@ class MakeSuggestionViewModel @Inject constructor(
     fun setShowDialogTrue() {
         _showDialog.value = true
     }
+
     fun setShowDialogFalse() {
         _showDialog.value = false
     }
 
-    fun setImages(images: List<@JvmSuppressWildcards Uri>) {
-        if (_imageUri.value != null){
-            _imageUri.value = _imageUri.value?.plus(images)
-        } else {
-            _imageUri.value = images
+
+//A partir de aca to do es de las imagenes
+
+
+//Funcion de guardado de imágenes
+private suspend fun saveImages(placeId: String?) {
+    if (_imageUri.value != null && placeId != null) {
+        db.storeImages(_imageUri.value!!, placeId)
+    } else {
+        Log.d("ERROR", "Error inesperado")
+    }
+}
+
+    var state by mutableStateOf(ImageList())
+        private set
+
+
+    fun updateSelectedImageList(listOfImages: List<Uri>) {
+        val updatedImageList = state.listOfSelectedImages.toMutableList()
+        viewModelScope.launch {
+            updatedImageList += listOfImages
+            state = state.copy(
+                listOfSelectedImages = updatedImageList.distinct()
+            )
+            _imageUri.value = state.listOfSelectedImages
+        }
+    }
+
+    fun onItemRemove(index: Int) {
+        val updatedImageList = state.listOfSelectedImages.toMutableList()
+        viewModelScope.launch {
+            updatedImageList.removeAt(index)
+            state = state.copy(
+                listOfSelectedImages = updatedImageList.distinct()
+            )
+            _imageUri.value = state.listOfSelectedImages
+        }
+    }
+
+    private fun resetImages() {
+        viewModelScope.launch {
+            state = state.copy(
+                listOfSelectedImages = emptyList()
+            )
         }
 
     }
