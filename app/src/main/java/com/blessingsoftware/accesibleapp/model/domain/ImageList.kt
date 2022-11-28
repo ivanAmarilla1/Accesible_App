@@ -1,7 +1,9 @@
 package com.blessingsoftware.accesibleapp.model.domain
 
+import android.graphics.Bitmap
 import android.net.Uri
 
 data class ImageList(
-    val listOfSelectedImages:List<Uri> = emptyList()
+    val listOfSelectedImages:List<Uri> = emptyList(),
+    val listOfSelectedBitmap:List<Bitmap> = emptyList()
 )

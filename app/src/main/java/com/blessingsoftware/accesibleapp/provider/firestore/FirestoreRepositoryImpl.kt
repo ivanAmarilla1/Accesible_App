@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.provider.firestore
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import com.blessingsoftware.accesibleapp.model.domain.Place
@@ -12,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.io.File
 import javax.inject.Inject
 
 class FirestoreRepositoryImpl @Inject constructor(
@@ -57,13 +59,15 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun storeImages(imgList: List<Uri>, placeId: String): Resource<String> {
+    override suspend fun storeImages(imgList: List<ByteArray>, placeId: String): Resource<String> {
+        var counter = 0
         return try {
             val folder: StorageReference = storage.reference.child("suggestionImages")
             val folderId: StorageReference = folder.child(placeId)
             for (item in imgList) {
-                val fileName: StorageReference = folderId.child("file" + item.lastPathSegment)
-                fileName.putFile(item).await()
+                val fileName: StorageReference = folderId.child("file$counter")
+                fileName.putBytes(item).await()
+                counter += 1
             }
             Resource.Success("Success")
         } catch (e: Exception) {

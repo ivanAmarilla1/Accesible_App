@@ -92,8 +92,7 @@ fun MakeSuggestion(
         }
     }
 
-    //Imagenes
-    val placeImages = suggestionViewModel.imageUri.observeAsState()
+
 
     //variables capturadas con LiveData
     val name: String by suggestionViewModel.name.observeAsState(initial = "")

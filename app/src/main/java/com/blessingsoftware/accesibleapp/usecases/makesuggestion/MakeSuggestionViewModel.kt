@@ -2,7 +2,11 @@ package com.blessingsoftware.accesibleapp.usecases.makesuggestion
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,8 +15,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.blessingsoftware.accesibleapp.model.domain.LocationLiveData
 import com.blessingsoftware.accesibleapp.model.domain.ImageList
+import com.blessingsoftware.accesibleapp.model.domain.LocationLiveData
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
@@ -21,6 +25,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -77,6 +82,12 @@ class MakeSuggestionViewModel @Inject constructor(
     //Imagen
     private val _imageUri = MutableLiveData<List<Uri>?>(null)
     val imageUri: LiveData<List<Uri>?> = _imageUri
+
+
+
+    //Imagen
+    private val _imageBitmap = MutableLiveData<List<Bitmap>?>(null)
+    val imageBitmap: LiveData<List<Bitmap>?> = _imageBitmap
 
     //Control de permisos (creo que no se usa ahora)
     private var _locationPermissionGranted = MutableLiveData(false)
@@ -164,6 +175,8 @@ class MakeSuggestionViewModel @Inject constructor(
         _flag.value = false
         _showDialog.value = false
         _imageUri.value = null
+        _imageBitmap.value = null
+        imageByteArray = null
         resetImages()
 
     }
@@ -208,39 +221,124 @@ class MakeSuggestionViewModel @Inject constructor(
 
 //A partir de aca to do es de las imagenes
 
+    //Imagen
+    private var imageByteArray: MutableList<ByteArray>? = arrayListOf()
 
-//Funcion de guardado de imágenes
-private suspend fun saveImages(placeId: String?) {
-    if (_imageUri.value != null && placeId != null) {
-        db.storeImages(_imageUri.value!!, placeId)
-    } else {
-        Log.d("ERROR", "Error inesperado")
+    //Funcion de guardado de imágenes
+    private suspend fun saveImages(placeId: String?) {
+        if (imageByteArray != null && placeId != null) {
+            db.storeImages(imageByteArray!!, placeId)
+        } else {
+            Log.d("ERROR", "Error inesperado")
+        }
     }
-}
+
+    fun getImageUriFromBitmap(context: Context, bitmap: Bitmap): Uri{
+        val bytes = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val path = MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, "Title", null)
+        return Uri.parse(path.toString())
+    }
+
+
+
 
     var state by mutableStateOf(ImageList())
         private set
 
 
-    fun updateSelectedImageList(listOfImages: List<Uri>) {
+    private fun resizeImages(listOfImages: List<Uri>, context: Context): MutableList<ByteArray> {
+        val PREFERRED_IMAGE_SIZE = 400  //400kb
+        val ONE_MB_TO_KB = 1024
+
+        val bitmapImages: MutableList<Bitmap> = arrayListOf()
+        val byteArray: MutableList<ByteArray> = arrayListOf()
+        val resizedImages: MutableList<Bitmap> = arrayListOf()
+
+        for (item in listOfImages) {
+            bitmapImages.add(toBitmap(item, context))
+
+        }
+
+        for (item in bitmapImages) {
+            val baos = ByteArrayOutputStream()
+            Log.d("Antes", "${item.byteCount / 1000} Kb")
+            item.compress(Bitmap.CompressFormat.JPEG, 50, baos)
+            //if compressed picture is greater than 400kb, than to reduce size
+            if (item.byteCount / ONE_MB_TO_KB > PREFERRED_IMAGE_SIZE) {
+                //resize photo
+                Log.d("Entro en resize", "Si entro")
+                resizedImages.add(resizePhoto(item))
+            } else {
+                Log.d("Entro en resize", "No entro")
+                resizedImages.add(item)
+            }
+            byteArray.add(baos.toByteArray())
+        }
+
+        for (item in resizedImages) {
+            Log.d("Despues", "${item.byteCount / 1000} Kb")
+        }
+
+        return byteArray
+
+    }
+
+    private fun resizePhoto(bitmap: Bitmap): Bitmap {
+
+        val w = bitmap.width
+        val h = bitmap.height
+
+        val aspRat = w.toDouble() / h
+        val W = 400
+        val H = (W * aspRat).toInt()
+        val b = Bitmap.createScaledBitmap(bitmap, W, H, false)
+        return b
+    }
+
+
+    private fun toBitmap(image: Uri, context: Context): Bitmap {
+        val bitmap = if (Build.VERSION.SDK_INT < 28) {
+            MediaStore.Images.Media.getBitmap(
+                context.contentResolver,
+                image
+            )
+        } else {
+            val source = ImageDecoder.createSource(context.contentResolver, image)
+            ImageDecoder.decodeBitmap(source)
+        }
+        return bitmap
+    }
+
+
+    fun updateSelectedImageList(listOfImages: List<Uri>, context: Context) {
+        //Guardar las imagenes para enviarlas luego a la db
+        val resizedImagesByteArray = resizeImages(listOfImages, context)
+        for (item in resizedImagesByteArray) {
+            imageByteArray?.add(item)
+        }
+
+        //Actualizar la UI
         val updatedImageList = state.listOfSelectedImages.toMutableList()
         viewModelScope.launch {
             updatedImageList += listOfImages
             state = state.copy(
                 listOfSelectedImages = updatedImageList.distinct()
             )
-            _imageUri.value = state.listOfSelectedImages
+
+            //_imageBitmap.value = state.listOfSelectedBitmap
         }
     }
 
-    fun onItemRemove(index: Int) {
+    fun onItemRemove(index: Int, context: Context) {
         val updatedImageList = state.listOfSelectedImages.toMutableList()
         viewModelScope.launch {
             updatedImageList.removeAt(index)
             state = state.copy(
                 listOfSelectedImages = updatedImageList.distinct()
             )
-            _imageUri.value = state.listOfSelectedImages
+            imageByteArray?.removeAt(index)
+            //_imageBitmap.value = state.listOfSelectedBitmap
         }
     }
 
@@ -250,7 +348,5 @@ private suspend fun saveImages(placeId: String?) {
                 listOfSelectedImages = emptyList()
             )
         }
-
     }
-
 }

@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.provider.firestore
 
+import android.graphics.Bitmap
 import android.net.Uri
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
@@ -23,7 +24,7 @@ interface FirestoreRepository {
     suspend fun getAllSuggestions() : ArrayList<Suggestion>
 
     //Images
-    suspend fun storeImages(imgList: List<Uri>, placeId: String) : Resource<String>
+    suspend fun storeImages(imgList: List<ByteArray>, placeId: String) : Resource<String>
     suspend fun getImages(placeId: String) : ArrayList<Uri>?
 
 

@@ -4,6 +4,7 @@ import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -13,11 +14,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -30,6 +33,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun SuggestionImages(viewModel: MakeSuggestionViewModel) {
 
+
+    val context = LocalContext.current
     val state = viewModel.state
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
@@ -38,7 +43,7 @@ fun SuggestionImages(viewModel: MakeSuggestionViewModel) {
         rememberLauncherForActivityResult(
             ActivityResultContracts.GetMultipleContents()
         ) {
-            viewModel.updateSelectedImageList(listOfImages = it)
+            viewModel.updateSelectedImageList(listOfImages = it, context)
         }
 
     val permissionState =
@@ -77,7 +82,7 @@ fun SuggestionImages(viewModel: MakeSuggestionViewModel) {
                         ImagePreviewItem(uri = uri,
                             height = screenHeight * 0.5f,
                             width = screenWidth * 0.6f,
-                            onClick = { viewModel.onItemRemove(index) }
+                            onClick = { viewModel.onItemRemove(index, context) }
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                     }
