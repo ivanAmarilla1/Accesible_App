@@ -2,13 +2,10 @@ package com.blessingsoftware.accesibleapp.usecases.makesuggestion
 
 import android.content.ContentValues.TAG
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
@@ -18,7 +15,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.*
@@ -39,7 +35,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.*
@@ -51,6 +46,7 @@ import com.google.maps.android.compose.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MakeSuggestion(
@@ -59,6 +55,7 @@ fun MakeSuggestion(
     currentUser: FirebaseUser?,
     scaffoldState: ScaffoldState
 ) {
+
     //Scroll
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     //Ubicación del usuario en live data
@@ -83,16 +80,12 @@ fun MakeSuggestion(
             position = CameraPosition.fromLatLngZoom(cam, 16f)
         }
     }
-
     //Captura el movimiento del mapa, si el mapa se mueve desactiva el verticalScroll, si no, lo activa
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
             columnScrollingEnabled = true
-            Log.d(TAG, "Map camera stopped moving - Enabling column scrolling...")
         }
     }
-
-
 
     //variables capturadas con LiveData
     val name: String by suggestionViewModel.name.observeAsState(initial = "")
@@ -100,7 +93,6 @@ fun MakeSuggestion(
     val userRating: Int by suggestionViewModel.rating.observeAsState(initial = 0)
     val placeType: String by suggestionViewModel.placeType.observeAsState(initial = "Seleccione")
     val suggestionFlow = suggestionViewModel.suggestionFlow.collectAsState()
-    val isGPSOn = suggestionViewModel.isGPSOn.observeAsState()
     val flag = suggestionViewModel.flag.observeAsState()
     //Utils
     val focusManager = LocalFocusManager.current
@@ -115,7 +107,6 @@ fun MakeSuggestion(
     val validateDescriptionError = stringResource(R.string.validate_suggestion_description)
     val validateTypeError = stringResource(R.string.validate_suggestion_type)
     val validateRateError = stringResource(R.string.validate_suggestion_rate)
-
     //Dialog
     val showDialog = suggestionViewModel.showDialog.observeAsState()
 
@@ -190,7 +181,6 @@ fun MakeSuggestion(
             Spacer(modifier = Modifier.height(15.dp))
 
             AddPlaceImages(suggestionViewModel, context)
-            //Spacer(modifier = Modifier.height(6.dp))
             SendSuggestionButton {
                 sendSuggestionFunction(
                     name,
@@ -204,8 +194,6 @@ fun MakeSuggestion(
                 columnScrollingEnabled = true
             }
         }
-
-        Log.d("currentUser xd", currentUser.toString())
         if (currentUser != null) {
             SendSuggestionDialog(
                 suggestionViewModel,
@@ -220,7 +208,6 @@ fun MakeSuggestion(
             )
         }
     }
-
     suggestionFlow.value.let {
         if (flag.value == true) {
             when (it) {
@@ -276,8 +263,6 @@ fun SendSuggestionDialog(
             }
         }
     }
-
-
 }
 
 @Composable
@@ -521,17 +506,20 @@ private fun sendSuggestionFunction(
     viewModel: MakeSuggestionViewModel,
     context: Context,
 ) {
-
     if (userMarker != null) {
         if (viewModel.validateDataMakeSuggestion(name, description, placeType, rate)) {
-            viewModel.setShowDialogTrue()
+            if (viewModel.isImageByteArrayEmpty()) {
+                Toast.makeText(context,"Selecciones al menos una imagen del lugar", Toast.LENGTH_LONG).show()
+            } else {
+                viewModel.setShowDialogTrue()
+            }
         } else {
-            Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Corriga los errores en los campos", Toast.LENGTH_LONG)
+                .show()
         }
     } else {
         Toast.makeText(context, "Seleccione una ubicación en el mapa", Toast.LENGTH_LONG).show()
     }
-
 }
 
 @Composable

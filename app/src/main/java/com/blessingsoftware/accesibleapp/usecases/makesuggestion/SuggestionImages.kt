@@ -82,7 +82,7 @@ fun SuggestionImages(viewModel: MakeSuggestionViewModel) {
                         ImagePreviewItem(uri = uri,
                             height = screenHeight * 0.5f,
                             width = screenWidth * 0.6f,
-                            onClick = { viewModel.onItemRemove(index, context) }
+                            onClick = { viewModel.onItemRemove(index) }
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                     }

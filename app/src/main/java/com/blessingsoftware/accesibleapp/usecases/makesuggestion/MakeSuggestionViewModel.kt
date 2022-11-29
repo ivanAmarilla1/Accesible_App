@@ -80,14 +80,11 @@ class MakeSuggestionViewModel @Inject constructor(
     val showDialog: LiveData<Boolean> = _showDialog
 
     //Imagen
-    private val _imageUri = MutableLiveData<List<Uri>?>(null)
-    val imageUri: LiveData<List<Uri>?> = _imageUri
-
-
-
+    //private val _imageUri = MutableLiveData<List<Uri>?>(null)
+    //val imageUri: LiveData<List<Uri>?> = _imageUri
     //Imagen
-    private val _imageBitmap = MutableLiveData<List<Bitmap>?>(null)
-    val imageBitmap: LiveData<List<Bitmap>?> = _imageBitmap
+    //private val _imageBitmap = MutableLiveData<List<Bitmap>?>(null)
+    //val imageBitmap: LiveData<List<Bitmap>?> = _imageBitmap
 
     //Control de permisos (creo que no se usa ahora)
     private var _locationPermissionGranted = MutableLiveData(false)
@@ -174,8 +171,8 @@ class MakeSuggestionViewModel @Inject constructor(
         _validateRate.value = true
         _flag.value = false
         _showDialog.value = false
-        _imageUri.value = null
-        _imageBitmap.value = null
+        //_imageUri.value = null
+        //_imageBitmap.value = null
         imageByteArray = null
         resetImages()
 
@@ -224,6 +221,10 @@ class MakeSuggestionViewModel @Inject constructor(
     //Imagen
     private var imageByteArray: MutableList<ByteArray>? = arrayListOf()
 
+    fun isImageByteArrayEmpty(): Boolean{
+        return imageByteArray?.isEmpty() ?: true
+    }
+
     //Funcion de guardado de imágenes
     private suspend fun saveImages(placeId: String?) {
         if (imageByteArray != null && placeId != null) {
@@ -233,33 +234,53 @@ class MakeSuggestionViewModel @Inject constructor(
         }
     }
 
-    fun getImageUriFromBitmap(context: Context, bitmap: Bitmap): Uri{
-        val bytes = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-        val path = MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, "Title", null)
-        return Uri.parse(path.toString())
-    }
-
-
-
-
     var state by mutableStateOf(ImageList())
         private set
 
+    fun updateSelectedImageList(listOfImages: List<Uri>, context: Context) {
+        //Guardar las imagenes para enviarlas luego a la db
+        val resizedImagesByteArray = resizeImages(listOfImages, context)
+        for (item in resizedImagesByteArray) {
+            imageByteArray?.add(item)
+        }
+        //Actualizar la UI
+        val updatedImageList = state.listOfSelectedImages.toMutableList()
+        viewModelScope.launch {
+            updatedImageList += listOfImages
+            state = state.copy(
+                listOfSelectedImages = updatedImageList.distinct()
+            )
+        }
+    }
+
+    fun onItemRemove(index: Int) {
+        val updatedImageList = state.listOfSelectedImages.toMutableList()
+        viewModelScope.launch {
+            updatedImageList.removeAt(index)
+            state = state.copy(
+                listOfSelectedImages = updatedImageList.distinct()
+            )
+            imageByteArray?.removeAt(index)
+        }
+    }
+
+    private fun resetImages() {
+        viewModelScope.launch {
+            state = state.copy(
+                listOfSelectedImages = emptyList()
+            )
+        }
+    }
 
     private fun resizeImages(listOfImages: List<Uri>, context: Context): MutableList<ByteArray> {
         val PREFERRED_IMAGE_SIZE = 400  //400kb
         val ONE_MB_TO_KB = 1024
-
         val bitmapImages: MutableList<Bitmap> = arrayListOf()
         val byteArray: MutableList<ByteArray> = arrayListOf()
         val resizedImages: MutableList<Bitmap> = arrayListOf()
-
         for (item in listOfImages) {
             bitmapImages.add(toBitmap(item, context))
-
         }
-
         for (item in bitmapImages) {
             val baos = ByteArrayOutputStream()
             Log.d("Antes", "${item.byteCount / 1000} Kb")
@@ -267,28 +288,18 @@ class MakeSuggestionViewModel @Inject constructor(
             //if compressed picture is greater than 400kb, than to reduce size
             if (item.byteCount / ONE_MB_TO_KB > PREFERRED_IMAGE_SIZE) {
                 //resize photo
-                Log.d("Entro en resize", "Si entro")
                 resizedImages.add(resizePhoto(item))
             } else {
-                Log.d("Entro en resize", "No entro")
                 resizedImages.add(item)
             }
             byteArray.add(baos.toByteArray())
         }
-
-        for (item in resizedImages) {
-            Log.d("Despues", "${item.byteCount / 1000} Kb")
-        }
-
         return byteArray
-
     }
 
     private fun resizePhoto(bitmap: Bitmap): Bitmap {
-
         val w = bitmap.width
         val h = bitmap.height
-
         val aspRat = w.toDouble() / h
         val W = 400
         val H = (W * aspRat).toInt()
@@ -311,42 +322,4 @@ class MakeSuggestionViewModel @Inject constructor(
     }
 
 
-    fun updateSelectedImageList(listOfImages: List<Uri>, context: Context) {
-        //Guardar las imagenes para enviarlas luego a la db
-        val resizedImagesByteArray = resizeImages(listOfImages, context)
-        for (item in resizedImagesByteArray) {
-            imageByteArray?.add(item)
-        }
-
-        //Actualizar la UI
-        val updatedImageList = state.listOfSelectedImages.toMutableList()
-        viewModelScope.launch {
-            updatedImageList += listOfImages
-            state = state.copy(
-                listOfSelectedImages = updatedImageList.distinct()
-            )
-
-            //_imageBitmap.value = state.listOfSelectedBitmap
-        }
-    }
-
-    fun onItemRemove(index: Int, context: Context) {
-        val updatedImageList = state.listOfSelectedImages.toMutableList()
-        viewModelScope.launch {
-            updatedImageList.removeAt(index)
-            state = state.copy(
-                listOfSelectedImages = updatedImageList.distinct()
-            )
-            imageByteArray?.removeAt(index)
-            //_imageBitmap.value = state.listOfSelectedBitmap
-        }
-    }
-
-    private fun resetImages() {
-        viewModelScope.launch {
-            state = state.copy(
-                listOfSelectedImages = emptyList()
-            )
-        }
-    }
 }
