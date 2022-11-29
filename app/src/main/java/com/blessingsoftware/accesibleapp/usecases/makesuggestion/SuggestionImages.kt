@@ -107,7 +107,7 @@ fun SuggestionImages(viewModel: MakeSuggestionViewModel) {
 
 
 @Composable
-fun ImagePreviewItem(
+private fun ImagePreviewItem(
     uri: Uri,
     height: Dp,
     width: Dp,

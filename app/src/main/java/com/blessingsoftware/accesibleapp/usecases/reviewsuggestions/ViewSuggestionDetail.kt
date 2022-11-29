@@ -4,7 +4,7 @@ import android.content.ContentValues
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
-import androidx.compose.foundation.Image
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -26,12 +26,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.ui.composables.CustomDialog
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
+import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -201,6 +201,9 @@ private fun ShowSuggestionDetails(
             }
         }
     }
+
+    //SuggestionDetailBackHandler(viewModel)
+
 }
 
 @Composable
@@ -356,20 +359,6 @@ fun SuggestionStatus(suggestionStatus: Int) {
     Spacer(modifier = Modifier.height(15.dp))
 }
 
-@Composable
-private fun SuggestionImages(viewModel: ReviewSuggestionViewModel, suggestionId: String, scope: CoroutineScope) {
-    LaunchedEffect(Unit) {
-        viewModel.getSuggestionImages(suggestionId)
-    }
-    val images = viewModel.imageList.observeAsState()
-
-    if (images.value != null) {
-        for (item in images.value!!) {
-            AsyncImage(model = item, contentDescription = "Image")
-        }
-    }
-
-}
 
 @Composable
 private fun SuggestionLocation(
@@ -484,4 +473,14 @@ private fun SuggestionName(suggestionName: String) {
         Text(text = suggestionName, style = MaterialTheme.typography.h5)
     }
     Spacer(modifier = Modifier.height(15.dp))
+}
+
+@Composable
+private fun SuggestionDetailBackHandler(
+    viewModel: ReviewSuggestionViewModel,
+) {
+    BackHandler(enabled = true, onBack = {
+        viewModel.cleanImages()
+    })
+
 }

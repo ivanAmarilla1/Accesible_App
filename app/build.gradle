@@ -121,6 +121,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.2.2")
     //permission handling in compose
     implementation 'com.google.accompanist:accompanist-permissions:0.24.11-rc'
+    //accompanist placeholder for loading
+    implementation 'com.google.accompanist:accompanist-placeholder:0.28.0'
 
 
 

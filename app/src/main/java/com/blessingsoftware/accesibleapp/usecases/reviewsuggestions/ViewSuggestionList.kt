@@ -85,6 +85,7 @@ private fun ShowAllSuggestions(
     Spacer(modifier = Modifier.height(5.dp))
     SuggestionList(suggestions) {
         viewModel.setSelectedSuggestion(it)
+        viewModel.cleanImages()
         navController.navigate(AppScreens.SuggestionDetail.route) {
             launchSingleTop = true
         }

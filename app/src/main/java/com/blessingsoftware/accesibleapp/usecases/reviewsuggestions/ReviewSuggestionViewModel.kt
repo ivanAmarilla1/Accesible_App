@@ -173,6 +173,10 @@ class ReviewSuggestionViewModel @Inject constructor(
         _isSuggestionEliminated.value = false
     }
 
+    fun cleanImages() {
+        _imageList.value = null
+    }
+
     fun setShowDialogTrue() {
         _showDialog.value = true
     }

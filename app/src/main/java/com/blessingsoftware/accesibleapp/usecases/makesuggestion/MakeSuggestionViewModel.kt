@@ -173,7 +173,7 @@ class MakeSuggestionViewModel @Inject constructor(
         _showDialog.value = false
         //_imageUri.value = null
         //_imageBitmap.value = null
-        imageByteArray = null
+        imageByteArray = arrayListOf()
         resetImages()
 
     }

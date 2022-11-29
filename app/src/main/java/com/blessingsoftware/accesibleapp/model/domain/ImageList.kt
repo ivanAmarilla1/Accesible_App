@@ -4,6 +4,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 
 data class ImageList(
-    val listOfSelectedImages:List<Uri> = emptyList(),
+    var listOfSelectedImages:List<Uri> = emptyList(),
     val listOfSelectedBitmap:List<Bitmap> = emptyList()
 )
