@@ -155,6 +155,7 @@ class MakeSuggestionViewModel @Inject constructor(
         if (_suggestionFlow.value == Resource.Success("Success")) {
             saveImages(result[_suggestionFlow.value])
         }
+        _suggestionFlow.value = result.keys.first()
         //result[_suggestionFlow.value]?.let { Log.d("Id de Resultado", it) }
     }
 

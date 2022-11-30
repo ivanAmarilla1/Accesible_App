@@ -26,6 +26,7 @@ interface FirestoreRepository {
     //Images
     suspend fun storeImages(imgList: List<ByteArray>, placeId: String) : Resource<String>
     suspend fun getImages(placeId: String) : ArrayList<Uri>?
+    suspend fun deleteImages(placeId: String, paths: ArrayList<String>) : Resource<String>
 
 
 

@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
@@ -14,7 +13,6 @@ import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -156,6 +154,11 @@ class ReviewSuggestionViewModel @Inject constructor(
                 _approveSuggestionFlag.value = true
                 val deleteSuggestion =
                     db.deleteSuggestion(suggestion.suggestionId)
+                //Elimina las imagenes de Firebase Storage
+                if (deleteSuggestion == Resource.Success("Success")) {
+                    val paths = getImagePaths()
+                    db.deleteImages(suggestion.suggestionId, paths)
+                }
                 _approveSuggestionFlow.value = deleteSuggestion
             }
         } else {
@@ -163,6 +166,21 @@ class ReviewSuggestionViewModel @Inject constructor(
             _approveSuggestionFlow.value =
                 Resource.Failure(exception = Exception("Usted no es un administrador"))
         }
+    }
+
+    private fun getImagePaths(): ArrayList<String> {
+        val paths = arrayListOf<String>()
+        if (_imageList.value != null) {
+            for (item in _imageList.value!!) {
+                item.lastPathSegment?.let {
+                    paths.add(it)
+                    Log.d("Item", item.lastPathSegment.toString())
+                }
+            }
+        } else {
+            Log.d("TAG", "_imageList es nulo")
+        }
+        return paths
     }
 
     fun clean() {

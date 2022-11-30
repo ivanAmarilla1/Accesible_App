@@ -1,6 +1,5 @@
 package com.blessingsoftware.accesibleapp.provider.firestore
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import com.blessingsoftware.accesibleapp.model.domain.Place
@@ -13,7 +12,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import java.io.File
 import javax.inject.Inject
 
 class FirestoreRepositoryImpl @Inject constructor(
@@ -88,6 +86,19 @@ class FirestoreRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    override suspend fun deleteImages(placeId: String, paths: ArrayList<String>): Resource<String> {
+        return try {
+            for (item in paths) {
+                val imagePath: StorageReference = storage.reference.child(item)
+                imagePath.delete().await()
+            }
+            Resource.Success("Success")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
         }
     }
 
