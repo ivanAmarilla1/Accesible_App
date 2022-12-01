@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.R
+import com.blessingsoftware.accesibleapp.model.domain.PlaceTypes
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.*
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
@@ -272,23 +273,19 @@ fun PlaceType(
     validateTypeError: String,
     onPlaceTypeSelected: (String) -> Unit
 ) {
-    val typeList = listOf(
-        "Estacionamiento",
-        "Comercio",
-        "Lugar Público",
-        "Entidad Estatal",
-        "Restaurante",
-        "Hotel",
-        "Punto de Interés",
-        "Zona de Entretenimiento",
-        "Otros"
-    )
+    val typeList = PlaceTypes.values()
+
+    val list: MutableList<String> = arrayListOf()
+    for (item in typeList) {
+        list.add(item.description())
+    }
+
 
     Text(text = "Tipo de Lugar", color = MaterialTheme.colors.secondary)
     Spacer(modifier = Modifier.height(5.dp))
     DropDownMenu(
         placeType,
-        typeList,
+        list,
         !validateType!!,
         validateTypeError,
         Modifier
@@ -345,7 +342,7 @@ private fun PlaceDescriptionField(
         leadingIconImageVector = Icons.Default.Description,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Done
+            imeAction = ImeAction.Default
         ),
         keyboardActions = KeyboardActions(
             onDone = { focusManager.clearFocus() },

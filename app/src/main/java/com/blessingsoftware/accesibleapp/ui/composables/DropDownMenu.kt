@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.blessingsoftware.accesibleapp.model.domain.PlaceTypes
 
 @Composable
 fun DropDownMenu(
@@ -97,3 +98,4 @@ fun DropDownMenu(
     }
 
 }
+

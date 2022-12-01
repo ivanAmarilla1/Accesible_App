@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -99,7 +100,6 @@ private fun ShowSuggestionDetails(
             .padding(16.dp, 50.dp, 16.dp, 0.dp)
             .verticalScroll(rememberScrollState(), columnScrollingEnabled)
     ) {
-        SuggestionImages(viewModel, suggestion.value!!.suggestionId, scope)
         SuggestionName(suggestion.value!!.suggestionName)
         SuggestionDesctiption(suggestion.value!!.suggestionDescription)
         SuggestionType(suggestion.value!!.suggestionType)
@@ -131,6 +131,7 @@ private fun ShowSuggestionDetails(
                     }
                 )
         )
+        SuggestionImages(viewModel, suggestion.value!!.suggestionId, scope)
         SuggestionStatus(suggestion.value!!.suggestionApproveStatus)
         if (suggestion.value!!.suggestionApproveStatus == 1) {
             ApproveOrDeclineButtons(
@@ -454,7 +455,10 @@ private fun SuggestionDesctiption(suggestionDescription: String) {
     ) {
         Text(text = "Descripción de Lugar", style = MaterialTheme.typography.body1)
         Spacer(modifier = Modifier.height(10.dp))
-        Text(text = suggestionDescription, style = MaterialTheme.typography.h5)
+        SelectionContainer {
+            Text(text = suggestionDescription, style = MaterialTheme.typography.h5)
+        }
+
     }
     Spacer(modifier = Modifier.height(15.dp))
 }

@@ -13,6 +13,7 @@ data class Place(
     var placeReviewedBy: String = "",
     var placeRate: Int = 0,
     var placeType: String = "",
+    var placeImages: String = "",
     @ServerTimestamp
     val placeAddDate: Date? = null,
     @DocumentId

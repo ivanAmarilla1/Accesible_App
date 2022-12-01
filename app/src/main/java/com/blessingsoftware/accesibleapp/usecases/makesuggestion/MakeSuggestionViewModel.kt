@@ -15,10 +15,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.blessingsoftware.accesibleapp.model.domain.ImageList
-import com.blessingsoftware.accesibleapp.model.domain.LocationLiveData
-import com.blessingsoftware.accesibleapp.model.domain.Resource
-import com.blessingsoftware.accesibleapp.model.domain.Suggestion
+import com.blessingsoftware.accesibleapp.model.domain.*
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -151,12 +148,11 @@ class MakeSuggestionViewModel @Inject constructor(
         )
         _flag.value = true
         val result = db.storeSuggestion(suggestion)
-        _suggestionFlow.value = result.keys.first()
-        if (_suggestionFlow.value == Resource.Success("Success")) {
-            saveImages(result[_suggestionFlow.value])
+        val key = result.keys.first()
+        if (key == Resource.Success("Success")) {
+            saveImages(result[key])
         }
-        _suggestionFlow.value = result.keys.first()
-        //result[_suggestionFlow.value]?.let { Log.d("Id de Resultado", it) }
+        _suggestionFlow.value = key
     }
 
 
@@ -222,16 +218,17 @@ class MakeSuggestionViewModel @Inject constructor(
     //Imagen
     private var imageByteArray: MutableList<ByteArray>? = arrayListOf()
 
-    fun isImageByteArrayEmpty(): Boolean{
+    fun isImageByteArrayEmpty(): Boolean {
         return imageByteArray?.isEmpty() ?: true
     }
 
     //Funcion de guardado de imágenes
     private suspend fun saveImages(placeId: String?) {
-        if (imageByteArray != null && placeId != null) {
+        if (!isImageByteArrayEmpty() && placeId != null) {
+            Log.d("Cantidad", imageByteArray!!.size.toString())
             db.storeImages(imageByteArray!!, placeId)
         } else {
-            Log.d("ERROR", "Error inesperado")
+            Log.d("ERROR", "Error inesperado ${!isImageByteArrayEmpty()} y ${placeId.toString()}")
         }
     }
 

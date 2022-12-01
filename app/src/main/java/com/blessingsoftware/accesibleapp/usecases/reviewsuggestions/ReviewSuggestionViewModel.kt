@@ -100,7 +100,8 @@ class ReviewSuggestionViewModel @Inject constructor(
                     suggestion.suggestionAddedBy,
                     repository.currentUser!!.uid,
                     suggestion.suggestionRate,
-                    suggestion.suggestionType
+                    suggestion.suggestionType,
+                    suggestion.suggestionId
                 )
                 _message.value = "Sugerencia aprobada correctamente"
                 _approveSuggestionFlag.value = true
@@ -155,7 +156,7 @@ class ReviewSuggestionViewModel @Inject constructor(
                 val deleteSuggestion =
                     db.deleteSuggestion(suggestion.suggestionId)
                 //Elimina las imagenes de Firebase Storage
-                if (deleteSuggestion == Resource.Success("Success")) {
+                if (deleteSuggestion == Resource.Success("Success") && suggestion.suggestionApproveStatus == 3) {
                     val paths = getImagePaths()
                     db.deleteImages(suggestion.suggestionId, paths)
                 }
