@@ -193,7 +193,6 @@ class MakeSuggestionViewModel @Inject constructor(
 
     fun setRating(rate: Int) {
         _rating.value = rate
-        Log.d("rate", _rating.value.toString())
     }
 
     fun setPlaceType(type: String) {

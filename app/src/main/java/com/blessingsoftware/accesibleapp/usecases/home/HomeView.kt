@@ -1,22 +1,27 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
 import android.app.Activity
-import android.graphics.Paint
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.blessingsoftware.accesibleapp.model.domain.Place
+import com.blessingsoftware.accesibleapp.ui.composables.Images
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -32,7 +37,7 @@ fun HomeView(viewModel: HomeViewModel, navController: NavHostController) {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
     val bottomDrawerState = rememberBottomDrawerState(BottomDrawerValue.Closed)
@@ -50,9 +55,10 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
     //TODO Centrar la camara en el marcador seleccionado
 
     BottomDrawer(
+        //modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
         drawerState = bottomDrawerState,
         drawerContent = {
-            DrawerContent(selectedPlace.value)
+            DrawerContent(selectedPlace.value, viewModel, bottomDrawerState)
         },
         gesturesEnabled = bottomDrawerState.isOpen
     ) {
@@ -77,7 +83,11 @@ fun MainMap(viewModel: HomeViewModel, onMarkerClicked: (Place) -> Boolean) {
         position = CameraPosition.fromLatLngZoom(cam, 14f)
     }
     //Composable de Google Maps
-    GoogleMap(modifier = Modifier.fillMaxSize().padding(bottom = 50.dp), cameraPositionState = cameraPosition) {
+    GoogleMap(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 50.dp), cameraPositionState = cameraPosition
+    ) {
         places.forEach { place ->
             if (place.placeLat.isNotEmpty() && place.placeLng.isNotEmpty()) {
                 val placePosition =
@@ -98,36 +108,60 @@ fun MainMap(viewModel: HomeViewModel, onMarkerClicked: (Place) -> Boolean) {
 }
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun DrawerContent(selectedPlace: Place?) {
-    Column(
+private fun DrawerContent(
+    selectedPlace: Place?,
+    viewModel: HomeViewModel,
+    bottomDrawerState: BottomDrawerState
+) {
+
+    // todo mostrar imagenes (1, 2, 3 o mas)
+
+    Surface(
         Modifier
             .background(MaterialTheme.colors.onSecondary)
             .fillMaxWidth()
-            .height(400.dp)
+            .height(600.dp)
     ) {
-        if (selectedPlace != null) {
-            Spacer(modifier = Modifier.height(15.dp))
-            Text(
-                selectedPlace.placeName,
-                modifier = Modifier.fillMaxWidth(0.9f),
-                MaterialTheme.colors.secondary,
-                style = MaterialTheme.typography.h6,
-                textAlign = TextAlign.Center,
-            )
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colors.onSecondary)
+                .verticalScroll(rememberScrollState())
+        ) {
             Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                selectedPlace.placeDescription,
-                modifier = Modifier.fillMaxWidth(0.9f),
-                MaterialTheme.colors.secondary,
-                style = MaterialTheme.typography.body1,
-                textAlign = TextAlign.Start,
-            )
-            Button(onClick = { Log.d("TAG", "DrawerContent: ") }) {
+            Divider(modifier = Modifier.fillMaxWidth(0.2f).align(Alignment.CenterHorizontally), thickness = 7.dp, color = MaterialTheme.colors.secondary)
+            if (selectedPlace != null) {
+                Images(
+                    viewModel = viewModel,
+                    id = selectedPlace.placeImages,
+                    modifier = Modifier.height(350.dp)
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    selectedPlace.placeName,
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    MaterialTheme.colors.secondary,
+                    style = MaterialTheme.typography.h6,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    selectedPlace.placeDescription,
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    MaterialTheme.colors.secondary,
+                    style = MaterialTheme.typography.body1,
+                    textAlign = TextAlign.Start,
+                )
+                Button(onClick = { Log.d("TAG", "DrawerContent: ") }) {
+                    Text(text = "Hola")
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(text = "Hola")
+                Text(text = "Hola")
+                Text(text = "Hola")
                 Text(text = "Hola")
             }
-
-
         }
 
     }

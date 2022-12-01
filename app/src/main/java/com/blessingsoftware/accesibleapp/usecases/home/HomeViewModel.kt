@@ -2,6 +2,7 @@ package com.blessingsoftware.accesibleapp.usecases.home
 
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,6 +22,10 @@ class HomeViewModel @Inject constructor(application: Application, private val db
     private val _isBottomBarVisible = MutableLiveData<Boolean>()
     val isBottomBarVisible : LiveData<Boolean?> =_isBottomBarVisible
 
+    //El listado de url de imagenes
+    private val _imageList = MutableLiveData<ArrayList<Uri>?>(null)
+    val imageList: LiveData<ArrayList<Uri>?> = _imageList
+
     private fun getPlaces(){
         places.value = db.getAllPlaces()
     }
@@ -31,6 +36,10 @@ class HomeViewModel @Inject constructor(application: Application, private val db
 
     fun setBottomBarVisible(boolean: Boolean) {
         _isBottomBarVisible.value = boolean
+    }
+
+    suspend fun getPlaceImages (uid: String) {
+        _imageList.value = db.getImages(uid)
     }
 
     init {
