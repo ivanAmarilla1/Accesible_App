@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -234,11 +235,16 @@ class MakeSuggestionViewModel @Inject constructor(
     var state by mutableStateOf(ImageList())
         private set
 
+
     fun updateSelectedImageList(listOfImages: List<Uri>, context: Context) {
         //Guardar las imagenes para enviarlas luego a la db
         val resizedImagesByteArray = resizeImages(listOfImages, context)
         for (item in resizedImagesByteArray) {
-            imageByteArray?.add(item)
+            if ((imageByteArray?.size ?: 0) < 4) {
+                imageByteArray?.add(item)
+            } else {
+                break
+            }
         }
         //Actualizar la UI
         val updatedImageList = state.listOfSelectedImages.toMutableList()
@@ -248,6 +254,8 @@ class MakeSuggestionViewModel @Inject constructor(
                 listOfSelectedImages = updatedImageList.distinct()
             )
         }
+
+
     }
 
     fun onItemRemove(index: Int) {
@@ -280,7 +288,6 @@ class MakeSuggestionViewModel @Inject constructor(
         }
         for (item in bitmapImages) {
             val baos = ByteArrayOutputStream()
-            Log.d("Antes", "${item.byteCount / 1000} Kb")
             item.compress(Bitmap.CompressFormat.JPEG, 50, baos)
             //if compressed picture is greater than 400kb, than to reduce size
             if (item.byteCount / ONE_MB_TO_KB > PREFERRED_IMAGE_SIZE) {

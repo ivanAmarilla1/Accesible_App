@@ -1,7 +1,9 @@
 package com.blessingsoftware.accesibleapp.usecases.makesuggestion
 
 import android.Manifest
+import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -27,6 +29,7 @@ import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import java.io.File
 
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -43,7 +46,16 @@ fun SuggestionImages(viewModel: MakeSuggestionViewModel) {
         rememberLauncherForActivityResult(
             ActivityResultContracts.GetMultipleContents()
         ) {
-            viewModel.updateSelectedImageList(listOfImages = it, context)
+            Log.d("State size", state.listOfSelectedImages.size.toString())
+            if (state.listOfSelectedImages.size < 4) {
+                val max = 4 - state.listOfSelectedImages.size
+                if (it.lastIndex < max){
+                    viewModel.updateSelectedImageList(listOfImages = it, context)
+                } else {
+                    viewModel.updateSelectedImageList(listOfImages = it.subList(0,max), context)
+                }
+
+            }
         }
 
     val permissionState =
@@ -70,8 +82,7 @@ fun SuggestionImages(viewModel: MakeSuggestionViewModel) {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Seleccione una imágen")
-
+                    Text(text = "Seleccione una imágen (Puede seleccionar hasta 4 imágenes)")
                 }
             }
             LazyRow(
