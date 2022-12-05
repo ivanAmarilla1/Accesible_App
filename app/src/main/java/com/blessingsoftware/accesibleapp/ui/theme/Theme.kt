@@ -13,12 +13,12 @@ private val DarkColorPalette = darkColors(
     primary = Primary,//Botones o cosas de la interfaz principal, etc
     primaryVariant = PimaryVariant,//reservado para otro color de la interfaz
     secondary = White,//Texto de la app
+    surface = SurfaceColor,// Para animacion de placeholder de imagenes
     secondaryVariant = DarkModeSecondaryTextColor,//placeholders
     onSecondary = DarkModeSecondary,//Fondo de Textfields
     onBackground = White,//Texto de los botones
     onSurface = Black,//Sobre mapa
     background = DarkModeBackground,//fondo de la app
-
 
 )
 
@@ -27,6 +27,7 @@ private val LightColorPalette = lightColors(
     primary = Primary,//Botones, interfaz principal, etc
     primaryVariant = PimaryVariant,//reservado para otro color de la interfaz
     secondary = LightModeText,//Texto de la app
+    surface = SurfaceColor,// Para animacion de placeholder de imagenes
     secondaryVariant = LightModeSecondaryTextColor,//placeholders
     onSecondary = LightModeSecondary,//Fondo de Textfields
     onBackground = White,//Texto de los botones

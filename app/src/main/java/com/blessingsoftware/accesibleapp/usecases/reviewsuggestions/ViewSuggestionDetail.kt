@@ -32,7 +32,6 @@ import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.ui.composables.CustomDialog
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
-import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -425,6 +424,7 @@ private fun SuggestioRate(suggestionRate: Int) {
     ) {
         Text(text = "Calificación preliminar del Usuario", style = MaterialTheme.typography.body1)
         Spacer(modifier = Modifier.height(10.dp))
+        //StarRate(rate = suggestionRate)
         StarRate(rate = suggestionRate)
     }
     Spacer(modifier = Modifier.height(15.dp))

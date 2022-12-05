@@ -254,8 +254,6 @@ class MakeSuggestionViewModel @Inject constructor(
                 listOfSelectedImages = updatedImageList.distinct()
             )
         }
-
-
     }
 
     fun onItemRemove(index: Int) {

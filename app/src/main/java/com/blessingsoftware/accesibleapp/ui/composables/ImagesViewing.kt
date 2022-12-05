@@ -14,7 +14,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.*
 import com.blessingsoftware.accesibleapp.model.domain.ImageList
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -34,7 +34,8 @@ fun Images(
     val screenWidth = configuration.screenWidthDp.dp
 
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(id) {
+        viewModel.setImageListEmpty()
         viewModel.getPlaceImages(id)
     }
     val images = viewModel.imageList.observeAsState()
@@ -69,10 +70,34 @@ fun Images(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                     }
-
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ImageItem(
+    uri: Uri,
+    height: Dp,
+    width: Dp,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        SubcomposeAsyncImage(
+            model = uri,
+            modifier = Modifier
+                .width(width)
+                .height(height),
+            loading = {
+                rememberAsyncImagePainter(ImagePlaceHolderTwo(height = height * 0.5f, width = width * 0.6f))
+            },
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+        )
     }
 }
 
@@ -88,7 +113,7 @@ private fun ImagePlaceHolder(height: Dp, width: Dp) {
                 .height(height)
                 .placeholder(
                     visible = true,
-                    color = MaterialTheme.colors.onSecondary,
+                    color = MaterialTheme.colors.surface,
                     highlight = PlaceholderHighlight.fade(MaterialTheme.colors.secondaryVariant),
                 )
         ) {}
@@ -99,7 +124,7 @@ private fun ImagePlaceHolder(height: Dp, width: Dp) {
                 .height(height)
                 .placeholder(
                     visible = true,
-                    color = MaterialTheme.colors.onSecondary,
+                    color = MaterialTheme.colors.surface,
                     highlight = PlaceholderHighlight.fade(MaterialTheme.colors.secondaryVariant),
                 )
         ) {}
@@ -107,23 +132,18 @@ private fun ImagePlaceHolder(height: Dp, width: Dp) {
 }
 
 @Composable
-private fun ImageItem(
-    uri: Uri,
-    height: Dp,
-    width: Dp,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        AsyncImage(
-            model = uri,
-            contentDescription = "",
-            modifier = Modifier
+private fun ImagePlaceHolderTwo(height: Dp, width: Dp) {
+        Box(
+            Modifier
                 .width(width)
-                .height(height),
-            contentScale = ContentScale.Crop
-        )
-    }
+                .height(height)
+                .placeholder(
+                    visible = true,
+                    color = MaterialTheme.colors.surface,
+                    highlight = PlaceholderHighlight.fade(MaterialTheme.colors.secondaryVariant),
+                )
+        ) {}
+        Spacer(modifier = Modifier.width(10.dp))
 }
+
+

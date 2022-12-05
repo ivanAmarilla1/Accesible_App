@@ -14,7 +14,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.blessingsoftware.accesibleapp.model.domain.ImageList
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.fade
@@ -34,7 +35,7 @@ fun SuggestionImages(
     val screenWidth = configuration.screenWidthDp.dp
 
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(suggestionId) {
         viewModel.getSuggestionImages(suggestionId)
     }
     val images = viewModel.imageList.observeAsState()
@@ -88,7 +89,7 @@ private fun PlaceHolder(height: Dp, width: Dp) {
                 .height(height)
                 .placeholder(
                     visible = true,
-                    color = MaterialTheme.colors.onSecondary,
+                    color = MaterialTheme.colors.surface,
                     highlight = PlaceholderHighlight.fade(MaterialTheme.colors.secondaryVariant),
                 )
         ) {}
@@ -99,12 +100,28 @@ private fun PlaceHolder(height: Dp, width: Dp) {
                 .height(height)
                 .placeholder(
                     visible = true,
-                    color = MaterialTheme.colors.onSecondary,
+                    color = MaterialTheme.colors.surface,
                     highlight = PlaceholderHighlight.fade(MaterialTheme.colors.secondaryVariant),
                 )
         ) {}
     }
 }
+
+@Composable
+private fun ImagePlaceHolderTwo(height: Dp, width: Dp) {
+    Box(
+        Modifier
+            .width(width)
+            .height(height)
+            .placeholder(
+                visible = true,
+                color = MaterialTheme.colors.surface,
+                highlight = PlaceholderHighlight.fade(MaterialTheme.colors.secondaryVariant),
+            )
+    ) {}
+    Spacer(modifier = Modifier.width(10.dp))
+}
+
 
 @Composable
 private fun ImageItem(
@@ -117,13 +134,16 @@ private fun ImageItem(
             .fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = uri,
-            contentDescription = "",
             modifier = Modifier
                 .width(width)
                 .height(height),
-            contentScale = ContentScale.Crop
+            loading = {
+                rememberAsyncImagePainter(ImagePlaceHolderTwo(height = height * 0.5f, width = width * 0.6f))
+            },
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
         )
     }
 }

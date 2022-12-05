@@ -96,7 +96,8 @@ fun StarRate(
     rate: Int,
     modifier: Modifier = Modifier,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
-    horizontalAlignment: Arrangement.Horizontal = Arrangement.Start
+    horizontalAlignment: Arrangement.Horizontal = Arrangement.Start,
+    size: Int = 30
 ) {
     Row(
         modifier = modifier,
@@ -108,8 +109,8 @@ fun StarRate(
                 painter = painterResource(id = R.drawable.ic_baseline_star_24),
                 contentDescription = "star",
                 modifier = Modifier
-                    .width(30.dp)
-                    .height(30.dp),
+                    .width(size.dp)
+                    .height(size.dp),
                 tint = if (i <= rate) Color(0xFFFFD700) else Color(0xFFA2ADB1)
             )
         }

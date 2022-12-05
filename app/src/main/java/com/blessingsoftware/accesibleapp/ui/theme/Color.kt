@@ -45,7 +45,7 @@ val Gray50= Color(0xFFFAFAFA)
 val Gray100= Color(0xFFF5F5F5)
 val Gray200= Color(0xFFEEEEEE)
 
-val Gray400= Color(0xFFBDBDBD)
+
 
 val Gray600= Color(0xFF757575)
 val Gray700= Color(0xFF616161)
@@ -56,6 +56,7 @@ val Primary= Color(0xFF0288D1)
 val PimaryVariant= Color(0xFF4FC3F7)
 val White = Color(0xFFFFFFFF)
 val Black = Color(0xFF000000)
+val SurfaceColor= Color(0xFFBDBDBD)
 
 //Dark Mode
 val DarkModeSecondary= Color(0xFF35363A)//para cosas dentro de la app, por ej. pop ups o ventanas

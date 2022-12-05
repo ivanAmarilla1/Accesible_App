@@ -1,12 +1,15 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -14,14 +17,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.ui.composables.Images
+import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -58,7 +60,7 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
         //modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
         drawerState = bottomDrawerState,
         drawerContent = {
-            DrawerContent(selectedPlace.value, viewModel, bottomDrawerState)
+            DrawerContent(selectedPlace.value, viewModel)
         },
         gesturesEnabled = bottomDrawerState.isOpen
     ) {
@@ -108,15 +110,12 @@ fun MainMap(viewModel: HomeViewModel, onMarkerClicked: (Place) -> Boolean) {
 }
 
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DrawerContent(
     selectedPlace: Place?,
     viewModel: HomeViewModel,
-    bottomDrawerState: BottomDrawerState
 ) {
-
-    // todo mostrar imagenes (1, 2, 3 o mas)
+    val context = LocalContext.current
 
     Surface(
         Modifier
@@ -130,7 +129,13 @@ private fun DrawerContent(
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(10.dp))
-            Divider(modifier = Modifier.fillMaxWidth(0.2f).align(Alignment.CenterHorizontally), thickness = 7.dp, color = MaterialTheme.colors.secondary)
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth(0.2f)
+                    .align(Alignment.CenterHorizontally),
+                thickness = 7.dp,
+                color = MaterialTheme.colors.secondary
+            )
             if (selectedPlace != null) {
                 Images(
                     viewModel = viewModel,
@@ -138,32 +143,110 @@ private fun DrawerContent(
                     modifier = Modifier.height(350.dp)
                 )
                 Spacer(modifier = Modifier.height(15.dp))
-                Text(
-                    selectedPlace.placeName,
-                    modifier = Modifier.fillMaxWidth(0.9f),
-                    MaterialTheme.colors.secondary,
-                    style = MaterialTheme.typography.h6,
-                    textAlign = TextAlign.Center,
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    selectedPlace.placeDescription,
-                    modifier = Modifier.fillMaxWidth(0.9f),
-                    MaterialTheme.colors.secondary,
-                    style = MaterialTheme.typography.body1,
-                    textAlign = TextAlign.Start,
-                )
-                Button(onClick = { Log.d("TAG", "DrawerContent: ") }) {
-                    Text(text = "Hola")
+
+                Column(Modifier.padding(horizontal = 10.dp)) {
+                    Text(
+                        selectedPlace.placeName,
+                        modifier = Modifier.fillMaxWidth(0.9f),
+                        MaterialTheme.colors.secondary,
+                        style = MaterialTheme.typography.h6,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        selectedPlace.placeDescription,
+                        modifier = Modifier.fillMaxWidth(0.9f),
+                        MaterialTheme.colors.secondary,
+                        style = MaterialTheme.typography.body1,
+                        textAlign = TextAlign.Start,
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    PlaceRate(suggestionRate = selectedPlace.placeRate)
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        Button(
+                            onClick = { Log.d("Boton", "Calificar") },
+                            modifier = Modifier
+                                .height(50.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = MaterialTheme.colors.primary,
+                            )
+                        ) {
+                            Text(
+                                "Calificar",
+                                modifier = Modifier,
+                                MaterialTheme.colors.secondary,
+                                style = MaterialTheme.typography.body1,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                openGoogleMaps(
+                                    context,
+                                    selectedPlace.placeLat,
+                                    selectedPlace.placeLng
+                                )
+                            },
+                            modifier = Modifier
+                                .height(50.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = MaterialTheme.colors.primary,
+                            )
+                        ) {
+                            Text(
+                                "Abrir en Uber/Bolt",
+                                modifier = Modifier,
+                                MaterialTheme.colors.secondary,
+                                style = MaterialTheme.typography.body1,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(15.dp))
+
                 }
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(text = "Hola")
-                Text(text = "Hola")
-                Text(text = "Hola")
-                Text(text = "Hola")
             }
         }
 
+    }
+}
+
+fun openGoogleMaps(context: Context, placeLat: String, placeLng: String) {
+
+    val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:$placeLat,$placeLng?z=18"))
+    try {
+        context.startActivity(mapIntent)
+    } catch (s: SecurityException) {
+        Toast.makeText(context, "An error occurred", Toast.LENGTH_LONG)
+            .show()
+    }
+}
+
+
+@Composable
+private fun PlaceRate(suggestionRate: Int) {
+    Spacer(modifier = Modifier.height(10.dp))
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            "Calificación de Accesibilidad:",
+            modifier = Modifier.align(Alignment.End),
+            MaterialTheme.colors.secondary,
+            style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Right,
+        )
+        StarRate(
+            rate = suggestionRate,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(end = 8.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.Bottom,
+            horizontalAlignment = Arrangement.End,
+            size = 40
+        )
     }
 }
 

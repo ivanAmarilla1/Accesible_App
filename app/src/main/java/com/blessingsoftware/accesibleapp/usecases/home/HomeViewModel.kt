@@ -46,6 +46,10 @@ class HomeViewModel @Inject constructor(application: Application, private val db
        getPlaces()
     }
 
+    fun setImageListEmpty() {
+        _imageList.value = arrayListOf()
+    }
+
 }
 /*
 @HiltViewModel
