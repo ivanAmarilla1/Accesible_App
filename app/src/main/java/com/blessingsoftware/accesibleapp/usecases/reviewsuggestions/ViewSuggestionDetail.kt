@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
@@ -41,7 +40,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.*
 
 @Composable
 fun ViewSuggestionDetail(viewModel: ReviewSuggestionViewModel, navController: NavController) {
@@ -90,84 +88,97 @@ private fun ShowSuggestionDetails(
     //Mensaje
     val message = viewModel.message.observeAsState(initial = "")
 
+    val status = when (suggestion.value!!.suggestionApproveStatus) {
+        1 -> "Pendiente"
+        2 -> "Aprobado"
+        else -> "Rechazado"
+    }
 
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp, 50.dp, 16.dp, 0.dp)
-            .verticalScroll(rememberScrollState(), columnScrollingEnabled)
-    ) {
-        SuggestionName(suggestion.value!!.suggestionName)
-        SuggestionDesctiption(suggestion.value!!.suggestionDescription)
-        SuggestionType(suggestion.value!!.suggestionType)
-        SuggestioRate(suggestion.value!!.suggestionRate)
-        SuggestionDate(suggestion.value!!.suggestionAddDate)
-        SuggestionAddedBy(suggestion.value!!.suggestionAddedBy)
-        SuggestionLocation(
-            suggestionPosition.latitude,
-            suggestionPosition.longitude,
-            cameraPositionState,
+    if (suggestion.value != null) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .testTag("Map")
-                .pointerInteropFilter(
-                    onTouchEvent = {
-                        when (it.action) {
-                            MotionEvent.ACTION_DOWN -> {
-                                columnScrollingEnabled = false
-                                false
-                            }
-                            else -> {
-                                Log.d(
-                                    ContentValues.TAG,
-                                    "MotionEvent ${it.action} - this never triggers."
-                                )
-                                true
+                .padding(16.dp, 50.dp, 16.dp, 0.dp)
+                .verticalScroll(rememberScrollState(), columnScrollingEnabled)
+        ) {
+            SuggestionData("Nombre del Lugar", suggestion.value!!.suggestionName)
+            SuggestionData("Descripción del Lugar", suggestion.value!!.suggestionDescription)
+            SuggestionData("Accesibilidades del Lugar", suggestion.value!!.suggestionAccessibility)
+            SuggestionData("Dificultades del Lugar", suggestion.value!!.suggestionDifficulties)
+            SuggestionData("Tipo de Lugar", suggestion.value!!.suggestionType)
+            SuggestioRate(suggestion.value!!.suggestionRate)
+            SuggestionData("Fecha de Sugerencia", suggestion.value!!.suggestionAddDate.toString())
+            SuggestionData("Usuario sugerente", suggestion.value!!.suggestionAddedBy)
+            SuggestionLocation(
+                suggestionPosition.latitude,
+                suggestionPosition.longitude,
+                cameraPositionState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag("Map")
+                    .pointerInteropFilter(
+                        onTouchEvent = {
+                            when (it.action) {
+                                MotionEvent.ACTION_DOWN -> {
+                                    columnScrollingEnabled = false
+                                    false
+                                }
+                                else -> {
+                                    Log.d(
+                                        ContentValues.TAG,
+                                        "MotionEvent ${it.action} - this never triggers."
+                                    )
+                                    true
+                                }
                             }
                         }
-                    }
-                )
-        )
-        SuggestionImages(viewModel, suggestion.value!!.suggestionId, scope)
-        SuggestionStatus(suggestion.value!!.suggestionApproveStatus)
-        if (suggestion.value!!.suggestionApproveStatus == 1) {
-            ApproveOrDeclineButtons(
-                Modifier,
-                {
-                    scope.launch {
-                        //Cuando se da click en rechazar
-                        approveOrDeclineDialog = false
-                        viewModel.setShowDialogTrue()
+                    )
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Imagenes de la sugerencia",
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.secondary
+            )
+            SuggestionImages(viewModel, suggestion.value!!.suggestionId, scope)
+            SuggestionData("Estado de Sugerencia", status)
+            if (suggestion.value!!.suggestionApproveStatus == 1) {
+                ApproveOrDeclineButtons(
+                    Modifier,
+                    {
+                        scope.launch {
+                            //Cuando se da click en rechazar
+                            approveOrDeclineDialog = false
+                            viewModel.setShowDialogTrue()
 
+                        }
+                    }
+                ) {
+                    scope.launch {
+                        //Cuando se da click en Aprobar
+                        approveOrDeclineDialog = true
+                        viewModel.setShowDialogTrue()
                     }
                 }
-            ) {
-                scope.launch {
-                    //Cuando se da click en Aprobar
-                    approveOrDeclineDialog = true
+            } else {
+                DeleteButton(Modifier) {
+                    //Cuando se da click en Eliminar
+                    deleteDialog = true
                     viewModel.setShowDialogTrue()
                 }
             }
-        } else {
-            DeleteButton(Modifier) {
-                //Cuando se da click en Eliminar
-                deleteDialog = true
-                viewModel.setShowDialogTrue()
-            }
+            SuggestionDialog(
+                viewModel,
+                scope,
+                showDialog.value!!,
+                approveOrDeclineDialog,
+                deleteDialog,
+                suggestion
+            )
+
         }
-
-
-        SuggestionDialog(
-            viewModel,
-            scope,
-            showDialog.value!!,
-            approveOrDeclineDialog,
-            deleteDialog,
-            suggestion
-        )
-
     }
     aproveSuggestionFlow.value.let {
         if (flag.value == true) {
@@ -338,27 +349,6 @@ fun ApproveOrDeclineButtons(
     Spacer(modifier = Modifier.height(25.dp))
 }
 
-@Composable
-fun SuggestionStatus(suggestionStatus: Int) {
-
-    val status = when (suggestionStatus) {
-        1 -> "Pendiente"
-        2 -> "Aprobado"
-        else -> "Rechazado"
-    }
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
-            .padding(10.dp, 10.dp, 10.dp, 10.dp)
-    ) {
-        Text(text = "Estado de la sugerencia", style = MaterialTheme.typography.body1)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(text = status, style = MaterialTheme.typography.h5, fontSize = 20.sp)
-    }
-    Spacer(modifier = Modifier.height(15.dp))
-}
-
 
 @Composable
 private fun SuggestionLocation(
@@ -367,6 +357,12 @@ private fun SuggestionLocation(
     cameraPositionState: CameraPositionState,
     modifier: Modifier = Modifier
 ) {
+    Text(
+        text = "Ubicación del lugar",
+        style = MaterialTheme.typography.body1,
+        color = MaterialTheme.colors.secondary
+    )
+    Spacer(modifier = Modifier.height(10.dp))
     Box {
         GoogleMap(
             modifier = modifier
@@ -380,39 +376,6 @@ private fun SuggestionLocation(
     Spacer(modifier = Modifier.height(15.dp))
 }
 
-@Composable
-private fun SuggestionAddedBy(suggestionAddedBy: String) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
-            .padding(10.dp, 10.dp, 10.dp, 10.dp)
-    ) {
-        Text(text = "Usuario sugerente", style = MaterialTheme.typography.body1)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(text = suggestionAddedBy, style = MaterialTheme.typography.h5, fontSize = 20.sp)
-    }
-    Spacer(modifier = Modifier.height(15.dp))
-}
-
-@Composable
-private fun SuggestionDate(suggestionAddDate: Date?) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
-            .padding(10.dp, 10.dp, 10.dp, 10.dp)
-    ) {
-        Text(text = "Fecha de Sugerencia", style = MaterialTheme.typography.body1)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = suggestionAddDate.toString(),
-            style = MaterialTheme.typography.h5,
-            fontSize = 20.sp
-        )
-    }
-    Spacer(modifier = Modifier.height(15.dp))
-}
 
 @Composable
 private fun SuggestioRate(suggestionRate: Int) {
@@ -422,59 +385,39 @@ private fun SuggestioRate(suggestionRate: Int) {
             .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
             .padding(10.dp, 10.dp, 10.dp, 10.dp)
     ) {
-        Text(text = "Calificación preliminar del Usuario", style = MaterialTheme.typography.body1)
+        Text(
+            text = "Calificación preliminar del Usuario",
+            style = MaterialTheme.typography.body1,
+            color = MaterialTheme.colors.secondary
+        )
         Spacer(modifier = Modifier.height(10.dp))
-        //StarRate(rate = suggestionRate)
         StarRate(rate = suggestionRate)
     }
     Spacer(modifier = Modifier.height(15.dp))
 }
 
 @Composable
-private fun SuggestionType(suggestionType: String) {
+fun SuggestionData(tittle: String, body: String) {
     Column(
         Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
             .padding(10.dp, 10.dp, 10.dp, 10.dp)
     ) {
-        Text(text = "Tipo de Lugar", style = MaterialTheme.typography.body1)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(text = suggestionType, style = MaterialTheme.typography.h5)
-    }
-    Spacer(modifier = Modifier.height(15.dp))
-}
-
-@Composable
-private fun SuggestionDesctiption(suggestionDescription: String) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
-            .padding(10.dp, 10.dp, 10.dp, 10.dp)
-    ) {
-        Text(text = "Descripción de Lugar", style = MaterialTheme.typography.body1)
+        Text(
+            text = tittle,
+            style = MaterialTheme.typography.body1,
+            color = MaterialTheme.colors.secondary
+        )
         Spacer(modifier = Modifier.height(10.dp))
         SelectionContainer {
-            Text(text = suggestionDescription, style = MaterialTheme.typography.h5)
+            Text(
+                text = body,
+                style = MaterialTheme.typography.h5,
+                color = MaterialTheme.colors.secondary
+            )
         }
 
-    }
-    Spacer(modifier = Modifier.height(15.dp))
-}
-
-@Composable
-private fun SuggestionName(suggestionName: String) {
-    Spacer(modifier = Modifier.height(15.dp))
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
-            .padding(10.dp, 10.dp, 10.dp, 10.dp)
-    ) {
-        Text(text = "Nombre de Lugar", style = MaterialTheme.typography.body1)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(text = suggestionName, style = MaterialTheme.typography.h5)
     }
     Spacer(modifier = Modifier.height(15.dp))
 }

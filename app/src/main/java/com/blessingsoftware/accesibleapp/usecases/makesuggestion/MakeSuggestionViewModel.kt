@@ -44,6 +44,11 @@ class MakeSuggestionViewModel @Inject constructor(
     val name: LiveData<String> = _name
     private val _description = MutableLiveData<String>()
     val description: LiveData<String> = _description
+
+    private val _accessibility = MutableLiveData<String>()
+    val accessibility: LiveData<String> = _accessibility
+    private val _difficulties = MutableLiveData<String>()
+    val difficulties: LiveData<String> = _difficulties
     private val _markerLocation = MutableLiveData<LatLng>()
     val markerLocation: LiveData<LatLng> = _markerLocation
     private val _rating = MutableLiveData<Int>()
@@ -56,6 +61,11 @@ class MakeSuggestionViewModel @Inject constructor(
     val validateName: LiveData<Boolean?> = _validateName
     private val _validateDescription = MutableLiveData<Boolean>()
     val validateDescription: LiveData<Boolean?> = _validateDescription
+    private val _validateAccessibility = MutableLiveData<Boolean>()
+    val validateAccessibility: LiveData<Boolean?> = _validateAccessibility
+    private val _validateDifficulties = MutableLiveData<Boolean>()
+    val validateDifficulties: LiveData<Boolean?> = _validateDifficulties
+
     private val _validateType = MutableLiveData<Boolean>()
     val validateType: LiveData<Boolean?> = _validateType
     private val _validateRate = MutableLiveData<Boolean>()
@@ -97,6 +107,8 @@ class MakeSuggestionViewModel @Inject constructor(
         //seteo de variables para evitar nullPointerExeption
         _validateName.value = true
         _validateDescription.value = true
+        _validateAccessibility.value = true
+        _validateDifficulties.value = true
         _validateType.value = true
         _validateRate.value = true
         _isGPSOn.value = false
@@ -112,24 +124,35 @@ class MakeSuggestionViewModel @Inject constructor(
         _description.value = description
     }
 
+    fun onChooserChanged(accessibilityes: String, difficulties: String) {
+        _accessibility.value = accessibilityes
+        _difficulties.value = difficulties
+    }
+
     //validacion de que los campos no esten vacios
     fun validateDataMakeSuggestion(
         name: String,
         description: String,
         placeType: String,
-        rate: Int
+        rate: Int,
+        accessibility: String,
+        difficulties: String
     ): Boolean {
         _validateName.value = name.isNotEmpty()
         _validateDescription.value = description.isNotEmpty()
+        _validateAccessibility.value = accessibility.isNotEmpty()
+        _validateDifficulties.value = difficulties.isNotEmpty()
         _validateType.value = placeType != "Seleccione"
         _validateRate.value = (rate in 1..5)
-        return _validateName.value!! && _validateDescription.value!! && _validateType.value!! && _validateRate.value!!
+        return _validateName.value!! && _validateDescription.value!! && _validateAccessibility.value!! && _validateDifficulties.value!! && _validateType.value!! && _validateRate.value!!
     }
 
     //Almacenar la sugerencia en la bd firestore
     suspend fun makeSuggestion(
         name: String,
         description: String,
+        accessibility: String,
+        difficulties: String,
         rate: Int,
         placetype: String,
         marker: LatLng,
@@ -138,14 +161,16 @@ class MakeSuggestionViewModel @Inject constructor(
         _showDialog.value = false
         _suggestionFlow.value = Resource.Loading
         val suggestion = Suggestion(
-            name,
-            description,
-            rate,
-            placetype,
-            marker.latitude.toString(),
-            marker.longitude.toString(),
-            1,
-            user
+            suggestionName = name,
+            suggestionDescription = description,
+            suggestionAccessibility = accessibility,
+            suggestionDifficulties = difficulties,
+            suggestionRate = rate,
+            suggestionType = placetype,
+            suggestionLat = marker.latitude.toString(),
+            suggestionLng = marker.longitude.toString(),
+            suggestionApproveStatus =  1,
+            suggestionAddedBy = user
         )
         _flag.value = true
         val result = db.storeSuggestion(suggestion)
@@ -161,10 +186,14 @@ class MakeSuggestionViewModel @Inject constructor(
     fun cleanSuggestionFields() {
         _name.value = ""
         _description.value = ""
+        _accessibility.value = ""
+        _difficulties.value = ""
         _rating.value = 0
         _placeType.value = "Seleccione"
         _validateName.value = true
         _validateDescription.value = true
+        _validateAccessibility.value = true
+        _validateDifficulties.value = true
         _validateType.value = true
         _validateRate.value = true
         _flag.value = false
@@ -322,6 +351,5 @@ class MakeSuggestionViewModel @Inject constructor(
         }
         return bitmap
     }
-
 
 }

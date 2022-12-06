@@ -82,7 +82,7 @@ fun SuggestionImages(viewModel: MakeSuggestionViewModel) {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Seleccione una imágen (Puede seleccionar hasta 4 imágenes)")
+                    Text(text = "Seleccione una imágen (Puede seleccionar hasta 4 imágenes)", color = MaterialTheme.colors.secondary)
                 }
             }
             LazyRow(

@@ -22,8 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.blessingsoftware.accesibleapp.model.domain.Place
-import com.blessingsoftware.accesibleapp.ui.composables.Images
-import com.blessingsoftware.accesibleapp.ui.composables.StarRate
+import com.blessingsoftware.accesibleapp.ui.composables.*
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -145,21 +144,21 @@ private fun DrawerContent(
                 Spacer(modifier = Modifier.height(15.dp))
 
                 Column(Modifier.padding(horizontal = 10.dp)) {
-                    Text(
+                    ReusableTittle(
                         selectedPlace.placeName,
                         modifier = Modifier.fillMaxWidth(0.9f),
                         MaterialTheme.colors.secondary,
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.h5,
                         textAlign = TextAlign.Center,
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        selectedPlace.placeDescription,
-                        modifier = Modifier.fillMaxWidth(0.9f),
-                        MaterialTheme.colors.secondary,
-                        style = MaterialTheme.typography.body1,
-                        textAlign = TextAlign.Start,
-                    )
+                    ReusableTextBody(selectedPlace.placeDescription)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    ReusableSubtitle("Accesibilidades")
+                    ReusableTextBody(selectedPlace.placeAccessibility)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    ReusableSubtitle("Potenciales Dificultades")
+                    ReusableTextBody(selectedPlace.placeDifficulties)
                     Spacer(modifier = Modifier.height(10.dp))
                     PlaceRate(suggestionRate = selectedPlace.placeRate)
                     Spacer(modifier = Modifier.height(10.dp))
@@ -176,8 +175,8 @@ private fun DrawerContent(
                         ) {
                             Text(
                                 "Calificar",
+                                color = MaterialTheme.colors.onBackground,
                                 modifier = Modifier,
-                                MaterialTheme.colors.secondary,
                                 style = MaterialTheme.typography.body1,
                                 textAlign = TextAlign.Center,
                             )
@@ -200,9 +199,9 @@ private fun DrawerContent(
                             Text(
                                 "Abrir en Uber/Bolt",
                                 modifier = Modifier,
-                                MaterialTheme.colors.secondary,
                                 style = MaterialTheme.typography.body1,
                                 textAlign = TextAlign.Center,
+                                color = MaterialTheme.colors.onBackground
                             )
                         }
                     }

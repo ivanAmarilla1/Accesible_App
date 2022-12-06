@@ -7,6 +7,8 @@ import java.util.*
 data class Suggestion(
     var suggestionName: String = "",
     var suggestionDescription: String = "",
+    var suggestionAccessibility: String = "",
+    var suggestionDifficulties: String = "",
     var suggestionRate: Int = 0,
     var suggestionType: String = "",
     var suggestionLat: String = "",

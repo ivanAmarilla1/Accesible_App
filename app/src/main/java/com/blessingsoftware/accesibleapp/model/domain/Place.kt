@@ -7,6 +7,8 @@ import java.util.*
 data class Place(
     var placeName: String = "",
     var placeDescription: String = "",
+    var placeAccessibility: String = "",
+    var placeDifficulties: String = "",
     var placeLat: String = "",
     var placeLng: String = "",
     var placeAddedBy: String = "",

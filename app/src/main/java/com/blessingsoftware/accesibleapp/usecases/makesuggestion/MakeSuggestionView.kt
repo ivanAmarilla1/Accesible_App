@@ -91,6 +91,9 @@ fun MakeSuggestion(
     //variables capturadas con LiveData
     val name: String by suggestionViewModel.name.observeAsState(initial = "")
     val description: String by suggestionViewModel.description.observeAsState(initial = "")
+    val accessibility: String by suggestionViewModel.accessibility.observeAsState(initial = "")
+    val difficulties: String by suggestionViewModel.difficulties.observeAsState(initial = "")
+
     val userRating: Int by suggestionViewModel.rating.observeAsState(initial = 0)
     val placeType: String by suggestionViewModel.placeType.observeAsState(initial = "Seleccione")
     val suggestionFlow = suggestionViewModel.suggestionFlow.collectAsState()
@@ -102,10 +105,14 @@ fun MakeSuggestion(
     //Validaciones
     val validateName = suggestionViewModel.validateName.observeAsState()
     val validateDescription = suggestionViewModel.validateDescription.observeAsState()
+    val validateAccessibility = suggestionViewModel.validateAccessibility.observeAsState()
+    val validateDifficulties = suggestionViewModel.validateDifficulties.observeAsState()
     val validateType = suggestionViewModel.validateType.observeAsState()
     val validateRate = suggestionViewModel.validateRate.observeAsState()
     val validateNameError = stringResource(R.string.validate_suggestion_name)
     val validateDescriptionError = stringResource(R.string.validate_suggestion_description)
+    val validateAccessibilityError = stringResource(R.string.validate_suggestion_accessibility)
+    val validateDifficultiesError = stringResource(R.string.validate_suggestion_difficulties)
     val validateTypeError = stringResource(R.string.validate_suggestion_type)
     val validateRateError = stringResource(R.string.validate_suggestion_rate)
     //Dialog
@@ -133,6 +140,18 @@ fun MakeSuggestion(
                 focusManager
             ) { suggestionViewModel.onFieldsChanged(name, it) }
             Spacer(modifier = Modifier.height(15.dp))
+            PlaceAccessibilityChooser(
+                validateAccessibility.value,
+                validateAccessibilityError
+            ) { suggestionViewModel.onChooserChanged(it, difficulties) }
+            Spacer(modifier = Modifier.height(20.dp))
+            PlaceDifficultiesChooser(
+                validateDifficulties.value,
+                validateDifficultiesError
+            ) {
+                suggestionViewModel.onChooserChanged(accessibility, it)
+            }
+
             PlaceType(placeType, validateType.value, validateTypeError) {
                 suggestionViewModel.setPlaceType(it)
             }
@@ -180,12 +199,13 @@ fun MakeSuggestion(
 
             }
             Spacer(modifier = Modifier.height(15.dp))
-
             AddPlaceImages(suggestionViewModel, context)
             SendSuggestionButton {
                 sendSuggestionFunction(
                     name,
                     description,
+                    accessibility,
+                    difficulties,
                     userRating,
                     placeType,
                     userMarker.value,
@@ -201,6 +221,8 @@ fun MakeSuggestion(
                 scope,
                 name,
                 description,
+                accessibility,
+                difficulties,
                 userRating,
                 placeType,
                 userMarker.value,
@@ -241,6 +263,8 @@ fun SendSuggestionDialog(
     scope: CoroutineScope,
     name: String,
     description: String,
+    accessibility: String,
+    difficulties: String,
     rate: Int,
     placeType: String,
     marker: LatLng?,
@@ -252,7 +276,7 @@ fun SendSuggestionDialog(
     val text =
         "La sugerencia será evaluada por un administrador antes de incluir el lugar en la aplicación"
     val image = painterResource(id = R.drawable.send)
-    if (showDialog == true) {
+    if (showDialog == true && marker != null) {
         CustomDialog(
             buttonText = buttonText,
             tittle = title,
@@ -260,7 +284,7 @@ fun SendSuggestionDialog(
             image = image,
             onDismissRequest = { viewModel.setShowDialogFalse() }) {
             scope.launch {
-                viewModel.makeSuggestion(name, description, rate, placeType, marker!!, user)
+                viewModel.makeSuggestion(name, description, accessibility, difficulties, rate, placeType, marker, user)
             }
         }
     }
@@ -348,8 +372,77 @@ private fun PlaceDescriptionField(
             onDone = { focusManager.clearFocus() },
         )
     )
+}
 
+@Composable
+private fun PlaceAccessibilityChooser(
+    validateAccessibility: Boolean?,
+    validateAccessibilityError: String,
+    onChooserChanged: (String) -> Unit
+) {
+    var checkedList = ""
+    val accessibility = listOf(
+        "Rampas para sillas de ruedas en accesos",
+        "Barandales de apoyo",
+        "huellas podotáctiles",
+        "Baño para discapacitados",
+        "Ascensores", "Estacioniento para discapacitados"
+    )
+    Spacer(modifier = Modifier.height(5.dp))
+    val options = accessibility.map {
+        val checked = remember { mutableStateOf(false) }
+        Option(
+            checked = checked.value,
+            onCheckedChange = { checked.value = it },
+            label = it,
+        )
+    }
+    val x = CheckboxList(
+        options = options,
+        listTitle = "Accesibilidades del Lugar",
+        validateAccessibility,
+        validateAccessibilityError
+    )
+    checkedList = ""
+    x.forEach {
+        checkedList += "- $it\r"
+    }
+    onChooserChanged(checkedList)
+}
 
+@Composable
+private fun PlaceDifficultiesChooser(
+    validateDifficulties: Boolean?,
+    validateDifficultiesError: String,
+    onChooserChanged: (String) -> Unit
+) {
+    var checkedList = ""
+    val difficulties = listOf(
+        "Escaleras sin rampas y/o ascensores",
+        "Espacio Reducido",
+        "Sin estacionamiento para discapacitados",
+        "Ninguno"
+    )
+    Spacer(modifier = Modifier.height(5.dp))
+    val options = difficulties.map {
+        val checked = remember { mutableStateOf(false) }
+        Option(
+            checked = checked.value,
+            onCheckedChange = { checked.value = it },
+            label = it,
+        )
+    }
+    val x = CheckboxList(
+        options = options,
+        listTitle = "Potenciales dificultades de accesibilidad",
+        validateDifficulties,
+        validateDifficultiesError
+    )
+    checkedList = ""
+    x.forEach {
+        checkedList += "- $it\r"
+    }
+    onChooserChanged(checkedList)
 }
 
 
@@ -497,6 +590,8 @@ private fun SendSuggestionButton(onSendSelected: () -> Unit) {
 private fun sendSuggestionFunction(
     name: String,
     description: String,
+    accessibility: String,
+    difficulties: String,
     rate: Int,
     placeType: String,
     userMarker: LatLng?,
@@ -504,9 +599,21 @@ private fun sendSuggestionFunction(
     context: Context,
 ) {
     if (userMarker != null) {
-        if (viewModel.validateDataMakeSuggestion(name, description, placeType, rate)) {
+        if (viewModel.validateDataMakeSuggestion(
+                name,
+                description,
+                placeType,
+                rate,
+                accessibility,
+                difficulties
+            )
+        ) {
             if (viewModel.isImageByteArrayEmpty()) {
-                Toast.makeText(context,"Selecciones al menos una imagen del lugar", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    "Selecciones al menos una imagen del lugar",
+                    Toast.LENGTH_LONG
+                ).show()
             } else {
                 viewModel.setShowDialogTrue()
             }

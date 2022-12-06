@@ -89,37 +89,42 @@ class ReviewSuggestionViewModel @Inject constructor(
     suspend fun approveSuggestion(suggestion: Suggestion) {
         setShowDialogFalse()
         _approveSuggestionFlow.value = Resource.Loading
-        if (checkIfUserIsAdminSuggestion()) {
-            if (suggestion.suggestionApproveStatus == 1) {
-                suggestion.suggestionApproveStatus = 2
-                val place = Place(
-                    suggestion.suggestionName,
-                    suggestion.suggestionDescription,
-                    suggestion.suggestionLat,
-                    suggestion.suggestionLng,
-                    suggestion.suggestionAddedBy,
-                    repository.currentUser!!.uid,
-                    suggestion.suggestionRate,
-                    suggestion.suggestionType,
-                    suggestion.suggestionId
-                )
-                _message.value = "Sugerencia aprobada correctamente"
-                _approveSuggestionFlag.value = true
-                val storePlace = db.storePlace(place)
-                if (storePlace == Resource.Success("Success")) {
-                    val updateSuggestion =
-                        db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
-                    _approveSuggestionFlow.value = updateSuggestion
-                    Log.d("Hola", _approveSuggestionFlow.value.toString())
-                } else {
-                    _approveSuggestionFlow.value = storePlace
+        repository.currentUser?.let {
+            if (checkIfUserIsAdminSuggestion()) {
+                if (suggestion.suggestionApproveStatus == 1) {
+                    suggestion.suggestionApproveStatus = 2
+                    val place = Place(
+                        suggestion.suggestionName,
+                        suggestion.suggestionDescription,
+                        suggestion.suggestionAccessibility,
+                        suggestion.suggestionDifficulties,
+                        suggestion.suggestionLat,
+                        suggestion.suggestionLng,
+                        suggestion.suggestionAddedBy,
+                        repository.currentUser!!.uid,
+                        suggestion.suggestionRate,
+                        suggestion.suggestionType,
+                        suggestion.suggestionId
+                    )
+                    _message.value = "Sugerencia aprobada correctamente"
+                    _approveSuggestionFlag.value = true
+                    val storePlace = db.storePlace(place)
+                    if (storePlace == Resource.Success("Success")) {
+                        val updateSuggestion =
+                            db.updateSuggestion(suggestion = suggestion, repository.currentUser!!.uid)
+                        _approveSuggestionFlow.value = updateSuggestion
+                        Log.d("Hola", _approveSuggestionFlow.value.toString())
+                    } else {
+                        _approveSuggestionFlow.value = storePlace
+                    }
                 }
+            } else {
+                _approveSuggestionFlag.value = true
+                _approveSuggestionFlow.value =
+                    Resource.Failure(exception = Exception("Usted no es un administrador"))
             }
-        } else {
-            _approveSuggestionFlag.value = true
-            _approveSuggestionFlow.value =
-                Resource.Failure(exception = Exception("Usted no es un administrador"))
         }
+
     }
 
     suspend fun getSuggestionImages (uid: String) {
