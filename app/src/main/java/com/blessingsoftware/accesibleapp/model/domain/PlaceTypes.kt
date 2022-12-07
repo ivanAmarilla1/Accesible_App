@@ -2,11 +2,10 @@ package com.blessingsoftware.accesibleapp.model.domain
 
 enum class PlaceTypes {
 
-    ESTACIONAMIENTO, COMERCIO, LUGAR_PUBLICO, LUGAR_PRIVADO, ENTIDAD_ESTATAL, RESTAURANTE, HOTEL, PUNTO_INTERES, ZONA_ENTRETENIMIENTO, OTROS;
+    COMERCIO, LUGAR_PUBLICO, LUGAR_PRIVADO, ENTIDAD_ESTATAL, RESTAURANTE, HOTEL, PUNTO_INTERES, ZONA_ENTRETENIMIENTO, ESTACIONAMIENTO, OTROS;
 
     fun description () : String {
         return when(this) {
-            ESTACIONAMIENTO -> "Estacionamiento"
             COMERCIO -> "Comercio"
             LUGAR_PUBLICO -> "Lugar Público"
             LUGAR_PRIVADO -> "Lugar Privado"
@@ -15,6 +14,7 @@ enum class PlaceTypes {
             HOTEL -> "Hotel"
             PUNTO_INTERES -> "Punto de Interés"
             ZONA_ENTRETENIMIENTO -> "Zona de Entretenimiento"
+            ESTACIONAMIENTO -> "Estacionamiento"
             OTROS -> "Otros"
         }
     }

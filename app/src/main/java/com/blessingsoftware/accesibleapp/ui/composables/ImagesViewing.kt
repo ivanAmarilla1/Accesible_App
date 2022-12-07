@@ -63,12 +63,21 @@ fun Images(
                     modifier = Modifier
                 ) {
                     itemsIndexed(imageList.listOfSelectedImages) { index, uri ->
-                        ImageItem(
-                            uri = uri,
-                            height = screenHeight * 0.5f,
-                            width = screenWidth * 0.6f,
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
+                        if (imageList.listOfSelectedImages.lastIndex>0) {
+                            ImageItem(
+                                uri = uri,
+                                height = screenHeight * 0.5f,
+                                width = screenWidth * 0.6f,
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                        } else {
+                            ImageItem(
+                                uri = uri,
+                                height = screenHeight * 1f,
+                                width = screenWidth * 1f,
+                            )
+                        }
+
                     }
                 }
             }

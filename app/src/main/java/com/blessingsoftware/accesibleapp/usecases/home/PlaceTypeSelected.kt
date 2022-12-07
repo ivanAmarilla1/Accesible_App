@@ -1,19 +1,21 @@
-package com.blessingsoftware.accesibleapp.usecases.reviewsuggestions
+package com.blessingsoftware.accesibleapp.usecases.home
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -22,39 +24,74 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
-import com.blessingsoftware.accesibleapp.model.domain.Suggestion
-import com.blessingsoftware.accesibleapp.ui.composables.DropDownMenu
+import com.blessingsoftware.accesibleapp.ui.composables.ReusableTittle
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.blessingsoftware.accesibleapp.ui.composables.SuggestionPlaceImage
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel, navController: NavController) {
+fun PlaceTypeSelected(viewModel: HomeViewModel, navController: NavController) {
 
-    //Sugerencias
-    val suggestions by viewModel.suggestions.observeAsState(initial = emptyList())
-    //El tipo de lista de sugerencias a ser mostrada, si son las pendientes, aprobadas o rechazadas
-    val suggestionViewType = viewModel.suggestionViewType.observeAsState(initial = 1)
-    //Corrutina que hace la consulta para obtener las sugerencias
-    LaunchedEffect(key1 = suggestionViewType.value) {//Cada vez que cambia la key se ejecuta el launched effect
-        viewModel.getSuggestions(suggestionViewType.value)
+    val selectedPlaceType = viewModel.selectedPlaceType.observeAsState(initial = "")
+
+    Scaffold(
+        topBar = {MyTopBar(navController, selectedPlaceType)}
+    ) {
+        PlaceSelection(viewModel = viewModel, navController = navController, selectedPlaceType)
+    }
+
+
+
+}
+
+@Composable
+private fun MyTopBar(navController: NavController, tittle: State<String>) {
+    TopAppBar(
+        modifier = Modifier.height(50.dp),
+        elevation = 0.dp,
+        title = {
+            ReusableTittle(tittle.value, textColor = MaterialTheme.colors.secondary)
+        },
+        navigationIcon = {
+            IconButton(onClick = {
+                navController.popBackStack()
+            }) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Arrow Back",
+                    tint = MaterialTheme.colors.secondary
+                )
+            }
+        },
+        backgroundColor = Color.Transparent
+    )
+}
+
+@Composable
+private fun PlaceSelection(
+    viewModel: HomeViewModel,
+    navController: NavController,
+    selectedPlaceType: State<String>
+) {
+    val searchedPlaces by viewModel.searchedPlaces.observeAsState(initial = emptyList())
+
+
+    LaunchedEffect(key1 = selectedPlaceType.value) {//Cada vez que cambia la key se ejecuta el launched effect
+        viewModel.getSeletedPlaces(selectedPlaceType.value)
     }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(0.dp, 50.dp, 0.dp, 0.dp)
     ) {
-        SelectSuggestionType(suggestionViewType.value) {
-            viewModel.setSuggestionViewType(it)
-        }
-
-        val getSuggestionFlow = viewModel.getSuggestionFlow.collectAsState()
-        getSuggestionFlow.value.let {
-            //Log.d("Valor", "Entrando en flow")
+        val getPlacesFlow = viewModel.getPlacesFlow.collectAsState()
+        getPlacesFlow.value.let {
             when (it) {
                 is Resource.Success -> {
-                    ShowAllSuggestions(viewModel, navController, suggestions)
+                    ShowSelectedPlaces(viewModel, navController, searchedPlaces)
                 }
                 is Resource.Failure -> {
                     val context = LocalContext.current
@@ -78,29 +115,44 @@ fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel, navController: NavC
 }
 
 @Composable
-private fun ShowAllSuggestions(
-    viewModel: ReviewSuggestionViewModel,
+private fun ShowSelectedPlaces(
+    viewModel: HomeViewModel,
     navController: NavController,
-    suggestions: List<Suggestion>,
+    searchedPlaces: List<Place>?
+) {
+    if (searchedPlaces != null) {
+        ShowAllPlaceSelected(
+            viewModel = viewModel,
+            navController = navController,
+            places = searchedPlaces
+        )
+    }
+}
+
+@Composable
+private fun ShowAllPlaceSelected(
+    viewModel: HomeViewModel,
+    navController: NavController,
+    places: List<Place>,
 ) {
     Spacer(modifier = Modifier.height(5.dp))
-    SuggestionList(suggestions) {
-        viewModel.setSelectedSuggestion(it)
+    PlaceList(places) {
+        viewModel.setSelectedSearchedPlace(it)
         viewModel.cleanImages()
-        navController.navigate(AppScreens.SuggestionDetail.route) {
+        navController.navigate(AppScreens.SelectedPlace.route) {
             launchSingleTop = true
         }
     }
 }
 
 @Composable
-private fun SuggestionList(
-    suggestions: List<Suggestion>,
-    onSuggestionSelected: (Suggestion) -> Unit
+private fun PlaceList(
+    places: List<Place>,
+    onSuggestionSelected: (Place) -> Unit
 ) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
         //si no hay sugerencias para revisar se muestra un mensaje, si no se muestran las sugerencias
-        if (suggestions.isEmpty()) {
+        if (places.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -110,14 +162,14 @@ private fun SuggestionList(
 
             ) {
                 Text(
-                    text = "No hay sugerencias",
+                    text = "No se encontraron datos",
                     style = MaterialTheme.typography.h6,
                     textAlign = TextAlign.Center
                 )
             }
         } else {
-            for (item in suggestions) {
-                Suggestion(item) { onSuggestionSelected(item) }
+            for (item in places) {
+                Place(item) { onSuggestionSelected(item) }
                 Spacer(modifier = Modifier.height(5.dp))
             }
         }
@@ -125,31 +177,7 @@ private fun SuggestionList(
 }
 
 @Composable
-fun SelectSuggestionType(selectedItem: Int, onSuggestionTypeSelected: (Int) -> Unit) {
-    val typeList = listOf(
-        "Pendientes",
-        "Aprobados",
-        "Rechazados",
-    )
-    DropDownMenu(
-        typeList[selectedItem - 1], typeList, false, "",
-        Modifier
-            .fillMaxWidth()
-            .height(50.dp)
-            .background(Color.Transparent)
-    ) {
-        val x: Int = when (it) {
-            "Pendientes" -> 1
-            "Aprobados" -> 2
-            "Rechazados" -> 3
-            else -> 1
-        }
-        onSuggestionTypeSelected(x)
-    }
-}
-
-@Composable
-private fun Suggestion(item: Suggestion, onSuggestionClick: () -> Unit) {
+private fun Place(item: Place, onPlaceClick: () -> Unit) {
     Column() {
         Row(
             modifier = Modifier
@@ -157,14 +185,14 @@ private fun Suggestion(item: Suggestion, onSuggestionClick: () -> Unit) {
                 .fillMaxWidth()
                 .padding(10.dp, 10.dp, 10.dp, 10.dp)
                 .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(10.dp))
-                .clickable { onSuggestionClick() }
+                .clickable { onPlaceClick() }
 
         ) {
-            SuggestionPlaceImage(suggestionType = item.suggestionType)
+            SuggestionPlaceImage(suggestionType = item.placeType)
             Spacer(modifier = Modifier.padding(10.dp))
             Column(Modifier.padding(top = 15.dp, end = 12.dp)) {
                 Text(
-                    text = item.suggestionName,
+                    text = item.placeName,
                     fontSize = 18.sp,
                     maxLines = 1,
                     fontWeight = FontWeight.Bold,
@@ -173,29 +201,23 @@ private fun Suggestion(item: Suggestion, onSuggestionClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = item.suggestionDescription,
+                    text = item.placeDescription,
                     fontSize = 14.sp,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colors.secondary
                 )
-                PreliminaryRate(item.suggestionRate)
+
+                StarRate(
+                    rate = item.placeRate,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(end = 8.dp, bottom = 12.dp),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalAlignment = Arrangement.End
+                )
             }
 
         }
     }
 }
-
-@Composable
-private fun PreliminaryRate(suggestionRate: Int) {
-    StarRate(
-        rate = suggestionRate,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(end = 8.dp, bottom = 12.dp),
-        verticalAlignment = Alignment.Bottom,
-        horizontalAlignment = Arrangement.End
-    )
-}
-
-

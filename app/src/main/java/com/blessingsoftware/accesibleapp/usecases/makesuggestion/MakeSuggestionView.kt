@@ -258,7 +258,7 @@ fun MakeSuggestion(
 }
 
 @Composable
-fun SendSuggestionDialog(
+private fun SendSuggestionDialog(
     viewModel: MakeSuggestionViewModel,
     scope: CoroutineScope,
     name: String,
@@ -291,7 +291,7 @@ fun SendSuggestionDialog(
 }
 
 @Composable
-fun PlaceType(
+private fun PlaceType(
     placeType: String,
     validateType: Boolean?,
     validateTypeError: String,
@@ -470,7 +470,7 @@ private fun MyPlaceRate(
 
 
 @Composable
-fun PlaceSelect(
+private fun PlaceSelect(
     suggestionViewModel: MakeSuggestionViewModel,
     userMarker: LatLng?,
     modifier: Modifier = Modifier,
@@ -564,7 +564,7 @@ fun PlaceSelect(
 }
 
 @Composable
-fun AddPlaceImages(suggestionViewModel: MakeSuggestionViewModel, context: Context) {
+private fun AddPlaceImages(suggestionViewModel: MakeSuggestionViewModel, context: Context) {
     Text(text = "Agregue imágenes del lugar", color = MaterialTheme.colors.secondary)
     SuggestionImages(viewModel = suggestionViewModel)
     Spacer(modifier = Modifier.height(10.dp))

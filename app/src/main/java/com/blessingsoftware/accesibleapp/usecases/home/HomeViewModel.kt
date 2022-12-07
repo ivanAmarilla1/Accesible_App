@@ -3,16 +3,23 @@ package com.blessingsoftware.accesibleapp.usecases.home
 
 import android.app.Application
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.blessingsoftware.accesibleapp.model.domain.Place
+import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(application: Application, private val db: FirestoreRepository): AndroidViewModel(application) {
+
+    //TODO DEL VIEW DEL MAPA
 
     var places: MutableLiveData<List<Place>> = MutableLiveData<List<Place>>()
     //Lugar seleccionado en el mapa
@@ -25,6 +32,11 @@ class HomeViewModel @Inject constructor(application: Application, private val db
     //El listado de url de imagenes
     private val _imageList = MutableLiveData<ArrayList<Uri>?>(null)
     val imageList: LiveData<ArrayList<Uri>?> = _imageList
+
+    fun cleanHome(){
+        _isBottomBarVisible.value = false
+        _imageList.value = null
+    }
 
     private fun getPlaces(){
         places.value = db.getAllPlaces()
@@ -42,63 +54,60 @@ class HomeViewModel @Inject constructor(application: Application, private val db
         _imageList.value = db.getImages(uid)
     }
 
-    init {
-       getPlaces()
-    }
-
     fun setImageListEmpty() {
         _imageList.value = arrayListOf()
     }
 
-}
-/*
-@HiltViewModel
-class HomeViewModel @Inject constructor(private val repository: FirebaseAuthRepository) :
-    ViewModel() {
 
 
-    private var _isNewLocationSelected = MutableLiveData(false)
-    var isNewLocationSelected: LiveData<Boolean> = _isNewLocationSelected
 
-    private var _selectedLat = mutableStateOf(0.0)
-    var selectedLat: MutableState<Double> = _selectedLat
+    //TODO DE LA OPCION DE BUSQUEDA
 
-    private var _selectedlng = mutableStateOf(0.0)
-    var selectedlng: MutableState<Double> = _selectedlng
+    //Para el callback de traer lugares
+    private val _getPlacesFlow = MutableStateFlow<Resource<String>?>(null)
+    val getPlacesFlow: StateFlow<Resource<String>?> = _getPlacesFlow
 
-    private var _userCurrentLat = MutableLiveData<Double>()
-    var userCurrentLat: LiveData<Double> = _userCurrentLat
+    //Lugares de la funcion de busqueda
+    var searchedPlaces: MutableLiveData<List<Place>> = MutableLiveData<List<Place>>()
 
-    private var _userCurrentLng = MutableLiveData<Double>()
-    var userCurrentLng: LiveData<Double> = _userCurrentLng
+    //Para el drop down menu
+    private val _selectedPlaceType = MutableLiveData<String>()
+    val selectedPlaceType: LiveData<String> = _selectedPlaceType
 
-    //Ubicacion actual del usuario
-    //val pickUp = LatLng(userCurrentLat.value, userCurrentLng.value)
+    private val _selectedSearchedPlace = MutableLiveData<Place>()
+    val selectedSearchedPlace: LiveData<Place> = _selectedSearchedPlace
 
-    private var _locationPermissionGranted = MutableLiveData(false)
-    var locationPermissionGranted : LiveData<Boolean> = _locationPermissionGranted
+    //El listado de url de imagenes
+    private val _searchImageList = MutableLiveData<ArrayList<Uri>?>(null)
+    val searchImageList: LiveData<ArrayList<Uri>?> = _searchImageList
+
 
     init {
-        _userCurrentLat.value = 0.0
-        _userCurrentLng.value = 0.0
+        getPlaces()
+        _getPlacesFlow.value = Resource.Loading
     }
 
-    fun currentUserGeoCoord(latLng: LatLng) {
-        _userCurrentLat.value = latLng.latitude
-        _userCurrentLng.value = latLng.longitude
-        Log.d("Ubicacion actual", "Lat: "+_userCurrentLat.value.toString()+"Lng: "+_userCurrentLng.value.toString())
+    fun cleanSearchOption(){
+
     }
 
-    fun updateSelectedLocation(status: Boolean) {
-        _isNewLocationSelected.value = status
+    fun setSelectedPlaceType(placeType: String) {
+        _selectedPlaceType.value = placeType
     }
 
-    fun permissionGrand(setGranted: Boolean) {
-        _locationPermissionGranted.value = setGranted
+    fun setSelectedSearchedPlace(suggestion: Place) {
+        _selectedSearchedPlace.value = suggestion
     }
 
+    suspend fun getSeletedPlaces(placeType: String) {
+        //Log.d("Dentro del viewmodel", placeType)
+        _getPlacesFlow.value = Resource.Loading
+        searchedPlaces.value = db.getPlaces("placeType", placeType)
+        _getPlacesFlow.value = Resource.Success("Success")
+    }
 
+    fun cleanImages() {
+        _searchImageList.value = null
+    }
 
-}*/
-
-
+}

@@ -75,7 +75,7 @@ class ReviewSuggestionViewModel @Inject constructor(
 
 
     suspend fun getSuggestions(suggestionApproveStatus: Int) {
-        Log.d("Dentro del viewmodel", suggestionApproveStatus.toString())
+        //Log.d("Dentro del viewmodel", suggestionApproveStatus.toString())
         _getSuggestionFlow.value = Resource.Loading
         suggestions.value = db.getSuggestions("suggestionApproveStatus", suggestionApproveStatus)
         _getSuggestionFlow.value = Resource.Success("Success")

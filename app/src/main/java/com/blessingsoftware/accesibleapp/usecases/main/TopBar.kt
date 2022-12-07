@@ -72,7 +72,7 @@ fun TopBar(
                     }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Menu icon",
+                            contentDescription = "Arrow Back",
                             tint = MaterialTheme.colors.secondary
                         )
                     }

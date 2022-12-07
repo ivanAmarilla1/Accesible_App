@@ -4,22 +4,16 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
-import com.blessingsoftware.accesibleapp.usecases.home.HomeView
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 
 @Composable
@@ -83,7 +77,7 @@ fun BottomBarPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colors.background
         ) {
-            val bottomNavigationItems = listOf(AppScreens.HomeView, AppScreens.RandomView)
+            val bottomNavigationItems = listOf(AppScreens.HomeView, AppScreens.FindWhereToGoView)
             val navController = rememberNavController()
             BottomNavigationBar(navController, bottomNavigationItems)
         }

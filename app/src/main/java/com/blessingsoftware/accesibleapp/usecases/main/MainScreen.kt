@@ -1,14 +1,11 @@
 package com.blessingsoftware.accesibleapp.usecases.main
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -17,12 +14,8 @@ import androidx.navigation.NavHostController
 import com.blessingsoftware.accesibleapp.ui.composables.BottomNavigationBar
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
-import com.blessingsoftware.accesibleapp.usecases.makesuggestion.MakeSuggestionViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppNavigation
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
-import com.blessingsoftware.accesibleapp.usecases.navigation.HOME_ROUTE
-import com.blessingsoftware.accesibleapp.usecases.reviewsuggestions.ReviewSuggestionViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -45,10 +38,11 @@ fun MainScreen(
         drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     )
 
-    val bottomNavigationItems = listOf(AppScreens.HomeView, AppScreens.RandomView)
+    val bottomNavigationItems = listOf(AppScreens.HomeView, AppScreens.FindWhereToGoView)
     val drawerItems = if (isAdmin.value == true) {
         listOf(
             AppScreens.HomeView,
+            AppScreens.FindWhereToGoView,
             AppScreens.MakeSuggestion,
             AppScreens.SuggestionList,
             AppScreens.ItemTwo,
@@ -57,6 +51,7 @@ fun MainScreen(
     } else {
         listOf(
             AppScreens.HomeView,
+            AppScreens.FindWhereToGoView,
             AppScreens.MakeSuggestion,
             AppScreens.ItemTwo,
             AppScreens.ItemThree,
@@ -69,7 +64,7 @@ fun MainScreen(
         AppScreens.SuggestionList,
         AppScreens.ItemTwo,
         AppScreens.ItemThree,
-        AppScreens.RandomView,
+        AppScreens.FindWhereToGoView,
         AppScreens.SuggestionDetail
     )
     Box(modifier = Modifier.fillMaxSize()){
