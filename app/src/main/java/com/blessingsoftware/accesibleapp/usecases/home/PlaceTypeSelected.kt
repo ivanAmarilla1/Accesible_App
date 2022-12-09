@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.ui.composables.MyTopBar
 import com.blessingsoftware.accesibleapp.ui.composables.ReusableTittle
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.blessingsoftware.accesibleapp.ui.composables.SuggestionPlaceImage
@@ -38,37 +39,12 @@ fun PlaceTypeSelected(viewModel: HomeViewModel, navController: NavController) {
     val selectedPlaceType = viewModel.selectedPlaceType.observeAsState(initial = "")
 
     Scaffold(
-        topBar = {MyTopBar(navController, selectedPlaceType)}
+        topBar = {MyTopBar(navController, selectedPlaceType.value)}
     ) {
         PlaceSelection(viewModel = viewModel, navController = navController, selectedPlaceType)
     }
-
-
-
 }
 
-@Composable
-private fun MyTopBar(navController: NavController, tittle: State<String>) {
-    TopAppBar(
-        modifier = Modifier.height(50.dp),
-        elevation = 0.dp,
-        title = {
-            ReusableTittle(tittle.value, textColor = MaterialTheme.colors.secondary)
-        },
-        navigationIcon = {
-            IconButton(onClick = {
-                navController.popBackStack()
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Arrow Back",
-                    tint = MaterialTheme.colors.secondary
-                )
-            }
-        },
-        backgroundColor = Color.Transparent
-    )
-}
 
 @Composable
 private fun PlaceSelection(
@@ -78,14 +54,12 @@ private fun PlaceSelection(
 ) {
     val searchedPlaces by viewModel.searchedPlaces.observeAsState(initial = emptyList())
 
-
     LaunchedEffect(key1 = selectedPlaceType.value) {//Cada vez que cambia la key se ejecuta el launched effect
         viewModel.getSeletedPlaces(selectedPlaceType.value)
     }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(0.dp, 50.dp, 0.dp, 0.dp)
     ) {
         val getPlacesFlow = viewModel.getPlacesFlow.collectAsState()
         getPlacesFlow.value.let {

@@ -7,31 +7,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun ReusableTittle(
-    tittle: String = "",
+    tittle: String,
     modifier: Modifier = Modifier,
     textColor: Color = MaterialTheme.colors.secondary,
     style: TextStyle = MaterialTheme.typography.h5,
-    textAlign: TextAlign = TextAlign.Start
-    ) {
+    textAlign: TextAlign = TextAlign.Start,
+    maxLines: Int = 1000,
+    textOverflow: TextOverflow = TextOverflow.Ellipsis,
+) {
     Text(
         tittle,
         modifier = modifier,
         color = textColor,
         style = style,
         textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = textOverflow
     )
 }
 
 @Composable
 fun ReusableSubtitle(
-    subtittle: String = "",
+    subtittle: String,
     modifier: Modifier = Modifier,
     textColor: Color = MaterialTheme.colors.secondary,
     style: TextStyle = MaterialTheme.typography.h6,
-    textAlign: TextAlign = TextAlign.Start
+    textAlign: TextAlign = TextAlign.Start,
+    maxLines: Int = 1000,
+    textOverflow: TextOverflow = TextOverflow.Ellipsis,
 ) {
     Text(
         subtittle,
@@ -39,16 +46,20 @@ fun ReusableSubtitle(
         color = textColor,
         style = style,
         textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = textOverflow
     )
 }
 
 @Composable
 fun ReusableTextBody(
-    body: String = "",
+    body: String,
     modifier: Modifier = Modifier,
     textColor: Color = MaterialTheme.colors.secondary,
     style: TextStyle = MaterialTheme.typography.body1,
-    textAlign: TextAlign = TextAlign.Start
+    textAlign: TextAlign = TextAlign.Start,
+    maxLines: Int = 1000,
+    textOverflow: TextOverflow = TextOverflow.Ellipsis,
 ) {
     Text(
         body,
@@ -56,5 +67,7 @@ fun ReusableTextBody(
         color = textColor,
         style = style,
         textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = textOverflow
     )
 }

@@ -42,4 +42,8 @@
     <string name="edit_account">Editar Perfil</string>
     <string name="request_permissions">Debe aceptar los permisos de ubicacion para que la aplicacion funcione correctamente</string>
 
+    //Emojis
+    <string name="emoji_check">&#9989;</string>
+    <string name="emoji_delete">&#10060;</string>
+
 </resources>
