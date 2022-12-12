@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
+import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 
 @Composable
 fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Context) {
@@ -123,7 +124,16 @@ fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
 fun MySearchedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Context, navController: NavController) {
     Scaffold(
         topBar = { MyTopBar(navController, selectedPlace?.placeName ?: "") },
-        bottomBar = { MySearchedPlaceBottomBar(selectedPlace, context) }
+        bottomBar = { MySearchedPlaceBottomBar(selectedPlace, context) {
+            navController.navigate(AppScreens.HomeView.route){
+                popUpTo(AppScreens.HomeView.route) {
+                    saveState = true
+                }
+                launchSingleTop = true
+            }
+            viewModel.setSelectedPlace(it)
+            viewModel.setBottomBarVisible(true)
+        } }
     ) {
         Column(
             modifier = Modifier
@@ -159,7 +169,7 @@ fun MySearchedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
 }
 
 @Composable
-private fun MySearchedPlaceBottomBar(selectedPlace: Place?, context: Context) {
+private fun MySearchedPlaceBottomBar(selectedPlace: Place?, context: Context, onOpenMapClick: (Place) -> Unit) {
     if (selectedPlace!=null) {
         BottomNavigation (
             modifier = Modifier.height(70.dp),
@@ -167,7 +177,7 @@ private fun MySearchedPlaceBottomBar(selectedPlace: Place?, context: Context) {
         ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 Button(
-                    onClick = { Log.d("Boton", "Calificar") },
+                    onClick = { onOpenMapClick(selectedPlace, ) },
                     modifier = Modifier
                         .width(160.dp)
                         .height(60.dp),
@@ -213,8 +223,8 @@ private fun MySearchedPlaceBottomBar(selectedPlace: Place?, context: Context) {
             Spacer(modifier = Modifier.height(10.dp))
         }
     }
-
 }
+
 
 private fun returnOrderedString(text: String, emoji: String): String {
     var orderedString = ""
