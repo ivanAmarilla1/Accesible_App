@@ -25,6 +25,8 @@ class HomeViewModel @Inject constructor(application: Application, private val db
     //Lugar seleccionado en el mapa
     private val _selectedPlace = MutableLiveData<Place>()
     val selectedPlace: LiveData<Place> = _selectedPlace
+
+
     //Muestra y esconde el bottomBar
     private val _isBottomBarVisible = MutableLiveData<Boolean>()
     val isBottomBarVisible : LiveData<Boolean?> =_isBottomBarVisible

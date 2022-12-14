@@ -42,6 +42,7 @@ import com.blessingsoftware.accesibleapp.ui.composables.*
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.firebase.auth.FirebaseUser
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.CoroutineScope
@@ -163,6 +164,7 @@ fun MakeSuggestion(
             PlaceSelect(
                 suggestionViewModel,
                 userMarker.value,
+                context,
                 modifier = Modifier
                     .fillMaxSize()
                     .testTag("Map")
@@ -473,6 +475,7 @@ private fun MyPlaceRate(
 private fun PlaceSelect(
     suggestionViewModel: MakeSuggestionViewModel,
     userMarker: LatLng?,
+    context: Context,
     modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState,
     userLocation: LatLng?,
@@ -480,6 +483,21 @@ private fun PlaceSelect(
     onMapClick: (position: LatLng) -> Unit,
     onMapLoaded: () -> Unit,
 ) {
+    //propiedades y UI del mapa
+    val mapSettings = if (isSystemInDarkTheme()) R.raw.nightmapsettings else R.raw.standardmapsettings
+    var uiSettings by remember { mutableStateOf(MapUiSettings()) }
+    val properties by remember {
+        mutableStateOf(
+            MapProperties(
+                mapType = MapType.NORMAL,
+
+                mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, mapSettings)
+            )
+        )
+    }
+    uiSettings = uiSettings.copy(zoomControlsEnabled = false)
+
+
     Text(text = "Indique la ubicación del lugar en el mapa", color = MaterialTheme.colors.secondary)
     Spacer(modifier = Modifier.height(5.dp))
     Surface(
@@ -501,6 +519,8 @@ private fun PlaceSelect(
                     modifier = modifier
                         .height(350.dp)
                         .fillMaxWidth(),
+                    properties = properties,
+                    uiSettings = uiSettings,
                     cameraPositionState = cameraPositionState,
                     onMapLoaded = {
                         suggestionViewModel.setMarker(userLocation)
