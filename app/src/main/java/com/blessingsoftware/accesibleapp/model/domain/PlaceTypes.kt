@@ -36,7 +36,21 @@ enum class PlaceTypes {
             ESTACIONAMIENTO -> R.drawable.estacionamiento
             OTROS -> R.drawable.otros
         }
+    }
 
+    fun placeIcon (): Int {
+        return when(this) {
+            COMERCIO -> R.drawable.comerce_icon
+            RESTAURANTE -> R.drawable.restaurant_icon
+            HOTEL -> R.drawable.hotel_icon
+            PUNTO_INTERES -> R.drawable.interest_point_icon
+            LUGAR_PUBLICO -> R.drawable.public_place_icon
+            LUGAR_PRIVADO -> R.drawable.private_place_icon
+            ENTIDAD_ESTATAL -> R.drawable.goverment_icon
+            ZONA_ENTRETENIMIENTO -> R.drawable.entertaiment_icon_2
+            ESTACIONAMIENTO -> R.drawable.parking_icon
+            OTROS -> R.drawable.others_icon
+        }
     }
 
 }

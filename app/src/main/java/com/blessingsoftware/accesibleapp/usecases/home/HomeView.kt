@@ -17,11 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Place
+import com.blessingsoftware.accesibleapp.model.domain.PlaceTypes
 import com.blessingsoftware.accesibleapp.ui.composables.*
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.*
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -116,7 +115,6 @@ fun MainMap(viewModel: HomeViewModel, selectedPlace: Place?, context: Context, o
         mutableStateOf(
             MapProperties(
                 mapType = MapType.NORMAL,
-
                 mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, mapSettings)
             )
         )
@@ -134,24 +132,69 @@ fun MainMap(viewModel: HomeViewModel, selectedPlace: Place?, context: Context, o
 
     ) {
         places.forEach { place ->
+            val placeType = getPlaceType(place)
             if (place.placeLat.isNotEmpty() && place.placeLng.isNotEmpty()) {
                 val placePosition =
                     LatLng(place.placeLat.toDouble(), place.placeLng.toDouble())
 
-                MarkerInfoWindow(
+                MyMarker(
                     position = placePosition,
                     title = place.placeName,
+                    visible = cameraPosition.position.zoom >= 14f,
+                    snippet = place.placeDescription,
+                    alpha = 0.5f,
+                    icon = bitmapDescriptor(context, placeType.placeIcon()),
+                ) {
+                    onMarkerClicked(place)
+                }
+                /*Marker(
+                    position = placePosition,
+                    icon = bitmapDescriptor(context, R.drawable.entertaiment_icon),
+                    title = place.placeName,
+                    visible = cameraPosition.position.zoom >= 15f,
                     snippet = place.placeDescription,
                     onClick = {
                         onMarkerClicked(place)
-
                     }
-                ) {
+                )*/
 
-                }
             }
         }
     }
+}
+
+
+fun getPlaceType(place: Place): PlaceTypes {
+    val myPlaceType = place.placeType
+    val placeTypes = PlaceTypes.values()
+    for (type in placeTypes) {
+        if (type.description() ==  myPlaceType) {
+            return type
+        }
+    }
+    return PlaceTypes.OTROS
+}
+
+
+@Composable
+fun MyMarker(
+    position: LatLng,
+    title: String,
+    visible: Boolean,
+    snippet: String?,
+    alpha: Float,
+    icon: BitmapDescriptor?,
+    onMarkerClicked: () -> Boolean
+){
+    Marker(
+        position = position,
+        icon = icon,
+        title = title,
+        snippet = snippet,
+        //alpha = alpha,
+        visible = visible,
+        onClick = { onMarkerClicked() }
+    )
 }
 
 

@@ -35,7 +35,7 @@ fun BottomNavigationBar(navController: NavHostController, items: List<AppScreens
                         Icon(
                             (if (selected) screen.icon_filled else screen.icon_outlined)!!,
                             contentDescription = screen.tittle,
-                            tint = MaterialTheme.colors.onBackground
+                            tint = MaterialTheme.colors.secondary
                         )
                     },
                     //label = { Text(screen.tittle, color = MaterialTheme.colors.onBackground) },

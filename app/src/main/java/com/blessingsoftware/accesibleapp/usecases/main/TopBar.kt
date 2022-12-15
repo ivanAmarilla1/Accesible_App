@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.usecases.main
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -62,7 +63,7 @@ fun TopBar(
                         Icon(
                             imageVector = Icons.Filled.Menu,
                             contentDescription = "Menu icon",
-                            tint = if (currentDestination?.route != AppScreens.HomeView.route) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface
+                            tint = if (isSystemInDarkTheme()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface
                         )
                     }
                 } else {

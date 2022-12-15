@@ -58,13 +58,13 @@ fun NavigationDrawer(
                         color = MaterialTheme.colors.secondary
                     )
                 }
-                Text(
+                /*Text(
                     text = stringResource(R.string.edit_account),
                     modifier = Modifier.clickable { },//TODO Editar perfil
                     fontSize = 14.sp,
                     //fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colors.secondary
-                )
+                )*/
             }
 
         }
