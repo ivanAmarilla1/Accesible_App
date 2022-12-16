@@ -1,10 +1,10 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
-import android.app.Activity
 import android.content.Context
-
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -53,18 +53,30 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
     val bottomDrawerState = rememberBottomDrawerState(BottomDrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val selectedPlace = viewModel.selectedPlace.observeAsState()
+
+    val cam = if (selectedPlace.value != null) {
+        if (selectedPlace.value!!.placeLat.isNotEmpty() && selectedPlace.value!!.placeLng.isNotEmpty()) {
+            LatLng(
+                selectedPlace.value!!.placeLat.toDouble(),
+                selectedPlace.value!!.placeLng.toDouble()
+            )
+        } else {
+            LatLng(-25.286863187452415, -57.65103018717416)
+        }
+    } else {
+        LatLng(-25.286863187452415, -57.65103018717416)
+    }
+
     //Muestra y oculta el Bottom drawer (botones de buscar y home de la parte de abajo) si se abre el modal
     if (bottomDrawerState.isOpen) {
         viewModel.setBottomBarVisible(false)
     } else {
         viewModel.setBottomBarVisible(true)
     }
-
     val context = LocalContext.current
 
     HomeViewBackHandler(bottomDrawerState, scope)
 
-    //TODO Centrar la camara en el marcador seleccionado
     BottomDrawer(
         drawerState = bottomDrawerState,
         drawerContent = {
@@ -72,7 +84,12 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
         },
         gesturesEnabled = bottomDrawerState.isOpen
     ) {
-        MainMap(viewModel = viewModel, selectedPlace = selectedPlace.value, context) {
+        MainMap(
+            viewModel = viewModel,
+            selectedPlace = selectedPlace.value,
+            camLatLng = cam,
+            context
+        ) {
             scope.launch {
                 viewModel.setSelectedPlace(it)
                 bottomDrawerState.open()
@@ -84,32 +101,38 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
 
 
 @Composable
-fun MainMap(viewModel: HomeViewModel, selectedPlace: Place?, context: Context, onMarkerClicked: (Place) -> Boolean) {
+fun MainMap(
+    viewModel: HomeViewModel,
+    selectedPlace: Place?,
+    camLatLng: LatLng,
+    context: Context,
+    onMarkerClicked: (Place) -> Boolean
+) {
     //Lugares
     val places by viewModel.places.observeAsState(initial = emptyList())
+
+
+    val scope = rememberCoroutineScope()
     //Posicion inicial de la vista del mapa
-    val cam = LatLng(-25.286863187452415, -57.65103018717416)
     val cameraPosition = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(cam, 14f)
+        position = CameraPosition.fromLatLngZoom(camLatLng, 14f)
     }
+
     //Cada que cambia el lugar seleccionado, la posicion de la camara se actualiza para centrarse en el lugar
-    if (selectedPlace != null) {
-        LaunchedEffect(key1 = selectedPlace) {
-            //Log.d("Entro aca", "si ${selectedPlace.placeId}")
-            cameraPosition.animate(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.fromLatLngZoom(
-                        LatLng(
-                            selectedPlace.placeLat.toDouble(),
-                            selectedPlace.placeLng.toDouble()
-                        ), 15f
-                    )
+    LaunchedEffect(Unit) {
+        cameraPosition.animate(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.fromLatLngZoom(
+                    camLatLng,
+                    if (cameraPosition.position.zoom < 15f) 15f else cameraPosition.position.zoom
                 )
             )
-        }
+        )
     }
+
     //propiedades y UI del mapa
-    val mapSettings = if (isSystemInDarkTheme()) R.raw.nightmapsettings else R.raw.standardmapsettings
+    val mapSettings =
+        if (isSystemInDarkTheme()) R.raw.nightmapsettings else R.raw.standardmapsettings
     var uiSettings by remember { mutableStateOf(MapUiSettings()) }
     val properties by remember {
         mutableStateOf(
@@ -120,6 +143,7 @@ fun MainMap(viewModel: HomeViewModel, selectedPlace: Place?, context: Context, o
         )
     }
     uiSettings = uiSettings.copy(zoomControlsEnabled = false)
+    var isMapLoaded by remember { mutableStateOf(false) }
 
     //Composable de Google Maps
     GoogleMap(
@@ -128,9 +152,12 @@ fun MainMap(viewModel: HomeViewModel, selectedPlace: Place?, context: Context, o
             .padding(bottom = 50.dp),
         cameraPositionState = cameraPosition,
         uiSettings = uiSettings,
-        properties = properties
+        properties = properties,
+        onMapLoaded = {
+            isMapLoaded = true
+        },
 
-    ) {
+        ) {
         places.forEach { place ->
             val placeType = getPlaceType(place)
             if (place.placeLat.isNotEmpty() && place.placeLng.isNotEmpty()) {
@@ -142,23 +169,35 @@ fun MainMap(viewModel: HomeViewModel, selectedPlace: Place?, context: Context, o
                     title = place.placeName,
                     visible = cameraPosition.position.zoom >= 14f,
                     snippet = place.placeDescription,
-                    alpha = 0.5f,
                     icon = bitmapDescriptor(context, placeType.placeIcon()),
                 ) {
+                    scope.launch {
+                        cameraPosition.animate(
+                            CameraUpdateFactory.newCameraPosition(
+                                CameraPosition.fromLatLngZoom(
+                                    placePosition, if(cameraPosition.position.zoom < 16f) 16f else cameraPosition.position.zoom
+                                )
+                            )
+                        )
+                    }
                     onMarkerClicked(place)
                 }
-                /*Marker(
-                    position = placePosition,
-                    icon = bitmapDescriptor(context, R.drawable.entertaiment_icon),
-                    title = place.placeName,
-                    visible = cameraPosition.position.zoom >= 15f,
-                    snippet = place.placeDescription,
-                    onClick = {
-                        onMarkerClicked(place)
-                    }
-                )*/
-
             }
+        }
+    }
+    if (!isMapLoaded) {
+        androidx.compose.animation.AnimatedVisibility(
+            modifier = Modifier
+                .fillMaxSize(),
+            visible = !isMapLoaded,
+            enter = EnterTransition.None,
+            exit = fadeOut()
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .background(MaterialTheme.colors.background)
+                    .wrapContentSize()
+            )
         }
     }
 }
@@ -168,7 +207,7 @@ fun getPlaceType(place: Place): PlaceTypes {
     val myPlaceType = place.placeType
     val placeTypes = PlaceTypes.values()
     for (type in placeTypes) {
-        if (type.description() ==  myPlaceType) {
+        if (type.description() == myPlaceType) {
             return type
         }
     }
@@ -182,10 +221,9 @@ fun MyMarker(
     title: String,
     visible: Boolean,
     snippet: String?,
-    alpha: Float,
     icon: BitmapDescriptor?,
     onMarkerClicked: () -> Boolean
-){
+) {
     Marker(
         position = position,
         icon = icon,
@@ -214,15 +252,3 @@ private fun DrawerContent(
         MySelectedPlace(selectedPlace, viewModel, context)
     }
 }
-
-@Composable
-private fun HomeBackHandler() {
-    val activity = (LocalContext.current as? Activity)
-    androidx.activity.compose.BackHandler(enabled = true, onBack = {
-        activity?.finish()
-
-        Log.d("BackHandler", "Boton atras")
-    })
-}
-
-

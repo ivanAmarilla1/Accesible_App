@@ -7,13 +7,16 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,6 +50,7 @@ class HomeViewModel @Inject constructor(application: Application, private val db
     fun setSelectedPlace(place: Place) {
         _selectedPlace.value = place
     }
+
 
     fun setBottomBarVisible(boolean: Boolean) {
         _isBottomBarVisible.value = boolean
@@ -89,9 +93,6 @@ class HomeViewModel @Inject constructor(application: Application, private val db
         _getPlacesFlow.value = Resource.Loading
     }
 
-    fun cleanSearchOption(){
-
-    }
 
     fun setSelectedPlaceType(placeType: String) {
         _selectedPlaceType.value = placeType

@@ -1,5 +1,6 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -7,8 +8,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -21,13 +24,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.PlaceTypes
+import com.blessingsoftware.accesibleapp.ui.composables.CloseDrawerBackHandler
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
-fun FindWhereToGoView(viewModel: HomeViewModel, navController: NavController) {
+fun FindWhereToGoView(
+    viewModel: HomeViewModel,
+    navController: NavController,
+    scaffoldState: ScaffoldState
+) {
     val placeTypes = PlaceTypes.values()
+    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.padding(0.dp, 50.dp, 0.dp, 50.dp)) {
         TypesLazyVerticalGrid(placeTypes) {
@@ -37,6 +47,7 @@ fun FindWhereToGoView(viewModel: HomeViewModel, navController: NavController) {
             }
         }
     }
+    CloseDrawerBackHandler(scaffoldState = scaffoldState, scope = scope) {}
 }
 
 
@@ -69,7 +80,7 @@ private fun TypesLazyVerticalGrid(placeTypes: Array<PlaceTypes>, onClick: (Strin
                         contentDescription = "Icono de usuario",
                         modifier = Modifier
                             .fillMaxSize()
-                                //el blur solo funciona con android 12 para adelante
+                            //el blur solo funciona con android 12 para adelante
                             .blur(
                                 radiusX = 10.dp,
                                 radiusY = 10.dp,
@@ -96,4 +107,3 @@ private fun TypesLazyVerticalGrid(placeTypes: Array<PlaceTypes>, onClick: (Strin
         }
     )
 }
-

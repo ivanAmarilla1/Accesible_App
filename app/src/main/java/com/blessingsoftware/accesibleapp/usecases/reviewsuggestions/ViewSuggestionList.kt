@@ -24,13 +24,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
+import com.blessingsoftware.accesibleapp.ui.composables.CloseDrawerBackHandler
 import com.blessingsoftware.accesibleapp.ui.composables.DropDownMenu
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.blessingsoftware.accesibleapp.ui.composables.SuggestionPlaceImage
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 
 @Composable
-fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel, navController: NavController) {
+fun ViewSuggestionList(
+    viewModel: ReviewSuggestionViewModel,
+    navController: NavController,
+    scaffoldState: ScaffoldState
+) {
 
     //Sugerencias
     val suggestions by viewModel.suggestions.observeAsState(initial = emptyList())
@@ -40,6 +45,7 @@ fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel, navController: NavC
     LaunchedEffect(key1 = suggestionViewType.value) {//Cada vez que cambia la key se ejecuta el launched effect
         viewModel.getSuggestions(suggestionViewType.value)
     }
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -75,6 +81,7 @@ fun ViewSuggestionList(viewModel: ReviewSuggestionViewModel, navController: NavC
             }
         }
     }
+    CloseDrawerBackHandler(scaffoldState = scaffoldState, scope = scope) {}
 }
 
 @Composable

@@ -1,5 +1,13 @@
 [
   {
+    "elementType": "labels.icon",
+    "stylers": [
+      {
+        "color": "#858580"
+      }
+    ]
+  },
+  {
     "featureType": "poi.business",
     "stylers": [
       {

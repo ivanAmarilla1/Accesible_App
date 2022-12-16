@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -152,7 +153,7 @@ fun MakeSuggestion(
             ) {
                 suggestionViewModel.onChooserChanged(accessibility, it)
             }
-
+            Spacer(modifier = Modifier.height(20.dp))
             PlaceType(placeType, validateType.value, validateTypeError) {
                 suggestionViewModel.setPlaceType(it)
             }
@@ -201,7 +202,7 @@ fun MakeSuggestion(
 
             }
             Spacer(modifier = Modifier.height(15.dp))
-            AddPlaceImages(suggestionViewModel, context)
+            AddPlaceImages(suggestionViewModel)
             SendSuggestionButton {
                 sendSuggestionFunction(
                     name,
@@ -256,7 +257,15 @@ fun MakeSuggestion(
             }
         }
     }
-    SuggestionBackHandler(suggestionViewModel, navController, scaffoldState, scope)
+    //SuggestionBackHandler(suggestionViewModel, navController, scaffoldState, scope)
+    CloseDrawerBackHandler(scaffoldState = scaffoldState, scope = scope) {
+        BackHandler(enabled = true, onBack = {
+            navController.navigate(AppScreens.HomeView.route) {
+                popUpTo(AppScreens.HomeView.route) { inclusive = true }
+            }
+            suggestionViewModel.cleanSuggestionFields()
+        })
+    }
 }
 
 @Composable
@@ -307,7 +316,7 @@ private fun PlaceType(
     }
 
 
-    Text(text = "Tipo de Lugar", color = MaterialTheme.colors.secondary)
+    Text(text = "Tipo de Lugar", color = MaterialTheme.colors.secondary, fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(5.dp))
     DropDownMenu(
         placeType,
@@ -330,7 +339,7 @@ private fun PlaceNameField(
     focusManager: FocusManager,
     onTextFieldChanged: (String) -> Unit
 ) {
-    Text(text = "Nombre del Lugar", color = MaterialTheme.colors.secondary)
+    Text(text = "Nombre del Lugar", color = MaterialTheme.colors.secondary, fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(5.dp))
     CustomOutlinedTextFieldTwo(
         value = placeName,
@@ -357,7 +366,7 @@ private fun PlaceDescriptionField(
     focusManager: FocusManager,
     onTextFieldChanged: (String) -> Unit
 ) {
-    Text(text = "Descripción del Lugar", color = MaterialTheme.colors.secondary)
+    Text(text = "Descripción del Lugar", color = MaterialTheme.colors.secondary, fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(5.dp))
     CustomOutlinedTextArea(
         value = placeDescription,
@@ -456,7 +465,7 @@ private fun MyPlaceRate(
     validateRateError: String,
     onRatingChange: (Int) -> Unit
 ) {
-    Text(text = "Agregue su calificación personal", color = MaterialTheme.colors.secondary)
+    Text(text = "Agregue su calificación personal", color = MaterialTheme.colors.secondary, fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(5.dp))
     Column() {
         RatingBar(
@@ -484,7 +493,7 @@ private fun PlaceSelect(
     onMapLoaded: () -> Unit,
 ) {
     //propiedades y UI del mapa
-    val mapSettings = if (isSystemInDarkTheme()) R.raw.nightmapsettings else R.raw.standardmapsettings
+    val mapSettings = if (isSystemInDarkTheme()) R.raw.mapwithpoidarksettings else R.raw.mapwithpoilightsettings
     var uiSettings by remember { mutableStateOf(MapUiSettings()) }
     val properties by remember {
         mutableStateOf(
@@ -498,8 +507,8 @@ private fun PlaceSelect(
     uiSettings = uiSettings.copy(zoomControlsEnabled = false)
 
 
-    Text(text = "Indique la ubicación del lugar en el mapa", color = MaterialTheme.colors.secondary)
-    Spacer(modifier = Modifier.height(5.dp))
+    Text(text = "Indique la ubicación del lugar en el mapa", color = MaterialTheme.colors.secondary, fontWeight = FontWeight.Bold)
+    Spacer(modifier = Modifier.height(10.dp))
     Surface(
         modifier = modifier,
         color = MaterialTheme.colors.background
@@ -529,6 +538,9 @@ private fun PlaceSelect(
                     },
                     onMapClick = {
                         onMapClick(it)
+                    },
+                    onPOIClick = {
+                        onMapClick(it.latLng)
                     }
 
                 ) {
@@ -584,8 +596,8 @@ private fun PlaceSelect(
 }
 
 @Composable
-private fun AddPlaceImages(suggestionViewModel: MakeSuggestionViewModel, context: Context) {
-    Text(text = "Agregue imágenes del lugar", color = MaterialTheme.colors.secondary)
+private fun AddPlaceImages(suggestionViewModel: MakeSuggestionViewModel) {
+    Text(text = "Agregue imágenes del lugar", color = MaterialTheme.colors.secondary, fontWeight = FontWeight.Bold)
     SuggestionImages(viewModel = suggestionViewModel)
     Spacer(modifier = Modifier.height(10.dp))
 }

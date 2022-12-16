@@ -7,6 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -30,7 +31,7 @@ fun CheckboxList(
     Column(
         modifier = Modifier
     ) { // 3
-        Text(listTitle, textAlign = TextAlign.Justify) // 4
+        Text(listTitle, textAlign = TextAlign.Justify, color = MaterialTheme.colors.secondary, fontWeight = FontWeight.Bold) // 4
         Spacer(Modifier.size(16.dp)) // 5
         options.forEach { option -> // 6
             LabelledCheckbox( // 7

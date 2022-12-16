@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,6 +24,7 @@ import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
+import kotlinx.coroutines.delay
 
 @Composable
 fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Context) {
@@ -125,12 +127,7 @@ fun MySearchedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
     Scaffold(
         topBar = { MyTopBar(navController, selectedPlace?.placeName ?: "") },
         bottomBar = { MySearchedPlaceBottomBar(selectedPlace, context) {
-            navController.navigate(AppScreens.HomeView.route){
-                popUpTo(AppScreens.HomeView.route) {
-                    saveState = true
-                }
-                launchSingleTop = true
-            }
+            navController.popBackStack(route = AppScreens.HomeView.route, inclusive = false)
             viewModel.setSelectedPlace(it)
             viewModel.setBottomBarVisible(true)
         } }
