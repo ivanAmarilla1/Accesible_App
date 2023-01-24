@@ -30,13 +30,11 @@ import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.ui.composables.CustomDialog
+import com.blessingsoftware.accesibleapp.ui.composables.DefaultMapMarker
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.CameraPositionState
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -111,7 +109,7 @@ private fun ShowSuggestionDetails(
             SuggestioRate(suggestion.value!!.suggestionRate)
             SuggestionData("Fecha de Sugerencia", suggestion.value!!.suggestionAddDate.toString())
             SuggestionData("Usuario sugerente", suggestion.value!!.suggestionAddedBy)
-            SuggestionLocation(
+            DefaultMapMarker(
                 suggestionPosition.latitude,
                 suggestionPosition.longitude,
                 cameraPositionState,
@@ -350,31 +348,7 @@ fun ApproveOrDeclineButtons(
 }
 
 
-@Composable
-private fun SuggestionLocation(
-    suggestionLat: Double,
-    suggestionLng: Double,
-    cameraPositionState: CameraPositionState,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = "Ubicación del lugar",
-        style = MaterialTheme.typography.body1,
-        color = MaterialTheme.colors.secondary
-    )
-    Spacer(modifier = Modifier.height(10.dp))
-    Box {
-        GoogleMap(
-            modifier = modifier
-                .height(350.dp)
-                .fillMaxWidth(),
-            cameraPositionState = cameraPositionState
-        ) {
-            Marker(position = LatLng(suggestionLat, suggestionLng))
-        }
-    }
-    Spacer(modifier = Modifier.height(15.dp))
-}
+
 
 
 @Composable

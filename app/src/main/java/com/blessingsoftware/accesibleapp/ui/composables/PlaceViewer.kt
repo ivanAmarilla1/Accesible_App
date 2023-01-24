@@ -1,10 +1,12 @@
 package com.blessingsoftware.accesibleapp.ui.composables
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,10 +14,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -24,7 +29,9 @@ import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
-import kotlinx.coroutines.delay
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Context) {
@@ -54,11 +61,19 @@ fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
                 ReusableTextBody(selectedPlace.placeDescription)
                 Spacer(modifier = Modifier.height(20.dp))
                 ReusableSubtitle("Accesibilidades")
-                ReusableTextBody(returnOrderedString(selectedPlace.placeAccessibility, stringResource(R.string.emoji_check)))
+                ReusableTextBody(
+                    returnOrderedString(
+                        selectedPlace.placeAccessibility,
+                        stringResource(R.string.emoji_check)
+                    )
+                )
                 Spacer(modifier = Modifier.height(20.dp))
                 ReusableSubtitle("Potenciales Dificultades")
-                ReusableTextBody(returnOrderedString(selectedPlace.placeDifficulties, stringResource(R.string.emoji_delete)
-                ))
+                ReusableTextBody(
+                    returnOrderedString(
+                        selectedPlace.placeDifficulties, stringResource(R.string.emoji_delete)
+                    )
+                )
                 Spacer(modifier = Modifier.height(10.dp))
                 PlaceRate(suggestionRate = selectedPlace.placeRate)
             }
@@ -121,20 +136,44 @@ fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun MySearchedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Context, navController: NavController) {
+fun MySearchedPlace(
+    selectedPlace: Place?,
+    viewModel: HomeViewModel,
+    context: Context,
+    navController: NavController
+) {
+
+    var columnScrollingEnabled by remember { mutableStateOf(true) }
+
+    //posicion para el mapa
+    val suggestionPosition = LatLng(
+        selectedPlace?.placeLat?.toDouble() ?: 0.0,
+        selectedPlace?.placeLng?.toDouble() ?: 0.0,
+    )
+
+    //posicion de la camara del mapa
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(suggestionPosition, 16f)
+    }
+
+    //Para activar y desactivar el scroll cuando se mueve la camara del mapa
+    LaunchedEffect(cameraPositionState.isMoving) {
+        if (!cameraPositionState.isMoving) {
+            columnScrollingEnabled = true
+            //Log.d(ContentValues.TAG, "Map camera stopped moving - Enabling column scrolling...")
+        }
+    }
     Scaffold(
         topBar = { MyTopBar(navController, selectedPlace?.placeName ?: "") },
-        bottomBar = { MySearchedPlaceBottomBar(selectedPlace, context) {
-            navController.popBackStack(route = AppScreens.HomeView.route, inclusive = false)
-            viewModel.setSelectedPlace(it)
-            viewModel.setBottomBarVisible(true)
-        } }
+        bottomBar = { MySearchedPlaceBottomBar(selectedPlace, context) }
     ) {
         Column(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
+                //.padding(bottom = 50.dp)
+                .verticalScroll(rememberScrollState(), columnScrollingEnabled)
         ) {
             Spacer(modifier = Modifier.height(10.dp))
             if (selectedPlace != null) {
@@ -143,11 +182,19 @@ fun MySearchedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
                     ReusableTextBody(selectedPlace.placeDescription)
                     Spacer(modifier = Modifier.height(20.dp))
                     ReusableSubtitle("Accesibilidades")
-                    ReusableTextBody(returnOrderedString(selectedPlace.placeAccessibility, stringResource(R.string.emoji_check)))
+                    ReusableTextBody(
+                        returnOrderedString(
+                            selectedPlace.placeAccessibility,
+                            stringResource(R.string.emoji_check)
+                        )
+                    )
                     Spacer(modifier = Modifier.height(20.dp))
                     ReusableSubtitle("Potenciales Dificultades")
-                    ReusableTextBody(returnOrderedString(selectedPlace.placeDifficulties, stringResource(R.string.emoji_delete)
-                    ))
+                    ReusableTextBody(
+                        returnOrderedString(
+                            selectedPlace.placeDifficulties, stringResource(R.string.emoji_delete)
+                        )
+                    )
                     Spacer(modifier = Modifier.height(10.dp))
                     PlaceRate(suggestionRate = selectedPlace.placeRate)
                 }
@@ -158,6 +205,33 @@ fun MySearchedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
                 )
                 //Spacer(modifier = Modifier.height(15.dp))
                 Spacer(modifier = Modifier.height(15.dp))
+                DefaultMapMarker(
+                    selectedPlace.placeLat.toDouble(),
+                    selectedPlace.placeLng.toDouble(),
+                    cameraPositionState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 10.dp)
+                        .testTag("Map")
+                        .pointerInteropFilter(
+                            onTouchEvent = {
+                                when (it.action) {
+                                    MotionEvent.ACTION_DOWN -> {
+                                        columnScrollingEnabled = false
+                                        false
+                                    }
+                                    else -> {
+                                        Log.d(
+                                            ContentValues.TAG,
+                                            "MotionEvent ${it.action} - this never triggers."
+                                        )
+                                        true
+                                    }
+                                }
+                            }
+                        )
+                )
+                Spacer(modifier = Modifier.height(70.dp))
             } else {
                 Text(text = "Ha ocurrido un error")
             }
@@ -166,15 +240,17 @@ fun MySearchedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
 }
 
 @Composable
-private fun MySearchedPlaceBottomBar(selectedPlace: Place?, context: Context, onOpenMapClick: (Place) -> Unit) {
-    if (selectedPlace!=null) {
-        BottomNavigation (
+private fun MySearchedPlaceBottomBar(selectedPlace: Place?, context: Context) {
+    if (selectedPlace != null) {
+        BottomNavigation(
             modifier = Modifier.height(70.dp),
-            backgroundColor = MaterialTheme.colors.background
+            backgroundColor = Color.Transparent,
+            elevation = 0.dp
         ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 Button(
-                    onClick = { onOpenMapClick(selectedPlace, ) },
+                    onClick = { //TODO
+                    },
                     modifier = Modifier
                         .width(160.dp)
                         .height(60.dp),
@@ -184,13 +260,15 @@ private fun MySearchedPlaceBottomBar(selectedPlace: Place?, context: Context, on
                     )
                 ) {
                     Text(
-                        "Ver en el Mapa",
+                        "Calificar",
                         color = MaterialTheme.colors.onBackground,
                         modifier = Modifier,
                         style = MaterialTheme.typography.body1,
                         textAlign = TextAlign.Center,
                     )
                 }
+
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Button(
                     onClick = {

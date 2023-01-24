@@ -1,7 +1,6 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
 import android.content.Context
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.fadeOut
@@ -54,18 +53,7 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
     val scope = rememberCoroutineScope()
     val selectedPlace = viewModel.selectedPlace.observeAsState()
 
-    val cam = if (selectedPlace.value != null) {
-        if (selectedPlace.value!!.placeLat.isNotEmpty() && selectedPlace.value!!.placeLng.isNotEmpty()) {
-            LatLng(
-                selectedPlace.value!!.placeLat.toDouble(),
-                selectedPlace.value!!.placeLng.toDouble()
-            )
-        } else {
-            LatLng(-25.286863187452415, -57.65103018717416)
-        }
-    } else {
-        LatLng(-25.286863187452415, -57.65103018717416)
-    }
+
 
     //Muestra y oculta el Bottom drawer (botones de buscar y home de la parte de abajo) si se abre el modal
     if (bottomDrawerState.isOpen) {
@@ -87,7 +75,7 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
         MainMap(
             viewModel = viewModel,
             selectedPlace = selectedPlace.value,
-            camLatLng = cam,
+            //camLatLng = cam,
             context
         ) {
             scope.launch {
@@ -101,15 +89,30 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
 
 
 @Composable
-fun MainMap(
+private fun MainMap(
     viewModel: HomeViewModel,
     selectedPlace: Place?,
-    camLatLng: LatLng,
+    //camLatLng: LatLng,
     context: Context,
     onMarkerClicked: (Place) -> Boolean
 ) {
     //Lugares
     val places by viewModel.places.observeAsState(initial = emptyList())
+
+
+    val camLatLng = if (selectedPlace != null) {
+        if (selectedPlace.placeLat.isNotEmpty() && selectedPlace.placeLng.isNotEmpty()) {
+            LatLng(
+                selectedPlace.placeLat.toDouble(),
+                selectedPlace.placeLng.toDouble()
+            )
+        } else {
+            LatLng(-25.286863187452415, -57.65103018717416)
+        }
+    } else {
+        LatLng(-25.286863187452415, -57.65103018717416)
+    }
+
 
 
     val scope = rememberCoroutineScope()

@@ -81,7 +81,7 @@ private fun PlaceSelection(
                     }
                 }
                 else -> {
-                    throw IllegalStateException("Error al obtener Sugerencias")
+                    Log.d("Error", "Error al obtener datos")
                 }
             }
         }

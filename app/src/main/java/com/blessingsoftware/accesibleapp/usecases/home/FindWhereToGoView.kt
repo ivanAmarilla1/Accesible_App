@@ -1,6 +1,5 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -27,8 +26,6 @@ import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.model.domain.PlaceTypes
 import com.blessingsoftware.accesibleapp.ui.composables.CloseDrawerBackHandler
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 fun FindWhereToGoView(
