@@ -98,16 +98,12 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     override suspend fun addPlaceRate(
         placeId: String,
-        actualRate: Int,
+        actualRate: Double,
         actualPlaceNumberOfRaters: Int,
         rate: Int
     ): Resource<String> {
 
-        val newRate = (actualRate+rate)/actualPlaceNumberOfRaters+1
-        Log.d("Actual Rate", "$actualRate")
-        Log.d("Suma Rate", "${actualRate+rate}")
-        Log.d("new Rate", "$newRate")
-
+        val newRate = (actualRate+rate)/(2)
 
         return try {
             db.collection("places").document(placeId).update(

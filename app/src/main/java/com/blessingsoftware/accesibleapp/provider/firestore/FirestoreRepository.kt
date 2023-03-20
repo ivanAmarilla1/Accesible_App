@@ -16,7 +16,7 @@ interface FirestoreRepository {
     suspend fun storePlace(place: Place) : Resource<String>
     fun getAllPlaces() : ArrayList<Place>
     suspend fun getPlaces(key: String, value: String) : ArrayList<Place>
-    suspend fun addPlaceRate (placeId: String, actualRate: Int, actualPlaceNumberOfRaters: Int, rate: Int) : Resource<String>
+    suspend fun addPlaceRate (placeId: String, actualRate: Double, actualPlaceNumberOfRaters: Int, rate: Int) : Resource<String>
 
     //Suggestions
     suspend fun storeSuggestion(suggestion: Suggestion) : HashMap<Resource<String>, String>//Resource<String>//, String

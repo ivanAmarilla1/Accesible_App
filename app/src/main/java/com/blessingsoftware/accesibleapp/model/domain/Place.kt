@@ -13,7 +13,7 @@ data class Place(
     var placeLng: String = "",
     var placeAddedBy: String = "",
     var placeReviewedBy: String = "",
-    var placeRate: Int = 0,
+    var placeRate: Double = 0.0,
     var placeNumberOfRaters: Int = 0,
     var placeType: String = "",
     var placeImages: String = "",

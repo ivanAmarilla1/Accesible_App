@@ -102,7 +102,7 @@ class ReviewSuggestionViewModel @Inject constructor(
                         suggestion.suggestionLng,
                         suggestion.suggestionAddedBy,
                         repository.currentUser!!.uid,
-                        suggestion.suggestionRate,
+                        suggestion.suggestionRate.toDouble(),
                         suggestion.suggestionNumberOfRaters,
                         suggestion.suggestionType,
                         suggestion.suggestionId

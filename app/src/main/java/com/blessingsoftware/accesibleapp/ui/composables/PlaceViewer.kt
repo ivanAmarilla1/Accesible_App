@@ -195,7 +195,10 @@ fun MySearchedPlace(
                         )
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    PlaceRate(suggestionRate = selectedPlace.placeRate, selectedPlace.placeNumberOfRaters)
+                    PlaceRate(
+                        suggestionRate = selectedPlace.placeRate,
+                        selectedPlace.placeNumberOfRaters
+                    )
                 }
                 Images(
                     viewModel = viewModel,
@@ -329,7 +332,8 @@ fun openGoogleMaps(context: Context, placeLat: String, placeLng: String) {
 
 
 @Composable
-private fun PlaceRate(suggestionRate: Int, placeNumberOfRaters: Int) {
+private fun PlaceRate(suggestionRate: Double, placeNumberOfRaters: Int) {
+    val suggestionRateRounded = String.format("%.1f", suggestionRate).toDouble()
     Spacer(modifier = Modifier.height(10.dp))
     Column(Modifier.fillMaxWidth()) {
         Text(
@@ -340,7 +344,7 @@ private fun PlaceRate(suggestionRate: Int, placeNumberOfRaters: Int) {
             textAlign = TextAlign.Right,
         )
         StarRate(
-            rate = suggestionRate,
+            rate = suggestionRate.toInt(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(end = 8.dp, bottom = 12.dp),
@@ -349,7 +353,7 @@ private fun PlaceRate(suggestionRate: Int, placeNumberOfRaters: Int) {
             size = 40
         )
         Text(
-            "($placeNumberOfRaters calificaciones)",
+            "($suggestionRateRounded de 5 con $placeNumberOfRaters calificaciones)",
             modifier = Modifier.align(Alignment.End),
             MaterialTheme.colors.secondary,
             style = MaterialTheme.typography.body1,

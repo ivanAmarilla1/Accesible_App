@@ -22,7 +22,6 @@ import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.PlaceTypes
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.*
-import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.*
 import com.google.maps.android.compose.*
@@ -58,6 +57,10 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
     val scope = rememberCoroutineScope()
     val selectedPlace = viewModel.selectedPlace.observeAsState()
 
+    //Para el callback
+    val addRateFlow = viewModel.addRateFlow.collectAsState()
+    val flag = viewModel.addRateFlag.observeAsState()
+
     //Muestra y oculta el Bottom drawer (botones de buscar y home de la parte de abajo) si se abre el modal
     if (bottomDrawerState.isOpen) {
         viewModel.setBottomBarVisible(false)
@@ -88,6 +91,33 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
             return@MainMap bottomDrawerState.isClosed
         }
     }
+
+
+    addRateFlow.value.let {
+        if (flag.value == true) {
+            when (it) {
+                is Resource.Success -> {
+                    Toast.makeText(context, "Calificación Enviada", Toast.LENGTH_LONG).show()
+                    viewModel.cleanRates()
+
+                }
+                is Resource.Failure -> {
+                    Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
+                    viewModel.cleanRates()
+                }
+                Resource.Loading -> {
+                    Box(Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    }
+                }
+                else -> {
+                    throw IllegalStateException("Error de al procesar sugerencia")
+                }
+            }
+        }
+    }
+
+
 }
 
 
@@ -250,10 +280,6 @@ private fun DrawerContent(
     //Coroutine Scope
     val scope = rememberCoroutineScope()
 
-    //Para el callback
-    val addRateFlow = viewModel.addRateFlow.collectAsState()
-    val flag = viewModel.addRateFlag.observeAsState()
-
     val context = LocalContext.current
 
     val showRateDialog = viewModel.showRatingDialog.observeAsState()
@@ -277,39 +303,12 @@ private fun DrawerContent(
         rating = userRating,
         validateRate = validatePlaceRate.value,
         showRateDialog.value,
-        {viewModel.setUserRating(it)}
+        { viewModel.setUserRating(it) }
     ) {
         scope.launch {
             viewModel.addPlaceRate(selectedPlace, it)
         }
     }
-
-    addRateFlow.value.let {
-        if (flag.value == true) {
-            when (it) {
-                is Resource.Success -> {
-                    Toast.makeText(context, "Calificación Enviada", Toast.LENGTH_LONG).show()
-                    viewModel.cleanRates()
-
-                }
-                is Resource.Failure -> {
-                    Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
-                    viewModel.cleanRates()
-                }
-                Resource.Loading -> {
-                    Box(Modifier.fillMaxSize()) {
-                        CircularProgressIndicator(Modifier.align(Alignment.Center))
-                    }
-                }
-                else -> {
-                    throw IllegalStateException("Error de al procesar sugerencia")
-                }
-            }
-        }
-    }
-
-
-
 }
 
 
@@ -327,7 +326,7 @@ private fun RatePlace(
             buttonText = "Calificar",
             rating,
             !validateRate!!,
-            onDismissRequest = { viewModel.setShowDialogFalse() }, {onRatingChange (it)})
+            onDismissRequest = { viewModel.setShowDialogFalse() }, { onRatingChange(it) })
         {
             if (viewModel.validatePlaceRate(it)) {
                 onConfirmButton(it)

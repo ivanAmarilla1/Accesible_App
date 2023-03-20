@@ -179,7 +179,7 @@ private fun Place(item: Place, onPlaceClick: () -> Unit) {
                 )
 
                 StarRate(
-                    rate = item.placeRate,
+                    rate = item.placeRate.toInt(),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(end = 8.dp, bottom = 12.dp),
