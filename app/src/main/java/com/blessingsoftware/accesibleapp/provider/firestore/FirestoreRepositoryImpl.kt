@@ -96,6 +96,33 @@ class FirestoreRepositoryImpl @Inject constructor(
         return places
     }
 
+    override suspend fun addPlaceRate(
+        placeId: String,
+        actualRate: Int,
+        actualPlaceNumberOfRaters: Int,
+        rate: Int
+    ): Resource<String> {
+
+        val newRate = (actualRate+rate)/actualPlaceNumberOfRaters+1
+        Log.d("Actual Rate", "$actualRate")
+        Log.d("Suma Rate", "${actualRate+rate}")
+        Log.d("new Rate", "$newRate")
+
+
+        return try {
+            db.collection("places").document(placeId).update(
+                hashMapOf(
+                    "placeRate" to newRate,
+                    "placeNumberOfRaters" to actualPlaceNumberOfRaters+1,
+                ) as Map<String, Any>
+            ).await()
+            Resource.Success("Success")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
 
 
     //Suggestions

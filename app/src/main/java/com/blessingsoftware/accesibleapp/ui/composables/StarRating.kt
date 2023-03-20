@@ -20,7 +20,6 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.blessingsoftware.accesibleapp.R
-import org.intellij.lang.annotations.JdkConstants
 
 @ExperimentalComposeUiApi
 @Composable

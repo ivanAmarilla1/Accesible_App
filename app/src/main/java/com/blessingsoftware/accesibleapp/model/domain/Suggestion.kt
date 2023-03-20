@@ -10,6 +10,7 @@ data class Suggestion(
     var suggestionAccessibility: String = "",
     var suggestionDifficulties: String = "",
     var suggestionRate: Int = 0,
+    val suggestionNumberOfRaters: Int = 1,
     var suggestionType: String = "",
     var suggestionLat: String = "",
     var suggestionLng: String = "",

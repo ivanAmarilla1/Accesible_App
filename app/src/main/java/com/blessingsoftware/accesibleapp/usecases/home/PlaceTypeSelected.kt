@@ -10,13 +10,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,7 +24,6 @@ import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.MyTopBar
-import com.blessingsoftware.accesibleapp.ui.composables.ReusableTittle
 import com.blessingsoftware.accesibleapp.ui.composables.StarRate
 import com.blessingsoftware.accesibleapp.ui.composables.SuggestionPlaceImage
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens

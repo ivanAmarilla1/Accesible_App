@@ -476,7 +476,6 @@ private fun MyPlaceRate(
             onRatingChange(it)
         }
     }
-
 }
 
 

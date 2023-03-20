@@ -1,6 +1,8 @@
 package com.blessingsoftware.accesibleapp.usecases.home
 
 import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.fadeOut
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -17,7 +20,9 @@ import androidx.navigation.NavHostController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.PlaceTypes
+import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.*
+import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.*
 import com.google.maps.android.compose.*
@@ -52,8 +57,6 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
     val bottomDrawerState = rememberBottomDrawerState(BottomDrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val selectedPlace = viewModel.selectedPlace.observeAsState()
-
-
 
     //Muestra y oculta el Bottom drawer (botones de buscar y home de la parte de abajo) si se abre el modal
     if (bottomDrawerState.isOpen) {
@@ -112,7 +115,6 @@ private fun MainMap(
     } else {
         LatLng(-25.286863187452415, -57.65103018717416)
     }
-
 
 
     val scope = rememberCoroutineScope()
@@ -178,7 +180,8 @@ private fun MainMap(
                         cameraPosition.animate(
                             CameraUpdateFactory.newCameraPosition(
                                 CameraPosition.fromLatLngZoom(
-                                    placePosition, if(cameraPosition.position.zoom < 16f) 16f else cameraPosition.position.zoom
+                                    placePosition,
+                                    if (cameraPosition.position.zoom < 16f) 16f else cameraPosition.position.zoom
                                 )
                             )
                         )
@@ -244,7 +247,19 @@ private fun DrawerContent(
     selectedPlace: Place?,
     viewModel: HomeViewModel,
 ) {
+    //Coroutine Scope
+    val scope = rememberCoroutineScope()
+
+    //Para el callback
+    val addRateFlow = viewModel.addRateFlow.collectAsState()
+    val flag = viewModel.addRateFlag.observeAsState()
+
     val context = LocalContext.current
+
+    val showRateDialog = viewModel.showRatingDialog.observeAsState()
+    val validatePlaceRate = viewModel.validatePlaceRate.observeAsState()
+    val userRating: Int by viewModel.userRating.observeAsState(initial = 0)
+
 
     Surface(
         Modifier
@@ -252,6 +267,73 @@ private fun DrawerContent(
             .fillMaxWidth()
             .height(600.dp)
     ) {
-        MySelectedPlace(selectedPlace, viewModel, context)
+        MySelectedPlace(selectedPlace, viewModel, context) {
+            viewModel.setShowDialogTrue()
+        }
     }
+
+    RatePlace(
+        viewModel,
+        rating = userRating,
+        validateRate = validatePlaceRate.value,
+        showRateDialog.value,
+        {viewModel.setUserRating(it)}
+    ) {
+        scope.launch {
+            viewModel.addPlaceRate(selectedPlace, it)
+        }
+    }
+
+    addRateFlow.value.let {
+        if (flag.value == true) {
+            when (it) {
+                is Resource.Success -> {
+                    Toast.makeText(context, "Calificación Enviada", Toast.LENGTH_LONG).show()
+                    viewModel.cleanRates()
+
+                }
+                is Resource.Failure -> {
+                    Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
+                    viewModel.cleanRates()
+                }
+                Resource.Loading -> {
+                    Box(Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    }
+                }
+                else -> {
+                    throw IllegalStateException("Error de al procesar sugerencia")
+                }
+            }
+        }
+    }
+
+
+
+}
+
+
+@Composable
+private fun RatePlace(
+    viewModel: HomeViewModel,
+    rating: Int,
+    validateRate: Boolean?,
+    showRateDialog: Boolean?,
+    onRatingChange: (Int) -> Unit,
+    onConfirmButton: (Int) -> Unit
+) {
+    if (showRateDialog == true) {
+        CustomRatingDialog(
+            buttonText = "Calificar",
+            rating,
+            !validateRate!!,
+            onDismissRequest = { viewModel.setShowDialogFalse() }, {onRatingChange (it)})
+        {
+            if (viewModel.validatePlaceRate(it)) {
+                onConfirmButton(it)
+            }
+            Log.d("New Rate", "${viewModel.userRating.value}")
+        }
+    }
+
 }

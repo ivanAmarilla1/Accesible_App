@@ -28,13 +28,12 @@ import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.usecases.home.HomeViewModel
-import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Context) {
+fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Context, onRatePlaceButtonClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colors.onSecondary)
@@ -75,7 +74,7 @@ fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
                     )
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                PlaceRate(suggestionRate = selectedPlace.placeRate)
+                PlaceRate(suggestionRate = selectedPlace.placeRate, selectedPlace.placeNumberOfRaters)
             }
             Images(
                 viewModel = viewModel,
@@ -85,7 +84,7 @@ fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
             //Spacer(modifier = Modifier.height(15.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 Button(
-                    onClick = { Log.d("Boton", "Calificar") },
+                    onClick = { onRatePlaceButtonClicked() },
                     modifier = Modifier
                         .width(160.dp)
                         .height(60.dp),
@@ -196,7 +195,7 @@ fun MySearchedPlace(
                         )
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    PlaceRate(suggestionRate = selectedPlace.placeRate)
+                    PlaceRate(suggestionRate = selectedPlace.placeRate, selectedPlace.placeNumberOfRaters)
                 }
                 Images(
                     viewModel = viewModel,
@@ -330,7 +329,7 @@ fun openGoogleMaps(context: Context, placeLat: String, placeLng: String) {
 
 
 @Composable
-private fun PlaceRate(suggestionRate: Int) {
+private fun PlaceRate(suggestionRate: Int, placeNumberOfRaters: Int) {
     Spacer(modifier = Modifier.height(10.dp))
     Column(Modifier.fillMaxWidth()) {
         Text(
@@ -348,6 +347,13 @@ private fun PlaceRate(suggestionRate: Int) {
             verticalAlignment = Alignment.Bottom,
             horizontalAlignment = Arrangement.End,
             size = 40
+        )
+        Text(
+            "($placeNumberOfRaters calificaciones)",
+            modifier = Modifier.align(Alignment.End),
+            MaterialTheme.colors.secondary,
+            style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Right,
         )
     }
 }

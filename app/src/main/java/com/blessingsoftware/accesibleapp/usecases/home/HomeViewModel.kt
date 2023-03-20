@@ -20,11 +20,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(application: Application, private val db: FirestoreRepository): AndroidViewModel(application) {
+class HomeViewModel @Inject constructor(
+    application: Application,
+    private val db: FirestoreRepository
+) : AndroidViewModel(application) {
 
     //TODO DEL VIEW DEL MAPA
-
     var places: MutableLiveData<List<Place>> = MutableLiveData<List<Place>>()
+
     //Lugar seleccionado en el mapa
     private val _selectedPlace = MutableLiveData<Place>()
     val selectedPlace: LiveData<Place> = _selectedPlace
@@ -32,18 +35,19 @@ class HomeViewModel @Inject constructor(application: Application, private val db
 
     //Muestra y esconde el bottomBar
     private val _isBottomBarVisible = MutableLiveData<Boolean>()
-    val isBottomBarVisible : LiveData<Boolean?> =_isBottomBarVisible
+    val isBottomBarVisible: LiveData<Boolean?> = _isBottomBarVisible
 
     //El listado de url de imagenes
     private val _imageList = MutableLiveData<ArrayList<Uri>?>(null)
     val imageList: LiveData<ArrayList<Uri>?> = _imageList
 
-    fun cleanHome(){
+    fun cleanHome() {
         _isBottomBarVisible.value = false
         _imageList.value = null
+        _showRatingDialog.value = false
     }
 
-    private fun getPlaces(){
+    private fun getPlaces() {
         places.value = db.getAllPlaces()
     }
 
@@ -56,15 +60,13 @@ class HomeViewModel @Inject constructor(application: Application, private val db
         _isBottomBarVisible.value = boolean
     }
 
-    suspend fun getPlaceImages (uid: String) {
+    suspend fun getPlaceImages(uid: String) {
         _imageList.value = db.getImages(uid)
     }
 
     fun setImageListEmpty() {
         _imageList.value = arrayListOf()
     }
-
-
 
 
     //TODO DE LA OPCION DE BUSQUEDA
@@ -88,12 +90,6 @@ class HomeViewModel @Inject constructor(application: Application, private val db
     val searchImageList: LiveData<ArrayList<Uri>?> = _searchImageList
 
 
-    init {
-        getPlaces()
-        _getPlacesFlow.value = Resource.Loading
-    }
-
-
     fun setSelectedPlaceType(placeType: String) {
         _selectedPlaceType.value = placeType
     }
@@ -113,4 +109,65 @@ class HomeViewModel @Inject constructor(application: Application, private val db
         _searchImageList.value = null
     }
 
+
+    //TODO Calificar sitios
+    //Para el callback de agregar calificacion
+    private val _addRateFlow = MutableStateFlow<Resource<String>?>(null)
+    val addRateFlow: StateFlow<Resource<String>?> = _addRateFlow
+    //Bandera
+    private val _addRateFlag = MutableLiveData<Boolean>()
+    val addRateFlag: LiveData<Boolean> = _addRateFlag
+    //Mostrar o no el dialogo de calificacion
+    private val _showRatingDialog = MutableLiveData<Boolean>()
+    val showRatingDialog: LiveData<Boolean> = _showRatingDialog
+
+    //para validar que se ha ingresado la calificacion cuando se quiere enviar
+    private val _validatePlaceRate = MutableLiveData<Boolean>()
+    val validatePlaceRate: LiveData<Boolean?> = _validatePlaceRate
+
+    //el rating del usuario
+    private val _userRating = MutableLiveData<Int>()
+    val userRating: LiveData<Int> = _userRating
+
+    suspend fun addPlaceRate(selectedPlace: Place?, rate: Int) {
+        _addRateFlow.value = Resource.Loading
+        _addRateFlag.value = true
+        if (selectedPlace != null) {
+            val updateRate = db.addPlaceRate(selectedPlace.placeId, selectedPlace.placeRate, selectedPlace.placeNumberOfRaters, rate)
+            _addRateFlow.value = updateRate
+        }
+    }
+
+    fun setShowDialogTrue() {
+        _showRatingDialog.value = true
+    }
+
+    fun setShowDialogFalse() {
+        _showRatingDialog.value = false
+        _userRating.value = 0
+        _validatePlaceRate.value = true
+    }
+
+    fun validatePlaceRate(rate: Int): Boolean {
+        _validatePlaceRate.value = (rate in 1..5)
+        return _validatePlaceRate.value!!
+    }
+
+    fun setUserRating(rate: Int) {
+        _userRating.value = rate
+    }
+
+    fun cleanRates() {
+        _addRateFlow.value = null
+        _addRateFlag.value = false
+        _userRating.value = 0
+        setShowDialogFalse()
+    }
+
+
+    init {
+        getPlaces()
+        _getPlacesFlow.value = Resource.Loading
+        _validatePlaceRate.value = true
+    }
 }

@@ -14,6 +14,7 @@ data class Place(
     var placeAddedBy: String = "",
     var placeReviewedBy: String = "",
     var placeRate: Int = 0,
+    var placeNumberOfRaters: Int = 0,
     var placeType: String = "",
     var placeImages: String = "",
     @ServerTimestamp

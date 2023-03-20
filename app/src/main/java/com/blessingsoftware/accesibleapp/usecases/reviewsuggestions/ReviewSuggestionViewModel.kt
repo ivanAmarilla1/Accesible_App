@@ -103,6 +103,7 @@ class ReviewSuggestionViewModel @Inject constructor(
                         suggestion.suggestionAddedBy,
                         repository.currentUser!!.uid,
                         suggestion.suggestionRate,
+                        suggestion.suggestionNumberOfRaters,
                         suggestion.suggestionType,
                         suggestion.suggestionId
                     )
