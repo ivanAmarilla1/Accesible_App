@@ -24,14 +24,15 @@ import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.*
+import com.google.firebase.auth.FirebaseUser
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun HomeView(viewModel: HomeViewModel, navController: NavHostController) {
+fun HomeView(viewModel: HomeViewModel, navController: NavHostController, currentUser: FirebaseUser?) {
     Box(modifier = Modifier.background(MaterialTheme.colors.onSecondary)) {
-        PlaceBottomDrawer(viewModel)
+        PlaceBottomDrawer(viewModel, currentUser)
     }
 }
 
@@ -52,7 +53,7 @@ fun HomeViewBackHandler(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
+private fun PlaceBottomDrawer(viewModel: HomeViewModel, currentUser: FirebaseUser?) {
     val bottomDrawerState = rememberBottomDrawerState(BottomDrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val selectedPlace = viewModel.selectedPlace.observeAsState()
@@ -74,7 +75,7 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel) {
     BottomDrawer(
         drawerState = bottomDrawerState,
         drawerContent = {
-            DrawerContent(selectedPlace.value, viewModel)
+            DrawerContent(selectedPlace.value, viewModel, currentUser)
         },
         gesturesEnabled = bottomDrawerState.isOpen
     ) {
@@ -276,6 +277,7 @@ fun MyMarker(
 private fun DrawerContent(
     selectedPlace: Place?,
     viewModel: HomeViewModel,
+    currentUser: FirebaseUser?,
 ) {
     //Coroutine Scope
     val scope = rememberCoroutineScope()
@@ -306,7 +308,7 @@ private fun DrawerContent(
         { viewModel.setUserRating(it) }
     ) {
         scope.launch {
-            viewModel.addPlaceRate(selectedPlace, it)
+            viewModel.addPlaceRate(selectedPlace, it, currentUser)
         }
     }
 }

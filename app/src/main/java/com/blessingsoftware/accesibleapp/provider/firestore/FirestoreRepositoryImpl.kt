@@ -2,10 +2,7 @@ package com.blessingsoftware.accesibleapp.provider.firestore
 
 import android.net.Uri
 import android.util.Log
-import com.blessingsoftware.accesibleapp.model.domain.Place
-import com.blessingsoftware.accesibleapp.model.domain.Resource
-import com.blessingsoftware.accesibleapp.model.domain.Suggestion
-import com.blessingsoftware.accesibleapp.model.domain.User
+import com.blessingsoftware.accesibleapp.model.domain.*
 import com.blessingsoftware.accesibleapp.util.await
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -40,7 +37,55 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     }
 
+    override suspend fun addUserPlaceRate(
+        uid: String,
+        placeId: String,
+        rate: Double
+    ): Resource<String> {
 
+        return try {
+            val ref =
+                db.collection("users").document(uid).collection("userPlaceRates").document(placeId)
+            ref.set(
+                hashMapOf(
+                    "placeRate" to rate,
+                )
+            )
+            Resource.Success("Success")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+
+    }
+
+
+    override suspend fun checkUserPlaceRate(
+        uid: String,
+        placeId: String
+    ): HashMap<Resource<String>, Int> {
+        val result = HashMap<Resource<String>, Int>()
+        return try {
+            val ref =
+                db.collection("users").document(uid).collection("userPlaceRates").document(placeId)
+            val x = ref.get().await()
+            if (x.exists()) {
+                val userPlaceRate = x.toObject(UserPlaceRate::class.java)
+                if (userPlaceRate != null) {
+                    result[Resource.Success("Exist")] = userPlaceRate.placeRate
+                } else {
+                    result[Resource.Success("DontExist")] = 0
+                }
+            } else {
+                result[Resource.Success("DontExist")] = 0
+            }
+            result
+        } catch (e: Exception) {
+            e.printStackTrace()
+            result[Resource.Failure(e)] = 0
+            result
+        }
+    }
 
     //Places
     override suspend fun storePlace(place: Place): Resource<String> {
@@ -100,16 +145,17 @@ class FirestoreRepositoryImpl @Inject constructor(
         placeId: String,
         actualRate: Double,
         actualPlaceNumberOfRaters: Int,
-        rate: Int
+        rate: Int,
+        addNumberOfRaters: Int
     ): Resource<String> {
 
-        val newRate = (actualRate+rate)/(2)
+        val newRate = (actualRate + rate) / (2)
 
         return try {
             db.collection("places").document(placeId).update(
                 hashMapOf(
                     "placeRate" to newRate,
-                    "placeNumberOfRaters" to actualPlaceNumberOfRaters+1,
+                    "placeNumberOfRaters" to actualPlaceNumberOfRaters + addNumberOfRaters,
                 ) as Map<String, Any>
             ).await()
             Resource.Success("Success")
@@ -118,7 +164,6 @@ class FirestoreRepositoryImpl @Inject constructor(
             Resource.Failure(e)
         }
     }
-
 
 
     //Suggestions
@@ -202,7 +247,6 @@ class FirestoreRepositoryImpl @Inject constructor(
     }
 
 
-
     //Images
     override suspend fun storeImages(imgList: List<ByteArray>, placeId: String): Resource<String> {
         var counter = 0
@@ -248,7 +292,6 @@ class FirestoreRepositoryImpl @Inject constructor(
             Resource.Failure(e)
         }
     }
-
 
 
 }

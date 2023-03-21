@@ -11,12 +11,14 @@ interface FirestoreRepository {
     //Users
     fun storeUser(uid: String, email: String, name: String, provider: String)
     suspend fun checkUser(id: String) : User?
+    suspend fun addUserPlaceRate(uid: String, placeId: String, rate: Double) : Resource<String>
+    suspend fun checkUserPlaceRate(uid: String, placeId: String) : HashMap<Resource<String>, Int>
 
     //Places
     suspend fun storePlace(place: Place) : Resource<String>
     fun getAllPlaces() : ArrayList<Place>
     suspend fun getPlaces(key: String, value: String) : ArrayList<Place>
-    suspend fun addPlaceRate (placeId: String, actualRate: Double, actualPlaceNumberOfRaters: Int, rate: Int) : Resource<String>
+    suspend fun addPlaceRate (placeId: String, actualRate: Double, actualPlaceNumberOfRaters: Int, rate: Int, addNumberOfRaters: Int) : Resource<String>
 
     //Suggestions
     suspend fun storeSuggestion(suggestion: Suggestion) : HashMap<Resource<String>, String>//Resource<String>//, String

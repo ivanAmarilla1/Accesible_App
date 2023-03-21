@@ -27,7 +27,7 @@ fun NavGraphBuilder.homeNavGraph(
 ) {
     navigation(startDestination = AppScreens.HomeView.route, route = HOME_ROUTE) {
         composable(route = AppScreens.HomeView.route) {
-            HomeView(homeViewModel, navController)
+            HomeView(homeViewModel, navController, authViewModel.currentUser)
         }
         composable(AppScreens.FindWhereToGoView.route) {
             FindWhereToGoView(homeViewModel, navController, scaffoldState)

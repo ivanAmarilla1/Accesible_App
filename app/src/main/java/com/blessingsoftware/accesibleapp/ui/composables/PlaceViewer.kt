@@ -333,7 +333,7 @@ fun openGoogleMaps(context: Context, placeLat: String, placeLng: String) {
 
 @Composable
 private fun PlaceRate(suggestionRate: Double, placeNumberOfRaters: Int) {
-    val suggestionRateRounded = String.format("%.1f", suggestionRate).toDouble()
+    val suggestionRateRounded = String.format("%.1f", suggestionRate).toDouble()//Muestra la calificacion con solo 1 numero decimal
     Spacer(modifier = Modifier.height(10.dp))
     Column(Modifier.fillMaxWidth()) {
         Text(

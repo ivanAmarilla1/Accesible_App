@@ -12,6 +12,7 @@ import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
+import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -114,9 +115,11 @@ class HomeViewModel @Inject constructor(
     //Para el callback de agregar calificacion
     private val _addRateFlow = MutableStateFlow<Resource<String>?>(null)
     val addRateFlow: StateFlow<Resource<String>?> = _addRateFlow
+
     //Bandera
     private val _addRateFlag = MutableLiveData<Boolean>()
     val addRateFlag: LiveData<Boolean> = _addRateFlag
+
     //Mostrar o no el dialogo de calificacion
     private val _showRatingDialog = MutableLiveData<Boolean>()
     val showRatingDialog: LiveData<Boolean> = _showRatingDialog
@@ -129,12 +132,50 @@ class HomeViewModel @Inject constructor(
     private val _userRating = MutableLiveData<Int>()
     val userRating: LiveData<Int> = _userRating
 
-    suspend fun addPlaceRate(selectedPlace: Place?, rate: Int) {
+    suspend fun addPlaceRate(selectedPlace: Place?, rate: Int, currentUser: FirebaseUser?) {
         _addRateFlow.value = Resource.Loading
         _addRateFlag.value = true
         if (selectedPlace != null) {
-            val updateRate = db.addPlaceRate(selectedPlace.placeId, selectedPlace.placeRate, selectedPlace.placeNumberOfRaters, rate)
-            _addRateFlow.value = updateRate
+            if (currentUser != null) {
+                val checkUserPlaceRate =
+                    db.checkUserPlaceRate(currentUser.uid, selectedPlace.placeId)
+                when (val key = checkUserPlaceRate.keys.first()) {
+                    Resource.Success("Exist") -> {
+
+                        //Calculo de la calificacion cuando ya existia una anterior del mismo usuario
+                        val userRate= checkUserPlaceRate.get(key)
+                        var actualRate = selectedPlace.placeRate
+                        if (userRate != null) {
+                            actualRate = (selectedPlace.placeRate*2) - userRate
+                        }
+
+                        db.addUserPlaceRate(currentUser.uid, selectedPlace.placeId, rate.toDouble())
+                        val addPlaceRate = db.addPlaceRate(
+                            selectedPlace.placeId,
+                            actualRate,
+                            selectedPlace.placeNumberOfRaters,
+                            rate,
+                            0
+                        )
+                        _addRateFlow.value = addPlaceRate
+                    }
+                    Resource.Success("DontExist") -> {
+                        db.addUserPlaceRate(currentUser.uid, selectedPlace.placeId, rate.toDouble())
+                        val addPlaceRate = db.addPlaceRate(
+                            selectedPlace.placeId,
+                            selectedPlace.placeRate,
+                            selectedPlace.placeNumberOfRaters,
+                            rate,
+                            1
+                        )
+                        _addRateFlow.value = addPlaceRate
+                    }
+                    else -> {
+                        _addRateFlow.value = key
+                    }
+                }
+
+            }
         }
     }
 
