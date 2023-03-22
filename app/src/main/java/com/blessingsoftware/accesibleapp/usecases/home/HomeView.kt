@@ -58,7 +58,7 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel, currentUser: FirebaseUse
     val scope = rememberCoroutineScope()
     val selectedPlace = viewModel.selectedPlace.observeAsState()
 
-    //Para el callback
+    //Para el callback de la calificacion
     val addRateFlow = viewModel.addRateFlow.collectAsState()
     val flag = viewModel.addRateFlag.observeAsState()
 
@@ -315,7 +315,7 @@ private fun DrawerContent(
 
 
 @Composable
-private fun RatePlace(
+fun RatePlace(
     viewModel: HomeViewModel,
     rating: Int,
     validateRate: Boolean?,

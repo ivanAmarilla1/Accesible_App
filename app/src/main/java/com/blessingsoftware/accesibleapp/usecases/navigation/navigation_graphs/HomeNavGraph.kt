@@ -25,9 +25,11 @@ fun NavGraphBuilder.homeNavGraph(
     reviewSuggestionViewModel: ReviewSuggestionViewModel,
     scaffoldState: ScaffoldState,
 ) {
+    val currentUser = authViewModel.currentUser
+
     navigation(startDestination = AppScreens.HomeView.route, route = HOME_ROUTE) {
         composable(route = AppScreens.HomeView.route) {
-            HomeView(homeViewModel, navController, authViewModel.currentUser)
+            HomeView(homeViewModel, navController, currentUser)
         }
         composable(AppScreens.FindWhereToGoView.route) {
             FindWhereToGoView(homeViewModel, navController, scaffoldState)
@@ -37,11 +39,11 @@ fun NavGraphBuilder.homeNavGraph(
         }
 
         composable(AppScreens.SelectedPlace.route) {
-            SelectedPlace(homeViewModel, navController)
+            SelectedPlace(homeViewModel, navController,currentUser)
         }
 
         composable(AppScreens.MakeSuggestion.route) {
-            MakeSuggestion(suggestionViewModel, navController, authViewModel.currentUser, scaffoldState)
+            MakeSuggestion(suggestionViewModel, navController, currentUser, scaffoldState)
         }
         composable(AppScreens.SuggestionList.route) {
             ViewSuggestionList(reviewSuggestionViewModel, navController, scaffoldState)

@@ -93,7 +93,7 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
         {
             viewModel.onFieldsChanged(email, it)
         }
-        ForgotPassword(Modifier.align(Alignment.End))
+        //ForgotPassword(Modifier.align(Alignment.End))
         Spacer(modifier = Modifier.padding(10.dp))
         LoginButton() {
             loginFunction(email, password, viewModel, context)

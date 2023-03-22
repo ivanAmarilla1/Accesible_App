@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.Resource
+import com.blessingsoftware.accesibleapp.ui.composables.ReusableTittle
 import com.blessingsoftware.accesibleapp.ui.theme.AccesibleAppTheme
 import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AUTH_ROUTE
@@ -67,15 +68,16 @@ fun Splash() {
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.icono_asuncion_accesible),
             contentDescription = "Logo",
-            modifier = Modifier.size(150.dp)
+            modifier = Modifier.size(250.dp)
         )
-        Text(
+        ReusableTittle(tittle = "Bienvenido")
+        /*Text(
             "Bienvenido",
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold
-        )
+        )*/
     }
 }
 

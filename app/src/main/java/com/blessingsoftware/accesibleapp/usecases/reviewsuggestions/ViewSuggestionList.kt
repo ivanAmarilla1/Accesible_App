@@ -24,10 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
-import com.blessingsoftware.accesibleapp.ui.composables.CloseDrawerBackHandler
-import com.blessingsoftware.accesibleapp.ui.composables.DropDownMenu
-import com.blessingsoftware.accesibleapp.ui.composables.StarRate
-import com.blessingsoftware.accesibleapp.ui.composables.SuggestionPlaceImage
+import com.blessingsoftware.accesibleapp.ui.composables.*
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 
 @Composable
@@ -116,11 +113,12 @@ private fun SuggestionList(
                 horizontalAlignment = Alignment.CenterHorizontally
 
             ) {
-                Text(
+                ReusableTittle(tittle = "No hay sugerencias")
+                /*Text(
                     text = "No hay sugerencias",
                     style = MaterialTheme.typography.h6,
                     textAlign = TextAlign.Center
-                )
+                )*/
             }
         } else {
             for (item in suggestions) {

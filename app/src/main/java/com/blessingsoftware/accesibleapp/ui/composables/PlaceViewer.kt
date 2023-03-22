@@ -142,7 +142,8 @@ fun MySearchedPlace(
     selectedPlace: Place?,
     viewModel: HomeViewModel,
     context: Context,
-    navController: NavController
+    navController: NavController,
+    onRatePlaceButtonClicked: () -> Unit
 ) {
 
     var columnScrollingEnabled by remember { mutableStateOf(true) }
@@ -167,7 +168,7 @@ fun MySearchedPlace(
     }
     Scaffold(
         topBar = { MyTopBar(navController, selectedPlace?.placeName ?: "") },
-        bottomBar = { MySearchedPlaceBottomBar(selectedPlace, context) }
+        bottomBar = { MySearchedPlaceBottomBar(selectedPlace, context) {onRatePlaceButtonClicked()} }
     ) {
         Column(
             modifier = Modifier
@@ -242,7 +243,11 @@ fun MySearchedPlace(
 }
 
 @Composable
-private fun MySearchedPlaceBottomBar(selectedPlace: Place?, context: Context) {
+private fun MySearchedPlaceBottomBar(
+    selectedPlace: Place?,
+    context: Context,
+    onRatePlaceButtonClicked: () -> Unit
+) {
     if (selectedPlace != null) {
         BottomNavigation(
             modifier = Modifier.height(70.dp),
@@ -251,7 +256,7 @@ private fun MySearchedPlaceBottomBar(selectedPlace: Place?, context: Context) {
         ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 Button(
-                    onClick = { //TODO
+                    onClick = { onRatePlaceButtonClicked()
                     },
                     modifier = Modifier
                         .width(160.dp)

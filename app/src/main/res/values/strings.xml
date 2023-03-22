@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Accesible App</string>
+    <string name="app_name">Asunción Accesible</string>
 
     <string name="name">Nombre</string>
     <string name="email">Email</string>
