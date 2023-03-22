@@ -46,4 +46,25 @@
     <string name="emoji_check">&#9989;</string>
     <string name="emoji_delete">&#10060;</string>
 
+
+    //Acerca de
+    <string name="what_is_asuncion_accesible" tools:ignore="ExtraTranslation">¿Qué es Asunción Accesible?</string>
+    <string name="app_explanation" tools:ignore="ExtraTranslation">
+        Es una aplicación móvil cuyo principal objetivo es brindar información sobre accesibilidad de la ciudad de Asunción a toda la ciudadanía paraguaya.
+La aplicación consta de un mapa principal donde se podrán ubicar los distintos lugares con la respectiva información acerca de su accesibilidad, por ejemplo, si el lugar cuenta con rampas para sillas de ruedas o ascensores. El usuario podrá también calificar dichos lugares según su accesibilidad, de 0 a 5 estrellas.
+También damos la posibilidad de abrir directamente la ubicación de cualquier lugar seleccionado con otras aplicaciones, como Google Maps, Uber o Bolt.
+    </string>
+
+    <string name="what_is_make_suggestion" tools:ignore="ExtraTranslation">¿Qué es la opción de Realizar sugerencia?</string>
+    <string name="make_suggestion_explanation" tools:ignore="ExtraTranslation">
+        Mediante esta opción los usuarios podrán enviar información de nuevos lugares accesibles para agregar a la aplicación. Si conoces un lugar de la ciudad de Asunción cuya información de accesibilidad no se encuentra en nuestra aplicación, podes enviar una sugerencia para que el equipo de administradores lo revise y agregue dicho lugar.
+En la sugerencia deberás adjuntar fotografías del lugar y toda la información pertinente a su accesibilidad.
+    </string>
+
+    <string name="help_us_improve" tools:ignore="ExtraTranslation">¡¡¡Ayúdanos a mejorar!!!</string>
+    <string name="text_hel_us_improve" tools:ignore="ExtraTranslation">
+        A continuación, te dejamos una rápida encuesta sobre tu experiencia usando la aplicación. Las opiniones y criticas constructivas siempre son bienvenidas.
+    </string>
+    <string name="what_is_app" tools:ignore="ExtraTranslation">sscsa</string>
+
 </resources>

@@ -45,7 +45,7 @@ fun MainScreen(
             AppScreens.FindWhereToGoView,
             AppScreens.MakeSuggestion,
             AppScreens.SuggestionList,
-            AppScreens.ItemTwo,
+            //AppScreens.ItemTwo,
             AppScreens.ItemThree,
         )
     } else {
@@ -53,7 +53,7 @@ fun MainScreen(
             AppScreens.HomeView,
             AppScreens.FindWhereToGoView,
             AppScreens.MakeSuggestion,
-            AppScreens.ItemTwo,
+            //AppScreens.ItemTwo,
             AppScreens.ItemThree,
         )
     }
@@ -62,7 +62,7 @@ fun MainScreen(
         AppScreens.HomeView,
         AppScreens.MakeSuggestion,
         AppScreens.SuggestionList,
-        AppScreens.ItemTwo,
+        //AppScreens.ItemTwo,
         AppScreens.ItemThree,
         AppScreens.FindWhereToGoView,
         AppScreens.SuggestionDetail

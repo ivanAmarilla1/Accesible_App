@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun ReusableTittle(
@@ -56,6 +57,7 @@ fun ReusableTextBody(
     body: String,
     modifier: Modifier = Modifier,
     textColor: Color = MaterialTheme.colors.secondary,
+    //fontSize: TextStyle = 24.sp,
     style: TextStyle = MaterialTheme.typography.body1,
     textAlign: TextAlign = TextAlign.Start,
     maxLines: Int = 1000,
@@ -65,6 +67,7 @@ fun ReusableTextBody(
         body,
         modifier = modifier,
         color = textColor,
+        //fontSize = fontSize,
         style = style,
         textAlign = textAlign,
         maxLines = maxLines,
