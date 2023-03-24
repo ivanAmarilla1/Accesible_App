@@ -59,7 +59,7 @@ fun ReusableTextBody(
     textColor: Color = MaterialTheme.colors.secondary,
     //fontSize: TextStyle = 24.sp,
     style: TextStyle = MaterialTheme.typography.body1,
-    textAlign: TextAlign = TextAlign.Start,
+    textAlign: TextAlign = TextAlign.Justify,
     maxLines: Int = 1000,
     textOverflow: TextOverflow = TextOverflow.Ellipsis,
 ) {
@@ -71,6 +71,6 @@ fun ReusableTextBody(
         style = style,
         textAlign = textAlign,
         maxLines = maxLines,
-        overflow = textOverflow
+        overflow = textOverflow,
     )
 }

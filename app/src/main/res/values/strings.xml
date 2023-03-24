@@ -63,8 +63,7 @@ En la sugerencia deberás adjuntar fotografías del lugar y toda la información
 
     <string name="help_us_improve" tools:ignore="ExtraTranslation">¡¡¡Ayúdanos a mejorar!!!</string>
     <string name="text_hel_us_improve" tools:ignore="ExtraTranslation">
-        A continuación, te dejamos una rápida encuesta sobre tu experiencia usando la aplicación. Las opiniones y criticas constructivas siempre son bienvenidas.
-    </string>
+        A continuación, te dejamos una rápida encuesta sobre tu experiencia usando la aplicación. Las opiniones y criticas constructivas siempre son bienvenidas.</string>
     <string name="what_is_app" tools:ignore="ExtraTranslation">sscsa</string>
 
 </resources>
