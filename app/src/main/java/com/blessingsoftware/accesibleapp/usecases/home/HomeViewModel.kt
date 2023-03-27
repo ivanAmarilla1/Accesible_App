@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.model.domain.Suggestion
+import com.blessingsoftware.accesibleapp.provider.firebase.FirebaseAuthRepository
 import com.blessingsoftware.accesibleapp.provider.firestore.FirestoreRepository
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -175,8 +176,11 @@ class HomeViewModel @Inject constructor(
                         _addRateFlow.value = key
                     }
                 }
-
+            } else {
+                _addRateFlow.value = Resource.Failure(IllegalStateException("Error al identificar usuario, por favor reinicie la aplicación"))
             }
+        } else {
+            _addRateFlow.value = Resource.Failure(IllegalStateException("Error al identificar lugar, por favor reinicie la aplicación"))
         }
     }
 

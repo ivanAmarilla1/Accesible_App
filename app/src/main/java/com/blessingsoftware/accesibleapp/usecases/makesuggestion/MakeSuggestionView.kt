@@ -40,6 +40,7 @@ import com.blessingsoftware.accesibleapp.R
 import com.blessingsoftware.accesibleapp.model.domain.PlaceTypes
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.*
+import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.blessingsoftware.accesibleapp.usecases.navigation.AppScreens
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -55,9 +56,11 @@ import kotlinx.coroutines.launch
 fun MakeSuggestion(
     suggestionViewModel: MakeSuggestionViewModel,
     navController: NavController,
-    currentUser: FirebaseUser?,
+    authViewModel: AuthViewModel,
     scaffoldState: ScaffoldState
 ) {
+    //recupera el usuario actual de la app
+    val currentUser = authViewModel.currentUser
 
     //Scroll
     var columnScrollingEnabled by remember { mutableStateOf(true) }

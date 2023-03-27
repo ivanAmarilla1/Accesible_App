@@ -324,6 +324,7 @@ private fun returnOrderedString(text: String, emoji: String): String {
     return orderedString
 }
 
+//Abre la ubicacion seleccionada con aplicaciones de terceros, como Google Maps o Bolt.
 fun openGoogleMaps(context: Context, placeLat: String, placeLng: String) {
 
     val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:$placeLat,$placeLng?z=18"))

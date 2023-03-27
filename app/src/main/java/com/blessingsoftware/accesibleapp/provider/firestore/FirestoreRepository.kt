@@ -1,6 +1,5 @@
 package com.blessingsoftware.accesibleapp.provider.firestore
 
-import android.graphics.Bitmap
 import android.net.Uri
 import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.Resource

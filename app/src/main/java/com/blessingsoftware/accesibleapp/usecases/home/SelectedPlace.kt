@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.MySearchedPlace
+import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
@@ -22,8 +23,11 @@ import kotlinx.coroutines.launch
 fun SelectedPlace(
     viewModel: HomeViewModel,
     navController: NavHostController,
-    currentUser: FirebaseUser?
+    authViewModel: AuthViewModel,
 ) {
+    //Recupera el usuario actual de la app
+    val currentUser = authViewModel.currentUser
+
     val selectedPlace = viewModel.selectedSearchedPlace.observeAsState()
     val context = LocalContext.current
 

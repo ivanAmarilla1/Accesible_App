@@ -29,7 +29,7 @@ fun NavGraphBuilder.homeNavGraph(
 
     navigation(startDestination = AppScreens.HomeView.route, route = HOME_ROUTE) {
         composable(route = AppScreens.HomeView.route) {
-            HomeView(homeViewModel, navController, currentUser)
+            HomeView(homeViewModel, navController, authViewModel)
         }
         composable(AppScreens.FindWhereToGoView.route) {
             FindWhereToGoView(homeViewModel, navController, scaffoldState)
@@ -39,11 +39,11 @@ fun NavGraphBuilder.homeNavGraph(
         }
 
         composable(AppScreens.SelectedPlace.route) {
-            SelectedPlace(homeViewModel, navController,currentUser)
+            SelectedPlace(homeViewModel, navController, authViewModel)
         }
 
         composable(AppScreens.MakeSuggestion.route) {
-            MakeSuggestion(suggestionViewModel, navController, currentUser, scaffoldState)
+            MakeSuggestion(suggestionViewModel, navController, authViewModel, scaffoldState)
         }
         composable(AppScreens.SuggestionList.route) {
             ViewSuggestionList(reviewSuggestionViewModel, navController, scaffoldState)

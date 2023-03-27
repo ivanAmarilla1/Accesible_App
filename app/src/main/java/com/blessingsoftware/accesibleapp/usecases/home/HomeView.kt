@@ -22,6 +22,7 @@ import com.blessingsoftware.accesibleapp.model.domain.Place
 import com.blessingsoftware.accesibleapp.model.domain.PlaceTypes
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.ui.composables.*
+import com.blessingsoftware.accesibleapp.usecases.authentication.AuthViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.FirebaseUser
@@ -30,9 +31,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun HomeView(viewModel: HomeViewModel, navController: NavHostController, currentUser: FirebaseUser?) {
+fun HomeView(
+    viewModel: HomeViewModel,
+    navController: NavHostController,
+    authViewModel: AuthViewModel) {
+
+    //obtiene el usuario actual de la app
+    val currentUser = authViewModel.currentUser
+
+    //Contenedor principal de la vista
     Box(modifier = Modifier.background(MaterialTheme.colors.onSecondary)) {
         PlaceBottomDrawer(viewModel, currentUser)
+    }
+    if (currentUser != null) {
+        Log.d("Current User", currentUser.email.toString())
+    } else {
+        Log.d("Current User", "Nulo")
     }
 }
 
@@ -112,7 +126,7 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel, currentUser: FirebaseUse
                     }
                 }
                 else -> {
-                    throw IllegalStateException("Error de al procesar sugerencia")
+                    throw IllegalStateException("Error de al procesar la calificación")
                 }
             }
         }
