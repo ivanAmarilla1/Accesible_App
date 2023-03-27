@@ -149,7 +149,7 @@ class FirestoreRepositoryImpl @Inject constructor(
         addNumberOfRaters: Int
     ): Resource<String> {
 
-        val newRate = (actualRate + rate) / (2)
+        val newRate = (actualRate + rate)
 
         return try {
             db.collection("places").document(placeId).update(

@@ -132,6 +132,7 @@ class HomeViewModel @Inject constructor(
     private val _userRating = MutableLiveData<Int>()
     val userRating: LiveData<Int> = _userRating
 
+    //función para agregar calificacion
     suspend fun addPlaceRate(selectedPlace: Place?, rate: Int, currentUser: FirebaseUser?) {
         _addRateFlow.value = Resource.Loading
         _addRateFlag.value = true
@@ -146,7 +147,7 @@ class HomeViewModel @Inject constructor(
                         val userRate= checkUserPlaceRate.get(key)
                         var actualRate = selectedPlace.placeRate
                         if (userRate != null) {
-                            actualRate = (selectedPlace.placeRate*2) - userRate
+                            actualRate -= userRate
                         }
 
                         db.addUserPlaceRate(currentUser.uid, selectedPlace.placeId, rate.toDouble())

@@ -74,7 +74,7 @@ fun MySelectedPlace(selectedPlace: Place?, viewModel: HomeViewModel, context: Co
                     )
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                PlaceRate(suggestionRate = selectedPlace.placeRate, selectedPlace.placeNumberOfRaters)
+                PlaceRate(suggestionRate = selectedPlace.placeRate/selectedPlace.placeNumberOfRaters, selectedPlace.placeNumberOfRaters)
             }
             Images(
                 viewModel = viewModel,
