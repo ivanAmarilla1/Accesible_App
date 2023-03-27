@@ -197,7 +197,7 @@ fun MySearchedPlace(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     PlaceRate(
-                        suggestionRate = selectedPlace.placeRate,
+                        suggestionRate = selectedPlace.placeRate/selectedPlace.placeNumberOfRaters,
                         selectedPlace.placeNumberOfRaters
                     )
                 }

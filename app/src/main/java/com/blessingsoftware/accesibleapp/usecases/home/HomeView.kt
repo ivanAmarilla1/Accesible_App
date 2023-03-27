@@ -43,11 +43,7 @@ fun HomeView(
     Box(modifier = Modifier.background(MaterialTheme.colors.onSecondary)) {
         PlaceBottomDrawer(viewModel, currentUser)
     }
-    if (currentUser != null) {
-        Log.d("Current User", currentUser.email.toString())
-    } else {
-        Log.d("Current User", "Nulo")
-    }
+
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -131,7 +127,6 @@ private fun PlaceBottomDrawer(viewModel: HomeViewModel, currentUser: FirebaseUse
             }
         }
     }
-
 
 }
 

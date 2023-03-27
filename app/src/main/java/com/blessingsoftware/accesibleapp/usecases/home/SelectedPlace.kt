@@ -76,7 +76,7 @@ fun SelectedPlace(
                     }
                 }
                 else -> {
-                    throw IllegalStateException("Error de al procesar sugerencia")
+                    throw IllegalStateException("Error de al procesar calificación")
                 }
             }
         }

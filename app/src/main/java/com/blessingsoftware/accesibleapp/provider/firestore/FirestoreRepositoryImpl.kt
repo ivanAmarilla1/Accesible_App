@@ -18,15 +18,19 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     //Users
     override fun storeUser(uid: String, email: String, name: String, provider: String) {
-        db.collection("users").document(uid).set(
-            hashMapOf(
-                "email" to email,
-                "name" to name,
-                "provider" to provider,
-                "admin" to false,
-                "added" to FieldValue.serverTimestamp()
+        try {
+            db.collection("users").document(uid).set(
+                hashMapOf(
+                    "email" to email,
+                    "name" to name,
+                    "provider" to provider,
+                    "admin" to false,
+                    "added" to FieldValue.serverTimestamp()
+                )
             )
-        )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override suspend fun checkUser(id: String): User? {
@@ -34,7 +38,6 @@ class FirestoreRepositoryImpl @Inject constructor(
         val document = docRef.get().await()
         //Log.d("Usuario bd", document.toString())
         return document.toObject<User>()
-
     }
 
     override suspend fun addUserPlaceRate(
@@ -42,7 +45,6 @@ class FirestoreRepositoryImpl @Inject constructor(
         placeId: String,
         rate: Double
     ): Resource<String> {
-
         return try {
             val ref =
                 db.collection("users").document(uid).collection("userPlaceRates").document(placeId)
@@ -56,7 +58,6 @@ class FirestoreRepositoryImpl @Inject constructor(
             e.printStackTrace()
             Resource.Failure(e)
         }
-
     }
 
 
@@ -101,44 +102,64 @@ class FirestoreRepositoryImpl @Inject constructor(
     override fun getAllPlaces(): ArrayList<Place> {
         //Inicializa una lista de objetos tipo Place en la que se guardaran todos los lugares
         val places = ArrayList<Place>()
+        return try {
 
-        val ref = db.collection("places")
+            val ref = db.collection("places")
 
-        ref.addSnapshotListener { snapshot, e ->
-            // handle the error if there is one, and then return
-            if (e != null) {
-                Log.w("Listen failed", e)
-                return@addSnapshotListener
-            }
-            // if we reached this point , there was not an error
-            snapshot?.let {
-                val documents = snapshot.documents
-                documents.forEach {
-                    val place = it.toObject(Place::class.java)
-                    //Log.d("Place name", place!!.placeName)
-                    place?.let {
-                        places.add(it)
+            ref.addSnapshotListener { snapshot, e ->
+                // handle the error if there is one, and then return
+                if (e != null) {
+                    Log.w("Listen failed", e)
+                    return@addSnapshotListener
+                }
+                // if we reached this point , there was not an error
+                snapshot?.let {
+                    val documents = snapshot.documents
+                    documents.forEach {
+                        val place = it.toObject(Place::class.java)
+                        //Log.d("Place name", place!!.placeName)
+                        place?.let {
+                            places.add(it)
+                        }
                     }
                 }
             }
+            places
+        } catch (e: Exception) {
+            e.printStackTrace()
+            places
         }
+
+    }
+
+    //TODO GETTER PARA UN PLACE ESPECIFICO
+    override suspend fun getSelectedPlace(id: String): Place {
+        val places = Place()
+        //val ref = db.collection("places").whereEqualTo(id)
         return places
+
     }
 
     override suspend fun getPlaces(key: String, value: String): ArrayList<Place> {
         val places = ArrayList<Place>()
-        val ref = db.collection("places").whereEqualTo(key, value)
+        return try {
+            val ref = db.collection("places").whereEqualTo(key, value)
 
-        val results = ref.get().await()
+            val results = ref.get().await()
 
-        for (document in results) {
-            val suggestion = document.toObject(Place::class.java)
-            suggestion?.let {
-                //suggestion.suggestionId = document.id
-                places.add(it)
+            for (document in results) {
+                val place = document.toObject(Place::class.java)
+                place?.let {
+                    //suggestion.suggestionId = document.id
+                    places.add(it)
+                }
             }
+            places
+        } catch (e: Exception) {
+            e.printStackTrace()
+            places
         }
-        return places
+
     }
 
     override suspend fun addPlaceRate(
@@ -215,35 +236,46 @@ class FirestoreRepositoryImpl @Inject constructor(
     override suspend fun getSuggestions(key: String, value: Int): ArrayList<Suggestion> {
         //Inicializa una lista de objetos tipo Place en la que se guardaran todos los lugares
         val suggestions = ArrayList<Suggestion>()
-        val ref = db.collection("suggestions").whereEqualTo(key, value)
+        return try {
+            val ref = db.collection("suggestions").whereEqualTo(key, value)
 
-        val results = ref.get().await()
+            val results = ref.get().await()
 
-        for (document in results) {
-            val suggestion = document.toObject(Suggestion::class.java)
-            suggestion?.let {
-                //suggestion.suggestionId = document.id
-                suggestions.add(it)
+            for (document in results) {
+                val suggestion = document.toObject(Suggestion::class.java)
+                suggestion?.let {
+                    //suggestion.suggestionId = document.id
+                    suggestions.add(it)
+                }
             }
+            suggestions
+        } catch (e: Exception) {
+            e.printStackTrace()
+            suggestions
         }
-        return suggestions
     }
 
     override suspend fun getAllSuggestions(): ArrayList<Suggestion> {
         //Inicializa una lista de objetos tipo Place en la que se guardaran todos los lugares
         val suggestions = ArrayList<Suggestion>()
-        val ref = db.collection("suggestions")
 
-        val results = ref.get().await()
+        return try {
+            val ref = db.collection("suggestions")
 
-        for (document in results) {
-            val suggestion = document.toObject(Suggestion::class.java)
-            suggestion?.let {
-                //suggestion.suggestionId = document.id
-                suggestions.add(it)
+            val results = ref.get().await()
+
+            for (document in results) {
+                val suggestion = document.toObject(Suggestion::class.java)
+                suggestion?.let {
+                    //suggestion.suggestionId = document.id
+                    suggestions.add(it)
+                }
             }
+            suggestions
+        } catch (e: Exception) {
+            e.printStackTrace()
+            suggestions
         }
-        return suggestions
     }
 
 

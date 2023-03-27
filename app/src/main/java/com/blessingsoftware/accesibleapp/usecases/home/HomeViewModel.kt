@@ -34,7 +34,6 @@ class HomeViewModel @Inject constructor(
     private val _selectedPlace = MutableLiveData<Place>()
     val selectedPlace: LiveData<Place> = _selectedPlace
 
-
     //Muestra y esconde el bottomBar
     private val _isBottomBarVisible = MutableLiveData<Boolean>()
     val isBottomBarVisible: LiveData<Boolean?> = _isBottomBarVisible
@@ -182,6 +181,7 @@ class HomeViewModel @Inject constructor(
         } else {
             _addRateFlow.value = Resource.Failure(IllegalStateException("Error al identificar lugar, por favor reinicie la aplicación"))
         }
+        getPlaces()
     }
 
     fun setShowDialogTrue() {

@@ -148,6 +148,7 @@ private fun PlaceList(
 
 @Composable
 private fun Place(item: Place, onPlaceClick: () -> Unit) {
+    val placeRate = item.placeRate/item.placeNumberOfRaters
     Column() {
         Row(
             modifier = Modifier
@@ -179,7 +180,7 @@ private fun Place(item: Place, onPlaceClick: () -> Unit) {
                 )
 
                 StarRate(
-                    rate = item.placeRate.toInt(),
+                    rate = placeRate.toInt(),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(end = 8.dp, bottom = 12.dp),

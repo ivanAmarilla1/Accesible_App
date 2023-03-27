@@ -25,7 +25,6 @@ fun NavGraphBuilder.homeNavGraph(
     reviewSuggestionViewModel: ReviewSuggestionViewModel,
     scaffoldState: ScaffoldState,
 ) {
-    val currentUser = authViewModel.currentUser
 
     navigation(startDestination = AppScreens.HomeView.route, route = HOME_ROUTE) {
         composable(route = AppScreens.HomeView.route) {

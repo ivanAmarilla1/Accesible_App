@@ -16,6 +16,7 @@ interface FirestoreRepository {
     //Places
     suspend fun storePlace(place: Place) : Resource<String>
     fun getAllPlaces() : ArrayList<Place>
+    suspend fun getSelectedPlace(id: String) : Place
     suspend fun getPlaces(key: String, value: String) : ArrayList<Place>
     suspend fun addPlaceRate (placeId: String, actualRate: Double, actualPlaceNumberOfRaters: Int, rate: Int, addNumberOfRaters: Int) : Resource<String>
 
