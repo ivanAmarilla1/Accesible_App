@@ -190,6 +190,7 @@ private fun MainMap(
     uiSettings = uiSettings.copy(zoomControlsEnabled = false)
     var isMapLoaded by remember { mutableStateOf(false) }
 
+
     //Composable de Google Maps
     GoogleMap(
         modifier = Modifier
@@ -201,7 +202,7 @@ private fun MainMap(
         onMapLoaded = {
             isMapLoaded = true
         },
-
+        contentPadding = PaddingValues(0.dp,50.dp,0.dp,0.dp)
         ) {
         places.forEach { place ->
             val placeType = getPlaceType(place)
