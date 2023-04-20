@@ -20,6 +20,7 @@ sealed class AppScreens(
     //Auth rutes
     object LoginView : AppScreens("login_view", "Iniciar Sesión",null, null)
     object SignUpView : AppScreens("signup_view", "Home", null, null)
+    object RecoverPasswordView : AppScreens("recover_password_view", "Recuperar contraseña", null, null)
 
     //Home routes
     object HomeView : AppScreens("home_view", "Inicio", Icons.Outlined.Home, Icons.Filled.Home )

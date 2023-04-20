@@ -1,5 +1,7 @@
 package com.blessingsoftware.accesibleapp.provider.firebase
 
+import android.content.Context
+import android.widget.Toast
 import com.blessingsoftware.accesibleapp.model.domain.Resource
 import com.blessingsoftware.accesibleapp.util.await
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -34,7 +36,9 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
     ): Resource<FirebaseUser> {
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
-            result?.user?.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build())?.await()
+            result?.user?.updateProfile(
+                UserProfileChangeRequest.Builder().setDisplayName(name).build()
+            )?.await()
             Resource.Success(result.user!!)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -43,14 +47,46 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun signUpWithGoogle(credential: AuthCredential): Resource<FirebaseUser> {
-         return try {
+        return try {
             val result = firebaseAuth.signInWithCredential(credential).await()
-             Resource.Success(result.user!!)
+            Resource.Success(result.user!!)
         } catch (e: Exception) {
-             e.printStackTrace()
-             Resource.Failure(e)
+            e.printStackTrace()
+            Resource.Failure(e)
         }
     }
+
+    override suspend fun recoverPassword(email: String, context: Context): String {
+        val result = "Successful"
+        val error = "Error Inesperado"
+        return try {
+            firebaseAuth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(
+                        context,
+                        "Se ha enviado un correo de recuperación de contraseña",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        context,
+                        task.exception!!.message.toString(),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+            return result
+        } catch (e: Exception) {
+            Toast.makeText(
+                context,
+                error,
+                Toast.LENGTH_LONG
+            ).show()
+            error
+        }
+    }
+
+
 
     override fun logOut() {
         firebaseAuth.signOut()

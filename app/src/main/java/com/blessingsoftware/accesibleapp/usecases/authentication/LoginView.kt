@@ -93,7 +93,7 @@ private fun Login(modifier: Modifier, viewModel: AuthViewModel, navController: N
         {
             viewModel.onFieldsChanged(email, it)
         }
-        //ForgotPassword(Modifier.align(Alignment.End))
+        ForgotPassword(Modifier.align(Alignment.End)) {navController.navigate(AppScreens.RecoverPasswordView.route); viewModel.cleanFields()}
         Spacer(modifier = Modifier.padding(10.dp))
         LoginButton() {
             loginFunction(email, password, viewModel, context)
@@ -199,10 +199,10 @@ private fun PasswordField(
 }
 
 @Composable
-private fun ForgotPassword(modifier: Modifier) {
+private fun ForgotPassword(modifier: Modifier, onRecoverPasswordSelected: () -> Unit) {
     Text(
         text = stringResource(R.string.forgot_password),
-        modifier = modifier.clickable { TODO() },
+        modifier = modifier.clickable { onRecoverPasswordSelected() },
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colors.secondary

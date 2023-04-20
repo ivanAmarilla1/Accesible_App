@@ -3,6 +3,7 @@ package com.blessingsoftware.accesibleapp.usecases.authentication
 import android.content.Context
 import android.util.Log
 import android.util.Patterns
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -282,4 +283,33 @@ class AuthViewModel @Inject constructor(
         _confirmPasswordVisibility.value = confirmPasswordVisibility
     }
 
+    //Recuperar contraseña
+    private val _recoverEmail = MutableLiveData<String>()
+    val recoverEmail: LiveData<String> = _recoverEmail
+
+    fun onRecoverFieldChanged(email: String) {
+        _flag.value = false
+        _recoverEmail.value = email
+    }
+
+    fun recoverUserPassword(email: String, context: Context) = viewModelScope.launch {
+        if (email.isEmpty()) {
+            Toast.makeText(context, "Por favor ingrese un correo", Toast.LENGTH_LONG).show()
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(context, "Ingrese una direccion de correo válida", Toast.LENGTH_LONG)
+                .show()
+        } else {
+            val x = repository.recoverPassword(email, context)
+
+            if (x=="Successful"){
+                cleanRecoverField()
+            }
+        }
+    }
+
+    fun cleanRecoverField(){
+        _recoverEmail.value = ""
+    }
 }
+
+
